@@ -1,0 +1,29 @@
+
+// 测试变量的声明和表达式
+const int A = 1;
+const int B = 2, C = 3 + A, D = 4;
+int a = 1;
+int b;
+int c = 2 + 3, d, e;
+int main() {
+    printf("21373032\n");
+    int _x1 = getint(); // _x1 = 5
+    int _x2 = getint(), _x3; // _x2 = 10
+    int _x4 = 1, _x5 = 2, _x6 = 3;
+    printf("1.hope 24, your answer: %d.\n", 4 * 5 + -+-4);
+    printf("2.hope 4, your answer: %d.\n", C);
+    _x3 = _x1 + _x2 - B; // _x3 = 13
+    printf("3.hope _x3 = 13, your answer: _x3 = %d.\n", _x3);
+    int a = _x3 % B + A * D % _x5 + 1; // a = 2
+    printf("4.hope a = 2, your answer: a = %d.\n", a);
+    _x5 = (D - e) * a % _x6; // _x5 = 2
+    printf("5.hope _x5 = 2, your answer: _x5 = %d.\n", _x5);
+    
+    printf("6.hope 0, your answer: %d.\n", _x3 <= _x5);
+    int y_1 = _x6 <= _x1 - B;
+    printf("7.hope 1, your answer: %d.\n", y_1);
+    int y_2 = _x2 != _x1;
+    printf("8.hope 1, your answer: %d.\n", y_2);
+    printf("9.hope 0, your answer: %d.\n", (_x1 + _x2) * _x3 == _x4 * _x5 + _x6);
+    return 0;
+}

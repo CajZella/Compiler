@@ -1,0 +1,10 @@
+21373032
+1.func2 accept
+2.func3 accept
+4.func4:3
+3.func5 accept
+5.func5:10
+6.func6:10
+7.func7:6
+8.hope 103, your answer: 103.
+9.hope 1, your answer: 1.

@@ -1,0 +1,10 @@
+21373032
+1.hope 9, your answer: 9.
+2.hope 15, your answer: 15.
+3.hope 15, your answer: 15.
+4.hope 18, your answer: 18.
+5.hope 8, your answer: 8.
+6.hope 41, your answer: 41.
+7.hope 78, your answer: 78.
+8.hope 1, your answer: 1.
+9.hope 4, your answer: 4.

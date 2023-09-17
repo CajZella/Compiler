@@ -1,0 +1,10 @@
+21373032
+1.hope 7, your answer: 7.if error, check 'for'
+2.hope 10, your answer: 10.if error, check 'for'
+3.hope 19, your answer: 19.if error, check 'for'
+4.hope 14, your answer: 14.if error, check 'func'
+5.hope 39, your answer: 39.if error, check 'func'
+6.hope 101, your answer: 101.
+7.hope 6540321, your answer: 6540321.
+8.hope -6540321, your answer: -6540321.
+9.hope 0, your answer: 0.

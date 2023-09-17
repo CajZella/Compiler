@@ -1,0 +1,47 @@
+
+/* 二维数组定义，数组元素的使用、数组传参和部分传参等 */
+
+const int A[2][2] = {{0,1},{2,3}};
+const int B[2][2] = {{9,8},{7,6}}, C[3][3] = {{5,4,3},{2,1,0},{-1,-2,-3}};
+int b[10 - 2][10 - 2], c[27][27], d[1][1] = {{2}};
+int e[2][2];
+void func1(int x[][2]) { return; }
+void func2(int len, int x[][2]) {
+    int i;
+    for (i = 0; i < len; i = i + 1) {
+        x[i][0] = i;
+    }
+    printf("1.func2 accept\n");
+    return;
+}
+void func3(int x[][2], int y[][2]) {
+    printf("2.func3 accept\n");
+}
+int func4() { return A[1][1]; }
+int func5(int x[][2], int y[][2]) { 
+    printf("3.func5 accept\n");
+    return x[0][0] + y[0][0]; 
+}
+int func6(int x[]) { return x[0]; }
+int func7(int x, int y) { return x + y; }
+int main() {
+    printf("21373032\n");
+    int n = getint();
+    int a_[2][2] = {{10, 11}, {9, 19}}, c_[10][2];
+    int i, j;
+    for (i = 0; i < n; i = i + 1)
+        for (j = 0; j < n; j = j + 1)
+            c[i][j] = i * j;
+    func1(a_);
+    func2(10, c_);
+    func3(a_, e);
+    printf("4.func4:%d\n", func4());
+    printf("5.func5:%d\n", func5(a_, c_));
+    printf("6.func6:%d\n", func6(a_[0]));
+    printf("7.func7:%d\n", func7(c[0][1], c[2][3]));
+    int temp = c[1][2] + c[2][4] * c[7][3] / c[1][5] % c[2][2] - c[0][9] + c[10][10];
+    printf("8.hope 103, your answer: %d.\n", temp);
+    if (c[6][8] == c[3][16])
+        printf("9.hope 1, your answer: 1.\n");
+    return 0;
+}

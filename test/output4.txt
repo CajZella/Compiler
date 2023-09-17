@@ -1,0 +1,10 @@
+21373032
+1.hope 24, your answer: 24.
+2.hope 4, your answer: 4.
+3.hope _x3 = 13, your answer: _x3 = 13.
+4.hope a = 2, your answer: a = 2.
+5.hope _x5 = 2, your answer: _x5 = 2.
+6.hope 0, your answer: 0.
+7.hope 1, your answer: 1.
+8.hope 1, your answer: 1.
+9.hope 0, your answer: 0.
