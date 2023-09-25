@@ -1,21 +1,25 @@
 package Settings;
 
-import Lexer.Lexer;
+import Parser.Parser;
 import util.MyIO;
 
 public class Configure {
-    private static Lexer lexer;
     public static void run() {
         MyIO.readSourceFile(Config.sourceFile);
         MyIO.openTargetFile(Config.targetFile);
-        lexer = new Lexer();
-        lexer.run();
-        lexDisplay();
+        Parser parser = new Parser();
+        parser.parseCompUnit();
         MyIO.closeFiles();
     }
-    private static void lexDisplay() {
+    public static void lexDisplay(String msg) {
         if (Config.isLexerOutput) {
-            MyIO.writeTargetFile(lexer.toString());
+            MyIO.writeTargetFile(msg + "\n");
+        }
+    }
+
+    public static void parseDisplay(String msg) {
+        if(Config.isParserOutput) {
+            MyIO.writeTargetFile(msg + "\n");
         }
     }
 }
