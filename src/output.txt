@@ -633,7 +633,7 @@ SEMICN ;
 <Stmt>
 RBRACE }
 <Block>
-<FuncType>
+<FuncDef>
 INTTK int
 <FuncType>
 IDENFR func2_params
@@ -756,7 +756,7 @@ SEMICN ;
 <Stmt>
 RBRACE }
 <Block>
-<FuncType>
+<FuncDef>
 VOIDTK void
 <FuncType>
 IDENFR func3_params
@@ -786,7 +786,7 @@ SEMICN ;
 <Stmt>
 RBRACE }
 <Block>
-<FuncType>
+<FuncDef>
 VOIDTK void
 <FuncType>
 IDENFR func4_params
@@ -828,7 +828,7 @@ SEMICN ;
 <Stmt>
 RBRACE }
 <Block>
-<FuncType>
+<FuncDef>
 INTTK int
 <FuncType>
 IDENFR func_no_params
@@ -853,7 +853,7 @@ SEMICN ;
 <Stmt>
 RBRACE }
 <Block>
-<FuncType>
+<FuncDef>
 VOIDTK void
 <FuncType>
 IDENFR func2_no_params
@@ -862,7 +862,7 @@ RPARENT )
 LBRACE {
 RBRACE }
 <Block>
-<FuncType>
+<FuncDef>
 INTTK int
 MAINTK main
 LPARENT (

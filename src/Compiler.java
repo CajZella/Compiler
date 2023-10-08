@@ -1,4 +1,4 @@
-import Settings.Configure;
+import settings.Configure;
 
 public class Compiler {
     public static void main(String[] args) {
