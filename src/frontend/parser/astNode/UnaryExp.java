@@ -7,11 +7,12 @@ import frontend.symbolTable.Symbol;
 import frontend.symbolTable.SymbolTable;
 import ir.types.DataType;
 import ir.types.FunctionType;
+import java.util.ArrayList;
 
 public class UnaryExp extends AstNode {
     private PrimaryExp primaryExp;
     private Token ident;
-    private FuncRParams funcRParams;
+    private FuncRParams funcRParams = new FuncRParams();
     private DataType funcReturnType;
     private UnaryOp unaryOp;
     private UnaryExp unaryExp;
@@ -20,17 +21,6 @@ public class UnaryExp extends AstNode {
         super(GrammarType.UnaryExp);
     }
     public void setPrimaryExp(PrimaryExp primaryExp) { this.primaryExp = primaryExp; }
-    public boolean checkIdent(Token ident, SymbolTable symbolTable) {
-        Symbol symbol = symbolTable.getSymbol(ident.getValue());
-        if (symbol == null) {
-            ErrorLog.addError(ErrorType.UNDEFINED_IDENFR, ident.getLine());
-            return false;
-        } else {
-            FunctionType functionType = (FunctionType) symbol.getType();
-            funcReturnType = functionType.getReturnType();
-            return true;
-        }
-    }
     @Override
     public DataType getDataType() {
         if (isPrimaryExpType()) {
@@ -56,4 +46,32 @@ public class UnaryExp extends AstNode {
     public boolean isPrimaryExpType() { return type == 1; }
     public boolean isCallFuncType() { return type == 2; }
     public boolean isUnaryType() { return type == 3; }
+    public void checkSema(SymbolTable symbolTable) {
+        if (isPrimaryExpType()) {
+            primaryExp.checkSema(symbolTable);
+        } else if (isCallFuncType()) {
+            funcRParams.checkSema(symbolTable);
+            Symbol symbol = symbolTable.getSymbol(ident.getValue());
+            if (symbol == null) {
+                ErrorLog.addError(ErrorType.UNDEFINED_IDENFR, ident.getLine());
+            } else {
+                FunctionType functionType = (FunctionType) symbol.getType();
+                funcReturnType = functionType.getReturnType();
+                ArrayList<DataType> formalArgs = functionType.getArgumentTypes();
+                if (formalArgs.size() != funcRParams.getExps().size()) {
+                    ErrorLog.addError(ErrorType.FUNC_PARAM_NUMBER_MISMATCHED, ident.getLine());
+                } else {
+                    boolean flag = true;
+                    for (int i = 0; i < funcRParams.getExps().size(); i++) {
+                        if (!funcRParams.getExps().get(i).getDataType().equals(formalArgs.get(i))) {
+                            flag = false;
+                        }
+                    }
+                    if (!flag) { ErrorLog.addError(ErrorType.FUNC_PARAM_TYPE_MISMATCHED, ident.getLine()); }
+                }
+            }
+        } else {
+            unaryExp.checkSema(symbolTable);
+        }
+    }
 }

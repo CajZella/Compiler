@@ -20,17 +20,25 @@ public class ConstDef extends AstNode {
         super(GrammarType.ConstDef);
         constExps = new ArrayList<>();
     }
-    public void setIdent(Token ident) { ident = ident; }
+    public void setIdent(Token ident) { this.ident = ident; }
     public void addConstExp(ConstExp constExp) { constExps.add(constExp); }
     public void setConstInitVal(ConstInitVal constInitVal) { this.constInitVal = constInitVal; }
     public Token getIdent() { return ident; }
     public boolean hasConstExps() { return !constExps.isEmpty(); }
     public ArrayList<ConstExp> getConstExps() { return constExps; }
     public ConstInitVal getConstInitVal() { return constInitVal; }
-    public void addSymbolTable(SymbolTable symbolTable, BType bType) {
-        if (symbolTable.checkSymbolWhenDecl(ident)) {
-            ErrorLog.addError(ErrorType.DUPLICATE_IDENFR, ident.getLine());
-        } else {
+    public void checkSema(SymbolTable symbolTable) {
+        // step1. check constExps
+        if (hasConstExps()) {
+            for (ConstExp constExp : constExps) {
+                constExp.checkSema(symbolTable);
+            }
+        }
+        // step2. check constInitVal
+        constInitVal.checkSema(symbolTable);
+        // step3. check ident
+        if (!symbolTable.checkSymbolWhenDecl(ident)) {
+            // step4. add into symbol table
             Type type;
             if (hasConstExps()) { // ArrayType
                 ArrayList<Integer> dims = new ArrayList<>();

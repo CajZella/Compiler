@@ -1,5 +1,7 @@
 package frontend.parser.astNode;
 
+import frontend.symbolTable.SymbolTable;
+
 public class StmtExp extends Stmt {
     private Exp exp;
     public StmtExp() {
@@ -13,5 +15,10 @@ public class StmtExp extends Stmt {
     }
     public Exp getExp() {
         return exp;
+    }
+    public void checkSema(SymbolTable symbolTable) {
+        if (hasExp()) {
+            exp.checkSema(symbolTable);
+        }
     }
 }

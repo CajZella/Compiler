@@ -15,9 +15,9 @@ public class ConstDecl extends AstNode {
     public void setBType(BType bType) { this.bType = bType; }
     public BType getBType() { return bType; }
     public ArrayList<ConstDef> getConstDefs() { return constDefs; }
-    public void addToSymbolTable(SymbolTable symbolTable) {
+    public void checkSema(SymbolTable symbolTable) {
         for (ConstDef constDef : constDefs) {
-            constDef.addSymbolTable(symbolTable, bType);
+            constDef.checkSema(symbolTable);
         }
     }
 }

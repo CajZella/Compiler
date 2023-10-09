@@ -1,5 +1,7 @@
 package frontend.parser.astNode;
 
+import frontend.symbolTable.SymbolTable;
+
 import java.util.ArrayList;
 
 public class BlockItem extends AstNode {
@@ -17,5 +19,13 @@ public class BlockItem extends AstNode {
     }
     public Stmt getStmt() {
         return (Stmt)elements.get(0);
+    }
+    public void checkSema(SymbolTable symbolTable) {
+        if (isDecl()) { getDecl().checkSema(symbolTable); }
+        else if (isStmt()) {
+            getStmt().setFuncType(funcType);
+            getStmt().setInLoop(isInLoop);
+            getStmt().checkSema(symbolTable);
+        }
     }
 }

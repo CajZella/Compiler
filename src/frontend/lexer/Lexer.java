@@ -21,7 +21,7 @@ public class Lexer {
     private final String singleDelimiterRegrex = "[+\\-*/%<>=!,;(){}\\[\\]]";
     private final String unsignedIntegerRegrex = "[1-9][0-9]*|0";
     private final String identifierRegrex = "[a-zA-Z_][a-zA-Z_0-9]*";
-    private final String stringConstRegrex = "\".*\"";
+    private final String stringConstRegrex = "\".*?\"";
     private final Pattern doubleDelimiterPattern = Pattern.compile(doubleDelimiterRegrex);
     private final Pattern singleDelimiterPattern = Pattern.compile(singleDelimiterRegrex);
     private final Pattern unsignedIntegerPattern = Pattern.compile(unsignedIntegerRegrex);

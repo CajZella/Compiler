@@ -1,5 +1,7 @@
 package frontend.parser.astNode;
 
+import frontend.symbolTable.SymbolTable;
+
 import java.util.ArrayList;
 
 public class CompUnit extends AstNode {
@@ -21,4 +23,13 @@ public class CompUnit extends AstNode {
     public ArrayList<Decl> getDecls() { return decls; }
     public ArrayList<FuncDef> getFuncDefs() { return funcDefs; }
     public MainFuncDef getMainFuncDef() { return mainFuncDef; }
+    public void checkSema(SymbolTable symbolTable) {
+        for (Decl decl : decls) {
+            decl.checkSema(symbolTable);
+        }
+        for (FuncDef funcDef : funcDefs) {
+            funcDef.checkSema(symbolTable);
+        }
+        mainFuncDef.checkSema(symbolTable);
+    }
 }

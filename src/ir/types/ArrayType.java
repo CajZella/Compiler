@@ -9,6 +9,7 @@ public class ArrayType extends Type {
     private int length;
     public boolean isIntegerTy(int bitWidth) { return false; }
     public ArrayType(Type elementType, int length) {
+        super(TypeID.ArrayTyID);
         if (elementType instanceof DataType) {
             dims.add(length);
             baseType = (DataType) elementType;
@@ -22,6 +23,7 @@ public class ArrayType extends Type {
         this.length = length;
     }
     public ArrayType(ArrayList<Integer> dims, DataType dataType) {
+        super(TypeID.ArrayTyID);
         Type temp = dataType;
         for (int i = 0; i < dims.size() - 1; i++) {
             temp = new ir.types.ArrayType(temp, dims.get(i));
@@ -34,9 +36,19 @@ public class ArrayType extends Type {
     public Type getElementType() { return this.elementType; }
     public DataType getBaseType() { return this.baseType; }
     public ArrayList<Integer> getDims() { return dims; }
+    public int getDimsSize() { return dims.size(); }
     public int getLength() { return this.length; }
     @Override
     public String toString() {
         return "[" + length + " x " + elementType + "]";
+    }
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof ArrayType) {
+            return this.elementType.equals(((ArrayType) object).getElementType()) &&
+                    this.length == ((ArrayType) object).getLength();
+        } else {
+            return false;
+        }
     }
 }

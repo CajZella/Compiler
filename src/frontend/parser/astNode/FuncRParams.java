@@ -3,6 +3,7 @@ package frontend.parser.astNode;
 import frontend.ErrorHandle.ErrorLog;
 import frontend.ErrorHandle.ErrorType;
 import frontend.symbolTable.Symbol;
+import frontend.symbolTable.SymbolTable;
 import ir.types.DataType;
 import ir.types.FunctionType;
 
@@ -20,19 +21,9 @@ public class FuncRParams extends AstNode {
     public ArrayList<Exp> getExps() {
         return exps;
     }
-    public void checkCallFunc(Symbol funcSymbol, int line) {
-        FunctionType functionType = (FunctionType) funcSymbol.getType();
-        ArrayList<DataType> formalArgs = functionType.getArgumentTypes();
-        if (formalArgs.size() != exps.size()) {
-            ErrorLog.addError(ErrorType.FUNC_PARAM_NUMBER_MISMATCHED, line);
-        } else {
-            boolean flag = true;
-            for (int i = 0; i < exps.size(); i++) {
-                if (exps.get(i).getDataType() != formalArgs.get(i)) {
-                    flag = false;
-                }
-            }
-            if (!flag) { ErrorLog.addError(ErrorType.FUNC_PARAM_TYPE_MISMATCHED, line); }
+    public void checkSema(SymbolTable symbolTable) {
+        for (Exp exp : exps) {
+            exp.checkSema(symbolTable);
         }
     }
 }

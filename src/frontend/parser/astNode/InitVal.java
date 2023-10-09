@@ -1,5 +1,7 @@
 package frontend.parser.astNode;
 
+import frontend.symbolTable.SymbolTable;
+
 import java.util.ArrayList;
 
 public class InitVal extends AstNode {
@@ -23,5 +25,14 @@ public class InitVal extends AstNode {
     }
     public ArrayList<InitVal> getInitVals() {
         return initVals;
+    }
+    public void checkSema(SymbolTable symbolTable) {
+        if (isExp()) {
+            exp.checkSema(symbolTable);
+        } else {
+            for (InitVal initVal : initVals) {
+                initVal.checkSema(symbolTable);
+            }
+        }
     }
 }

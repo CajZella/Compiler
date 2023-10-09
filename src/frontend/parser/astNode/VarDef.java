@@ -45,9 +45,22 @@ public class VarDef extends AstNode {
         return initVal;
     }
     public void addSymbolTable(SymbolTable symbolTable, BType bType) {
-        if (symbolTable.checkSymbolWhenDecl(ident)) {
-            ErrorLog.addError(ErrorType.DUPLICATE_IDENFR, ident.getLine());
-        } else {
+
+    }
+    public void checkSema(SymbolTable symbolTable) {
+        // step1. check constExps
+        if (hasConstExps()) {
+            for (ConstExp constExp : constExps) {
+                constExp.checkSema(symbolTable);
+            }
+        }
+        // step2. check initVal
+        if (hasInitVal()) {
+            initVal.checkSema(symbolTable);
+        }
+        // step3. check ident
+        if (!symbolTable.checkSymbolWhenDecl(ident)) {
+            // step4. add symbol
             Type type;
             if (hasConstExps()) { // ArrayType
                 ArrayList<Integer> dims = new ArrayList<>();

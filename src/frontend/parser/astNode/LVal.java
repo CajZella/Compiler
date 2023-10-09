@@ -7,42 +7,61 @@ import frontend.symbolTable.Symbol;
 import frontend.symbolTable.SymbolTable;
 import ir.types.ArrayType;
 import ir.types.DataType;
+import ir.types.IntegerType;
 import ir.types.PointerType;
 import ir.types.Type;
-
 import java.util.ArrayList;
 
+/*
+    int a[2][2];
+    a: [2 x i32]*
+    a[0]: i32*
+    a[0][0]: i32
+ */
 public class LVal extends AstNode {
     private Token ident;
     private ArrayList<Exp> exps;
-    private Type identType;
+    private Symbol symbol;
     public LVal() {
         super(GrammarType.LVal);
         exps = new ArrayList<>();
     }
-    public boolean checkIdent(Token ident, SymbolTable symbolTable) {
-        Symbol symbol = symbolTable.getSymbol(ident.getValue());
+    public void checkSema(SymbolTable symbolTable) {
+        symbol = symbolTable.getSymbol(ident.getValue());
         if (symbol == null) {
             ErrorLog.addError(ErrorType.UNDEFINED_IDENFR, ident.getLine());
-            return false;
-        } else {
-            identType = symbol.getType();
-            return true;
+        }
+        if (hasExps()) {
+            for (Exp exp : exps) {
+                exp.checkSema(symbolTable);
+            }
         }
     }
     @Override
     public DataType getDataType() {
-        if (identType.isArrayTy()) {
-            Type type = identType;
+        if (symbol.getType().isArrayTy()) {
+            Type type = symbol.getType();
             for (int i = 0; i < exps.size(); i++) {
-                type = ((ArrayType)identType).getElementType();
+                type = ((ArrayType)type).getElementType();
             }
-            return new PointerType(type);
-        } else { return (DataType) identType; }
+            return type.isIntegerTy() ? (IntegerType)type : new PointerType(((ArrayType)type).getElementType());
+        } else if (symbol.getType().isPointerTy()) {
+            Type referencedType = ((PointerType)symbol.getType()).getReferencedType();
+            if (referencedType.isIntegerTy()) {
+                return exps.size() == 1 ? (IntegerType)referencedType : (PointerType)symbol.getType();
+            } else {
+                return switch (exps.size()) {
+                    case 0 -> (PointerType) symbol.getType();
+                    case 1 -> new PointerType(((ArrayType) referencedType).getElementType());
+                    default -> (IntegerType) ((ArrayType) referencedType).getElementType();
+                };
+            }
+        } else { return (DataType) symbol.getType(); }
     }
     public void setIdent(Token ident) { this.ident = ident; }
     public void addExp(Exp exp) { exps.add(exp); }
     public Token getIdent() { return ident; }
     public boolean hasExps() { return !exps.isEmpty(); }
     public ArrayList<Exp> getExps() { return exps; }
+    public Symbol getSymbol() { return symbol; }
 }

@@ -2,7 +2,10 @@ package ir.types;
 
 public class IntegerType extends DataType {
     private final int bitWidth;
-    public IntegerType(int bitWidth) { this.bitWidth = bitWidth; }
+    public IntegerType(int bitWidth) {
+        super(TypeID.IntegerTyID);
+        this.bitWidth = bitWidth;
+    }
     public boolean isIntegerTy(int bitWidth) {
         return this.bitWidth == bitWidth;
     }

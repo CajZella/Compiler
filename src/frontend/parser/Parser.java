@@ -1,18 +1,15 @@
 package frontend.parser;
 
+import frontend.LexParseLog;
 import frontend.lexer.Token;
 import frontend.lexer.WordType;
 import frontend.parser.astNode.*;
 import frontend.parser.astNode.Number;
 import frontend.ErrorHandle.ErrorLog;
 import frontend.ErrorHandle.ErrorType;
-import frontend.symbolTable.SymbolTable;
-import settings.Configure;
 
 public class Parser {
     private final TokenManager tokenManager;
-    private boolean isInLoop = false;
-    private boolean isFuncRetVoid = false;
 
     public Parser() {
         this.tokenManager = new TokenManager();
@@ -35,7 +32,7 @@ public class Parser {
         if (tokenManager.checkTokenType(1, WordType.MAINTK)) {
             compUnit.setMainFuncDef(parseMainFuncDef());
         }
-        Configure.parseDisplay(compUnit.toString());
+        LexParseLog.add(compUnit.toString());
         return compUnit;
     }
 
@@ -72,19 +69,17 @@ public class Parser {
             Token token = tokenManager.makeupToken(WordType.RPARENT);
             ErrorLog.addError(ErrorType.RPARENT_MISSED, token.getLine());
         }
-        funcDef.addFuncSymbol(tokenManager.symbolTable);
-        tokenManager.symbolTable = new SymbolTable(tokenManager.symbolTable);
-        funcDef.getFuncFParams().addToSymbolTable(tokenManager.symbolTable);
         funcDef.setBlock(parseBlock()); // Block
-        tokenManager.symbolTable = tokenManager.symbolTable.getParent();
-        Configure.parseDisplay(funcDef.toString());
+        LexParseLog.add(funcDef.toString());
         return funcDef;
     }
 
     /* MainFuncDef -> 'int' 'main' '(' ')' Block */
     public MainFuncDef parseMainFuncDef() throws ParserException {
         MainFuncDef mainFuncDef = new MainFuncDef();
-        tokenManager.getNextToken(WordType.INTTK); // 'int'
+        FuncType funcType = new FuncType();
+        funcType.addElement(tokenManager.getNextToken(WordType.INTTK));
+        mainFuncDef.setFuncType(funcType); // 'int'
         mainFuncDef.setIdent(tokenManager.getNextToken(WordType.MAINTK)); // 'main'
         tokenManager.getNextToken(WordType.LPARENT); // '('
         try {
@@ -93,11 +88,8 @@ public class Parser {
             Token token = tokenManager.makeupToken(WordType.RPARENT);
             ErrorLog.addError(ErrorType.RPARENT_MISSED, token.getLine());
         }
-        mainFuncDef.addFuncSymbol(tokenManager.symbolTable);
-        tokenManager.symbolTable = new SymbolTable(tokenManager.symbolTable);
         mainFuncDef.setBlock(parseBlock()); // Block
-        tokenManager.symbolTable = tokenManager.symbolTable.getParent();
-        Configure.parseDisplay(mainFuncDef.toString());
+        LexParseLog.add(mainFuncDef.toString());
         return mainFuncDef;
     }
 
@@ -117,8 +109,7 @@ public class Parser {
             Token token = tokenManager.makeupToken(WordType.SEMICN);
             ErrorLog.addError(ErrorType.SEMICN_MISSED, token.getLine());
         }
-        constDecl.addToSymbolTable(tokenManager.symbolTable);
-        Configure.parseDisplay(constDecl.toString());
+        LexParseLog.add(constDecl.toString());
         return constDecl;
     }
 
@@ -138,7 +129,7 @@ public class Parser {
         }
         tokenManager.getNextToken(WordType.ASSIGN); // '='
         constDef.setConstInitVal(parseConstInitVal());
-        Configure.parseDisplay(constDef.toString());
+        LexParseLog.add(constDef.toString());
         return constDef;
     }
 
@@ -157,8 +148,7 @@ public class Parser {
             Token token = tokenManager.makeupToken(WordType.SEMICN);
             ErrorLog.addError(ErrorType.SEMICN_MISSED, token.getLine());
         }
-        varDecl.addToSymbolTable(tokenManager.symbolTable);
-        Configure.parseDisplay(varDecl.toString());
+        LexParseLog.add(varDecl.toString());
         return varDecl;
     }
 
@@ -180,7 +170,7 @@ public class Parser {
             tokenManager.getNextToken(); // '='
             varDef.setInitVal(parseInitVal()); // InitVal
         }
-        Configure.parseDisplay(varDef.toString());
+        LexParseLog.add(varDef.toString());
         return varDef;
     }
 
@@ -207,7 +197,7 @@ public class Parser {
             }
             tokenManager.getNextToken(WordType.RBRACE); // '}'
         }
-        Configure.parseDisplay(constInitVal.toString());
+        LexParseLog.add(constInitVal.toString());
         return constInitVal;
     }
 
@@ -215,7 +205,7 @@ public class Parser {
     public ConstExp parseConstExp() throws ParserException {
         ConstExp constExp = new ConstExp();
         constExp.addElement(parseAddExp());
-        Configure.parseDisplay(constExp.toString());
+        LexParseLog.add(constExp.toString());
         return constExp;
     }
 
@@ -235,7 +225,7 @@ public class Parser {
             }
             tokenManager.getNextToken(WordType.RBRACE); // '}'
         }
-        Configure.parseDisplay(initVal.toString());
+        LexParseLog.add(initVal.toString());
         return initVal;
     }
 
@@ -243,7 +233,7 @@ public class Parser {
     public Exp parseExp() throws ParserException {
         Exp exp = new Exp();
         exp.addElement(parseAddExp());
-        Configure.parseDisplay(exp.toString());
+        LexParseLog.add(exp.toString());
         return exp;
     }
 
@@ -251,7 +241,7 @@ public class Parser {
     public FuncType parseFuncType() throws ParserException {
         FuncType funcType = new FuncType();
         funcType.addElement(tokenManager.getNextToken(WordType.VOIDTK, WordType.INTTK));
-        Configure.parseDisplay(funcType.toString());
+        LexParseLog.add(funcType.toString());
         return funcType;
     }
 
@@ -263,7 +253,7 @@ public class Parser {
             tokenManager.getNextToken();
             funcFParams.addFuncFParam(parseFuncFParam());
         }
-        Configure.parseDisplay(funcFParams.toString());
+        LexParseLog.add(funcFParams.toString());
         return funcFParams;
     }
 
@@ -274,8 +264,8 @@ public class Parser {
         while (!tokenManager.checkTokenType(0, WordType.RBRACE)) { // (BlockItem)*
             block.addBlockItem(parseBlockItem());
         }
-        tokenManager.getNextToken(WordType.RBRACE); // '}'
-        Configure.parseDisplay(block.toString());
+        block.setRbraceLine(tokenManager.getNextToken(WordType.RBRACE).getLine()); // '}'
+        LexParseLog.add(block.toString());
         return block;
     }
 
@@ -304,7 +294,7 @@ public class Parser {
                 }
             }
         }
-        Configure.parseDisplay(funcFParam.toString());
+        LexParseLog.add(funcFParam.toString());
         return funcFParam;
     }
 
@@ -349,15 +339,21 @@ public class Parser {
             stmt = parseStmtPrintf();
         } else { // ① ② ③
             try {
+                tokenManager.openBackup();
                 stmt = parseStmtGetint();
+                tokenManager.closeBackup();
             } catch (ParserException e) {
                 tokenManager.rollBack();
                 try {
+                    tokenManager.openBackup();
                     stmt = parseStmtAssign();
+                    tokenManager.closeBackup();
                 } catch (ParserException e1) {
                     tokenManager.rollBack();
                     try {
+                        tokenManager.openBackup();
                         stmt = parseStmtExp();
+                        tokenManager.closeBackup();
                     } catch (ParserException e2) {
                         tokenManager.rollBack();
                         throw new ParserException(ParserException.ParserExcType.OTHER);
@@ -365,7 +361,7 @@ public class Parser {
                 }
             }
         }
-        Configure.parseDisplay(stmt.toString());
+        LexParseLog.add(stmt.toString());
         return stmt;
     }
 
@@ -389,9 +385,6 @@ public class Parser {
     }
     public StmtBrkCon parseStmtBrkCon() throws ParserException {
         StmtBrkCon stmtBrkCon = new StmtBrkCon(tokenManager.getNextToken(WordType.BREAKTK, WordType.CONTINUETK));
-        if (!isInLoop) { // ToDo
-            ErrorLog.addError(ErrorType.BREAK_CONTINUE_MISPLACED, stmtBrkCon.getToken().getLine());
-        }
         try {
             tokenManager.getNextToken(WordType.SEMICN); // ';'
         } catch (ParserException e) {
@@ -472,9 +465,7 @@ public class Parser {
             Token token = tokenManager.makeupToken(WordType.RPARENT);
             ErrorLog.addError(ErrorType.RPARENT_MISSED, token.getLine());
         }
-        isInLoop = true;
         stmtFor.setStmt(parseStmt()); // Stmt
-        isInLoop = false;
         return stmtFor;
     }
     public StmtWhile parseStmtWhile() throws ParserException {
@@ -488,9 +479,7 @@ public class Parser {
             Token token = tokenManager.makeupToken(WordType.RPARENT);
             ErrorLog.addError(ErrorType.RPARENT_MISSED, token.getLine());
         }
-        isInLoop = true;
         stmtWhile.setStmt(parseStmt()); // Stmt
-        isInLoop = false;
         return stmtWhile;
     }
     public StmtGetint parseStmtGetint() throws ParserException {
@@ -533,7 +522,7 @@ public class Parser {
     }
     public StmtPrintf parseStmtPrintf() throws ParserException {
         StmtPrintf stmtPrintf = new StmtPrintf();
-        int printfLine = tokenManager.getNextToken(WordType.PRINTFTK).getLine(); // 'printf' // Todo
+        stmtPrintf.setPrintfLine(tokenManager.getNextToken(WordType.PRINTFTK).getLine()); // 'printf'
         tokenManager.getNextToken(WordType.LPARENT); // '('
         stmtPrintf.setFormatString(tokenManager.getNextToken(WordType.STRCON)); // FormatString
         while (tokenManager.checkTokenType(0, WordType.COMMA)) { // (',' Exp)*
@@ -552,12 +541,11 @@ public class Parser {
             Token token = tokenManager.makeupToken(WordType.SEMICN);
             ErrorLog.addError(ErrorType.SEMICN_MISSED, token.getLine());
         }
-        ErrorLog.checkPrintf(stmtPrintf, printfLine); // todo
         return stmtPrintf;
     }
     public StmtReturn parseStmtReturn() throws ParserException {
         StmtReturn stmtReturn = new StmtReturn();
-        tokenManager.getNextToken(WordType.RETURNTK); // 'return'
+        stmtReturn.setReturnLine(tokenManager.getNextToken(WordType.RETURNTK).getLine()); // 'return'
         if (!tokenManager.checkTokenType(0, WordType.SEMICN)) { // (Exp)?
             try {
                 tokenManager.openBackup();
@@ -590,7 +578,7 @@ public class Parser {
                 ErrorLog.addError(ErrorType.RBRACK_MISSED, token.getLine());
             }
         }
-        Configure.parseDisplay(lVal.toString());
+        LexParseLog.add(lVal.toString());
         return lVal;
     }
 
@@ -598,7 +586,7 @@ public class Parser {
     public Cond parseCond() throws ParserException {
         Cond cond = new Cond();
         cond.addElement(parseLOrExp());
-        Configure.parseDisplay(cond.toString());
+        LexParseLog.add(cond.toString());
         return cond;
     }
 
@@ -608,7 +596,7 @@ public class Parser {
         forStmt.setLVal(parseLVal()); // LVal
         tokenManager.getNextToken(WordType.ASSIGN); // '='
         forStmt.setExp(parseExp()); // Exp
-        Configure.parseDisplay(forStmt.toString());
+        LexParseLog.add(forStmt.toString());
         return forStmt;
     }
 
@@ -616,11 +604,11 @@ public class Parser {
     public AddExp parseAddExp() throws ParserException {
         AddExp addExp = new AddExp();
         addExp.addElement(parseMulExp()); // MulExp
-        Configure.parseDisplay(addExp.toString()); // 消除左递归的副作用
+        LexParseLog.add(addExp.toString()); // 消除左递归的副作用
         while (tokenManager.checkTokenType(0, WordType.PLUS, WordType.MINU)) { // (('+'|'-' MulExp))*
             addExp.addElement(tokenManager.getNextToken()); // '+'|'-'
             addExp.addElement(parseMulExp()); // MulExp
-            Configure.parseDisplay(addExp.toString()); // 消除左递归的副作用
+            LexParseLog.add(addExp.toString()); // 消除左递归的副作用
         }
         return addExp;
     }
@@ -629,11 +617,11 @@ public class Parser {
     public MulExp parseMulExp() throws ParserException {
         MulExp mulExp = new MulExp();
         mulExp.addElement(parseUnaryExp()); // UnaryExp
-        Configure.parseDisplay(mulExp.toString()); // 消除左递归的副作用
+        LexParseLog.add(mulExp.toString()); // 消除左递归的副作用
         while (tokenManager.checkTokenType(0, WordType.MULT, WordType.DIV, WordType.MOD)) { // (('*' | '/' | '%') UnaryExp)*
             mulExp.addElement(tokenManager.getNextToken()); // '*' | '/' | '%'
             mulExp.addElement(parseUnaryExp()); // UnaryExp
-            Configure.parseDisplay(mulExp.toString()); // 消除左递归的副作用
+            LexParseLog.add(mulExp.toString()); // 消除左递归的副作用
         }
         return mulExp;
     }
@@ -655,7 +643,7 @@ public class Parser {
         } else { // LVal
             primaryExp.addElement(parseLVal()); // LVal
         }
-        Configure.parseDisplay(primaryExp.toString());
+        LexParseLog.add(primaryExp.toString());
         return primaryExp;
     }
 
@@ -663,7 +651,7 @@ public class Parser {
     public Number parseNumber() throws ParserException {
         Number number = new Number();
         number.addElement(tokenManager.getNextToken(WordType.INTCON));
-        Configure.parseDisplay(number.toString());
+        LexParseLog.add(number.toString());
         return number;
     }
 
@@ -697,7 +685,7 @@ public class Parser {
             unaryExp.setPrimaryExpType();
             unaryExp.setPrimaryExp(parsePrimaryExp()); // PrimaryExp
         }
-        Configure.parseDisplay(unaryExp.toString());
+        LexParseLog.add(unaryExp.toString());
         return unaryExp;
     }
 
@@ -705,7 +693,7 @@ public class Parser {
     public UnaryOp parseUnaryOp() throws ParserException {
         UnaryOp unaryOp = new UnaryOp();
         unaryOp.addElement(tokenManager.getNextToken(WordType.PLUS, WordType.MINU, WordType.NOT));
-        Configure.parseDisplay(unaryOp.toString());
+        LexParseLog.add(unaryOp.toString());
         return unaryOp;
     }
 
@@ -717,7 +705,7 @@ public class Parser {
             tokenManager.getNextToken(); // ','
             funcRParams.addExp(parseExp()); // Exp
         }
-        Configure.parseDisplay(funcRParams.toString());
+        LexParseLog.add(funcRParams.toString());
         return funcRParams;
     }
 
@@ -725,11 +713,11 @@ public class Parser {
     public RelExp parseRelExp() throws ParserException {
         RelExp relExp = new RelExp();
         relExp.addElement(parseAddExp()); // AddExp
-        Configure.parseDisplay(relExp.toString()); // 消除左递归的副作用
+        LexParseLog.add(relExp.toString()); // 消除左递归的副作用
         while (tokenManager.checkTokenType(0, WordType.LSS, WordType.LEQ, WordType.GRE, WordType.GEQ)) { // (('<' | '<=' | '>' | '>=') AddExp)*
             relExp.addElement(tokenManager.getNextToken()); // '<' | '<=' | '>' | '>='
             relExp.addElement(parseAddExp()); // AddExp
-            Configure.parseDisplay(relExp.toString()); // 消除左递归的副作用
+            LexParseLog.add(relExp.toString()); // 消除左递归的副作用
         }
         return relExp;
     }
@@ -738,11 +726,11 @@ public class Parser {
     public EqExp parseEqExp() throws ParserException {
         EqExp eqExp = new EqExp();
         eqExp.addElement(parseRelExp()); // RelExp
-        Configure.parseDisplay(eqExp.toString()); // 消除左递归的副作用
+        LexParseLog.add(eqExp.toString()); // 消除左递归的副作用
         while (tokenManager.checkTokenType(0, WordType.EQL, WordType.NEQ)) { // (('==' | '!=') RelExp)*
             eqExp.addElement(tokenManager.getNextToken()); // '==' | '!='
             eqExp.addElement(parseRelExp()); // RelExp
-            Configure.parseDisplay(eqExp.toString()); // 消除左递归的副作用
+            LexParseLog.add(eqExp.toString()); // 消除左递归的副作用
         }
         return eqExp;
     }
@@ -751,11 +739,11 @@ public class Parser {
     public LAndExp parseLAndExp() throws ParserException {
         LAndExp lAndExp = new LAndExp();
         lAndExp.addElement(parseEqExp()); // EqExp
-        Configure.parseDisplay(lAndExp.toString()); // 消除左递归的副作用
+        LexParseLog.add(lAndExp.toString()); // 消除左递归的副作用
         while (tokenManager.checkTokenType(0, WordType.AND)) { // ('&&' EqExp)*
             lAndExp.addElement(tokenManager.getNextToken()); // '&&'
             lAndExp.addElement(parseEqExp()); // EqExp
-            Configure.parseDisplay(lAndExp.toString()); // 消除左递归的副作用
+            LexParseLog.add(lAndExp.toString()); // 消除左递归的副作用
         }
         return lAndExp;
     }
@@ -764,11 +752,11 @@ public class Parser {
     public LOrExp parseLOrExp() throws ParserException {
         LOrExp lOrExp = new LOrExp();
         lOrExp.addElement(parseLAndExp()); // LAndExp
-        Configure.parseDisplay(lOrExp.toString()); // 消除左递归的副作用
+        LexParseLog.add(lOrExp.toString()); // 消除左递归的副作用
         while (tokenManager.checkTokenType(0, WordType.OR)) { // ('||' LAndExp)*
             lOrExp.addElement(tokenManager.getNextToken()); // '||'
             lOrExp.addElement(parseLAndExp()); // LAndExp
-            Configure.parseDisplay(lOrExp.toString()); // 消除左递归的副作用
+            LexParseLog.add(lOrExp.toString()); // 消除左递归的副作用
         }
         return lOrExp;
     }

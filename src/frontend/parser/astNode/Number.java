@@ -1,5 +1,6 @@
 package frontend.parser.astNode;
 
+import frontend.symbolTable.SymbolTable;
 import ir.types.DataType;
 import ir.types.IntegerType;
 
@@ -10,4 +11,5 @@ public class Number extends AstNode {
     }
     @Override
     public DataType getDataType() { return dataType; }
+    public void checkSema(SymbolTable symbolTable) { return; }
 }

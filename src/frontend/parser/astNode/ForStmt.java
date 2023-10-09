@@ -1,5 +1,9 @@
 package frontend.parser.astNode;
 
+import frontend.ErrorHandle.ErrorLog;
+import frontend.ErrorHandle.ErrorType;
+import frontend.symbolTable.SymbolTable;
+
 public class ForStmt extends AstNode {
     private LVal lVal;
     private Exp exp;
@@ -17,5 +21,12 @@ public class ForStmt extends AstNode {
     }
     public Exp getExp() {
         return exp;
+    }
+    public void checkSema(SymbolTable symbolTable) {
+        lVal.checkSema(symbolTable);
+        exp.checkSema(symbolTable);
+        if (lVal.getSymbol().isConst()) {
+            ErrorLog.addError(ErrorType.CONST_ASSIGNMENT, lVal.getIdent().getLine());
+        }
     }
 }

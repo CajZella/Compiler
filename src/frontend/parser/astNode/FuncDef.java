@@ -11,24 +11,11 @@ import ir.types.IntegerType;
 import ir.types.VoidType;
 
 public class FuncDef extends AstNode {
-    private FuncType funcType;
     private Token ident;
     private FuncFParams funcFParams = null;
     private Block block;
     public FuncDef() {
         super(GrammarType.FuncDef);
-    }
-    public void addFuncSymbol(SymbolTable symbolTable) {
-        if (symbolTable.checkSymbolWhenDecl(ident)) {
-            ErrorLog.addError(ErrorType.DUPLICATE_IDENFR, ident.getLine());
-        } else {
-            DataType returnType = funcType.isVoid() ? new VoidType() : new IntegerType(32);
-            FunctionType functionType = new FunctionType(funcFParams.getTypes(), returnType);
-            symbolTable.addSymbol(new Symbol(ident.getValue(), false, functionType, ident.getLine()));
-        }
-    }
-    public void setFuncType(FuncType funcType) {
-        this.funcType = funcType;
     }
     public void setIdent(Token ident) {
         this.ident = ident;
@@ -38,9 +25,6 @@ public class FuncDef extends AstNode {
     }
     public void setBlock(Block block) {
         this.block = block;
-    }
-    public FuncType getFuncType() {
-        return funcType;
     }
     public Token getIdent() {
         return ident;
@@ -53,5 +37,35 @@ public class FuncDef extends AstNode {
     }
     public Block getBlock() {
         return block;
+    }
+    public void checkSema(SymbolTable symbolTable) {
+        // step1. function symbol
+        if (!symbolTable.checkSymbolWhenDecl(ident)) {
+            DataType returnType = funcType.isVoid() ? new VoidType() : new IntegerType(32);
+            FunctionType functionType = new FunctionType(null == funcFParams ? null : funcFParams.getTypes(), returnType);
+            symbolTable.addSymbol(new Symbol(ident.getValue(), false, functionType, ident.getLine()));
+        }
+        // step2. FunFParams check
+        SymbolTable childTable = new SymbolTable(symbolTable);
+        if (hasFuncFParams()) {
+            funcFParams.checkSema(childTable);
+        }
+        // step3. Block check
+        block.setFuncType(funcType);
+        block.checkSema(childTable);
+        // step4. check return stmt
+        if (funcType.isInt()) {
+            if (block.getBlockItems().isEmpty()) {
+                ErrorLog.addError(ErrorType.NON_RETURN_FUNC, block.getRbraceLine());
+            } else {
+                BlockItem blockItem = block.getBlockItems().get(block.getBlockItems().size() - 1);
+                if (blockItem.isStmt()) {
+                    Stmt stmt = blockItem.getStmt();
+                    if (!stmt.isReturnStmt()) {
+                        ErrorLog.addError(ErrorType.NON_RETURN_FUNC, block.getRbraceLine());
+                    }
+                }
+            }
+        }
     }
 }

@@ -1,5 +1,7 @@
 package frontend.parser.astNode;
 
+import frontend.symbolTable.SymbolTable;
+
 import java.util.ArrayList;
 
 public class ConstInitVal extends AstNode {
@@ -14,4 +16,13 @@ public class ConstInitVal extends AstNode {
     public boolean isConstExp() { return constExp != null; }
     public ConstExp getConstExp() { return constExp; }
     public ArrayList<ConstInitVal> getConstInitVals() { return constInitVals; }
+    public void checkSema(SymbolTable symbolTable) {
+        if (isConstExp()) {
+            constExp.checkSema(symbolTable);
+        } else {
+            for (ConstInitVal constInitVal : constInitVals) {
+                constInitVal.checkSema(symbolTable);
+            }
+        }
+    }
 }

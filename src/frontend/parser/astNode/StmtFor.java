@@ -1,5 +1,7 @@
 package frontend.parser.astNode;
 
+import frontend.symbolTable.SymbolTable;
+
 public class StmtFor extends Stmt {
     private ForStmt forStmt1 = null;
     private Cond cond = null;
@@ -40,5 +42,19 @@ public class StmtFor extends Stmt {
     }
     public Stmt getStmt() {
         return stmt;
+    }
+    public void checkSema(SymbolTable symbolTable) {
+        if (hasForStmt1()) {
+            forStmt1.checkSema(symbolTable);
+        }
+        if (hasCond()) {
+            cond.checkSema(symbolTable);
+        }
+        if (hasForStmt2()) {
+            forStmt2.checkSema(symbolTable);
+        }
+        stmt.setFuncType(funcType);
+        stmt.setInLoop(true);
+        stmt.checkSema(symbolTable);
     }
 }

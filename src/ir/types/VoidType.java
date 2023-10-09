@@ -1,6 +1,7 @@
 package ir.types;
 
 public class VoidType extends DataType {
+    public VoidType() { super(TypeID.VoidTyID); }
     public boolean isIntegerTy(int bitWidth) { return false; }
     @Override
     public String toString() {

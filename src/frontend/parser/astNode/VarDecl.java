@@ -23,9 +23,9 @@ public class VarDecl extends AstNode {
     public ArrayList<VarDef> getVarDefs() {
         return varDefs;
     }
-    public void addToSymbolTable(SymbolTable symbolTable) {
+    public void checkSema(SymbolTable symbolTable) {
         for (VarDef varDef : varDefs) {
-            varDef.addSymbolTable(symbolTable, bType);
+            varDef.checkSema(symbolTable);
         }
     }
 }

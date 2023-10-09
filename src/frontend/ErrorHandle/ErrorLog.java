@@ -21,17 +21,29 @@ public class ErrorLog {
         }
         return stringBuilder.toString();
     }
-    public static void checkPrintf(StmtPrintf stmtPrintf, int line) {
-        String strCon = stmtPrintf.getFormatString().getValue();
-        String regrex = "%d";
-        Pattern pattern = Pattern.compile(regrex);
-        Matcher matcher = pattern.matcher(strCon);
-        int count = 0;
-        while (matcher.find()) {
-            count++;
+    public static boolean hasError() {
+        return errorList.size() != 0;
+    }
+    public static int size() { return errorList.size(); }
+    public static void remain(int num) {
+        errorList = new ArrayList<>(errorList.subList(0, num));
+    }
+    public static void sort() {
+        errorList.sort((o1, o2) -> {
+            if (o1.getLine() < o2.getLine()) {
+                return -1;
+            } else if (o1.getLine() > o2.getLine()) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+    }
+    public static String print() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Error error : errorList) {
+            stringBuilder.append(error.toString() + "\n");
         }
-        if (count != stmtPrintf.getExps().size()) {
-            ErrorLog.addError(ErrorType.PRINTF_MISMATCHED, line);
-        }
+        return stringBuilder.toString();
     }
 }

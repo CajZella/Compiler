@@ -2,7 +2,6 @@ package frontend.parser.astNode;
 
 import frontend.symbolTable.SymbolTable;
 import ir.types.DataType;
-import ir.types.Type;
 
 import java.util.ArrayList;
 
@@ -25,9 +24,9 @@ public class FuncFParams extends AstNode {
         }
         return types;
     }
-    public void addToSymbolTable(SymbolTable symbolTable) {
+    public void checkSema(SymbolTable symbolTable) {
         for (FuncFParam funcFParam : funcFParams) {
-            funcFParam.addSymbol(symbolTable);
+            funcFParam.checkSema(symbolTable);
         }
     }
 }

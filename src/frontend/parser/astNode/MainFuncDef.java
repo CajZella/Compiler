@@ -8,7 +8,6 @@ import frontend.symbolTable.SymbolTable;
 import ir.types.DataType;
 import ir.types.FunctionType;
 import ir.types.IntegerType;
-import ir.types.VoidType;
 
 public class MainFuncDef extends AstNode {
     private Token ident;
@@ -25,13 +24,30 @@ public class MainFuncDef extends AstNode {
     public Token getIdent() {
         return ident;
     }
-    public void addFuncSymbol(SymbolTable symbolTable) {
-        if (symbolTable.checkSymbolWhenDecl(ident)) {
-            ErrorLog.addError(ErrorType.DUPLICATE_IDENFR, ident.getLine());
-        } else {
+
+    public void checkSema(SymbolTable symbolTable) {
+        // step1. function symbol
+        if (!symbolTable.checkSymbolWhenDecl(ident)) {
             DataType returnType = new IntegerType(32);
             FunctionType functionType = new FunctionType(null, returnType);
             symbolTable.addSymbol(new Symbol(ident.getValue(), false, functionType, ident.getLine()));
+        }
+        // step2. build child symbol table
+        SymbolTable childTable = new SymbolTable(symbolTable);
+        // step3. Block check
+        block.setFuncType(funcType);
+        block.checkSema(childTable);
+        // step4. check return stmt
+        if (block.getBlockItems().isEmpty()) {
+            ErrorLog.addError(ErrorType.NON_RETURN_FUNC, block.getRbraceLine());
+        } else {
+            BlockItem blockItem = block.getBlockItems().get(block.getBlockItems().size() - 1);
+            if (blockItem.isStmt()) {
+                Stmt stmt = blockItem.getStmt();
+                if (!stmt.isReturnStmt()) {
+                    ErrorLog.addError(ErrorType.NON_RETURN_FUNC, block.getRbraceLine());
+                }
+            }
         }
     }
     public Block getBlock() {

@@ -2,6 +2,7 @@ package frontend.parser.astNode;
 
 import frontend.lexer.Token;
 import frontend.lexer.WordType;
+import frontend.symbolTable.SymbolTable;
 
 import java.util.ArrayList;
 
@@ -23,4 +24,9 @@ public class AddExp extends AstNode {
 //    }
 //    public ArrayList<MulExp> getMulExps() { return this.mulExps; }
 //    public ArrayList<Token> getOperations() { return this.operations; }
+    public void checkSema(SymbolTable symbolTable) {
+        for (AstNode node : elements) {
+            if (node.isMulExp()) { ((MulExp)node).checkSema(symbolTable); }
+        }
+    }
 }

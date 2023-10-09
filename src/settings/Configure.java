@@ -1,29 +1,32 @@
 package settings;
 
+import frontend.ErrorHandle.ErrorLog;
+import frontend.LexParseLog;
 import frontend.parser.Parser;
+import frontend.parser.astNode.CompUnit;
+import frontend.symbolTable.Sema;
 import util.MyIO;
 
 public class Configure {
     public static void run() {
         MyIO.readSourceFile(Config.sourceFile);
-        MyIO.openTargetFile(Config.targetFile);
         Parser parser = new Parser();
+        CompUnit compUnit;
         try {
-            parser.parseCompUnit();
+            compUnit = parser.parseCompUnit();
+            Sema sema = new Sema(compUnit);
+            sema.run();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        MyIO.closeFiles();
-    }
-    public static void lexDisplay(String msg) {
-        if (Config.isLexerOutput) {
-            MyIO.writeTargetFile(msg + "\n");
+        if (ErrorLog.hasError()) {
+            ErrorLog.sort();
+            if (Config.isErrorOutput)
+                MyIO.writeFile(Config.errorFile, ErrorLog.print());
+        } else {
+            if (Config.isParserOutput)
+                MyIO.writeFile(Config.targetFile, LexParseLog.print());
         }
-    }
-
-    public static void parseDisplay(String msg) {
-        if(Config.isParserOutput) {
-            MyIO.writeTargetFile(msg + "\n");
-        }
+        MyIO.closeReadFiles();
     }
 }

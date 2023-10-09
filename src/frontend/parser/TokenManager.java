@@ -1,5 +1,7 @@
 package frontend.parser;
 
+import frontend.ErrorHandle.ErrorLog;
+import frontend.LexParseLog;
 import frontend.lexer.Lexer;
 import frontend.lexer.Token;
 import frontend.lexer.WordType;
@@ -19,21 +21,21 @@ public class TokenManager {
     private boolean isBackup;
     private Token curToken;
     private Token prevToken;
-    public SymbolTable symbolTable;
     private final LinkedList<Token> backupBuffer;
     private Token backupCurToken;
     private Token backupPrevToken;
-    private SymbolTable backupSymbolTable;
+    private int backupErrorLogSize;
+    private int backupLexParseLogSize;
 
     public TokenManager() {
         this.lexer = new Lexer();
         this.buffer = new LinkedList<>();
         this.curToken = null;
-        this.symbolTable = new SymbolTable(null);
         this.isBackup = true;
         this.backupBuffer = new LinkedList<>();
         this.backupCurToken = null;
-        this.backupSymbolTable = null;
+        this.backupErrorLogSize = -1;
+        this.backupLexParseLogSize = -1;
     }
     public Token getNextToken() {
         if (buffer.isEmpty()) {
@@ -45,7 +47,7 @@ public class TokenManager {
         }
         prevToken = curToken;
         curToken = buffer.removeFirst();
-        Configure.lexDisplay(curToken.toString());
+        LexParseLog.add(curToken.toString());
         return curToken;
     }
     public Token getNextToken(WordType... wordType) throws ParserException {
@@ -77,7 +79,7 @@ public class TokenManager {
             }
         }
         buffer.removeFirst();
-        Configure.lexDisplay(curToken.toString());
+        LexParseLog.add(curToken.toString());
         return curToken;
     }
     public Token makeupToken(WordType wordType) {
@@ -107,21 +109,21 @@ public class TokenManager {
         backupBuffer.addAll(buffer);
         backupCurToken = curToken;
         backupPrevToken = prevToken;
-        backupSymbolTable = symbolTable.clone();
+        backupErrorLogSize = ErrorLog.size();
+        backupLexParseLogSize = LexParseLog.size();
     }
     public void closeBackup() {
         isBackup = false;
         backupBuffer.clear();
-        backupSymbolTable = null;
     }
     public void rollBack() {
         buffer.clear();
         buffer.addAll(backupBuffer);
         curToken = backupCurToken;
         prevToken = backupPrevToken;
-        symbolTable = backupSymbolTable;
+        ErrorLog.remain(backupErrorLogSize);
+        LexParseLog.remain(backupLexParseLogSize);
         isBackup = false;
         backupBuffer.clear();
-        backupSymbolTable = null;
     }
 }

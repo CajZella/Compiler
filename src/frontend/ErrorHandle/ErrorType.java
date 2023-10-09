@@ -7,7 +7,7 @@ public enum ErrorType {
     FUNC_PARAM_NUMBER_MISMATCHED("mismatched number of function param", 'd'),
     FUNC_PARAM_TYPE_MISMATCHED("mismatched type of function param", 'e'),
     RETURN_VALUE_IN_VOID_FUNC("mismatched type of return value", 'f'),
-    RETURN_MISSED("missing return value", 'g'),
+    NON_RETURN_FUNC("missing return value", 'g'),
     CONST_ASSIGNMENT("assigning value to constant", 'h'),
     SEMICN_MISSED("missing semicolon", 'i'),
     RPARENT_MISSED("missing right parenthesis", 'j'),

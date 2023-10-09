@@ -1,6 +1,9 @@
 package ir.types;
 
 public class LabelType extends Type {
+    public LabelType() {
+        super(TypeID.LabelTyID);
+    }
     public boolean isIntegerTy(int bitWidth) { return false; }
     @Override
     public String toString() {

@@ -12,7 +12,9 @@ import ir.types.PointerType;
 import ir.types.Type;
 
 import java.util.ArrayList;
-
+// int a: i32
+// int a[]: i32*
+// int a[][5]: [2 x i32]*
 public class FuncFParam extends AstNode {
     private BType bType;
     private Token ident;
@@ -34,17 +36,20 @@ public class FuncFParam extends AstNode {
             type = new IntegerType(32);
         } else {
             type = new IntegerType(32);
-            for (int i = constExps.size() - 2; i >= 0; i--) {
+            for (int i = constExps.size() - 1; i > 0; i--) {
                 type = new ArrayType(type, constExps.get(i).getResult());
             }
             type = new PointerType(type);
         }
         return (DataType) type;
     }
-    public void addSymbol(SymbolTable symbolTable) {
-        if (symbolTable.checkSymbolWhenDecl(ident)) {
-            ErrorLog.addError(ErrorType.DUPLICATE_IDENFR, ident.getLine());
-        } else {
+    public void checkSema(SymbolTable symbolTable) {
+        // step1. check constExps
+        for (int i = 1; i < constExps.size(); i++) {
+            constExps.get(i).checkSema(symbolTable);
+        }
+        // step2. check ident
+        if (!symbolTable.checkSymbolWhenDecl(ident)) { // step3. add symbol
             symbolTable.addSymbol(new Symbol(ident.getValue(), false, getType(), ident.getLine()));
         }
     }

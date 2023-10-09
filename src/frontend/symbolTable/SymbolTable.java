@@ -18,6 +18,7 @@ public class SymbolTable extends MyLinkedNode {
         this.table = new HashMap<>();
         this.childTable = new MyLinkedList<>();
         this.parent = parent;
+        if (null != parent) parent.addChild(this);
     }
     public void addSymbol(Symbol symbol) {
         this.table.put(symbol.getIdent(), symbol);
@@ -42,15 +43,4 @@ public class SymbolTable extends MyLinkedNode {
     public SymbolTable getParent() { return this.parent; }
     public SymbolTable getFirstChild() {return childTable.getHead(); }
     public void addChild(SymbolTable table) { childTable.insertAtTail(table);}
-    public SymbolTable clone(SymbolTable parent) {
-        SymbolTable newTable = new SymbolTable(parent);
-        for (String key : this.table.keySet()) {
-            newTable.addSymbol(this.table.get(key));
-        }
-        Iterator<SymbolTable> iterator = this.childTable.iterator();
-        while (iterator.hasNext()) {
-            newTable.addChild(iterator.next().clone(newTable));
-        }
-        return newTable;
-    }
 }
