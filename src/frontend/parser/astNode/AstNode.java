@@ -9,6 +9,7 @@ public abstract class AstNode {
     protected GrammarType grammarType;
     protected ArrayList<AstNode> elements;
     protected FuncType funcType = null;
+    protected boolean isGlobal = false;
     protected boolean isInLoop = false;
     public AstNode(GrammarType grammarType) {
         this.grammarType = grammarType;
@@ -18,6 +19,7 @@ public abstract class AstNode {
     public void setFuncType(FuncType funcType) {
         this.funcType = funcType;
     }
+    public void setGlobal(boolean isGlobal) { this.isGlobal = isGlobal; }
     public FuncType getFuncType() {
         return funcType;
     }

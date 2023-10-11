@@ -50,7 +50,7 @@ public class FuncFParam extends AstNode {
         }
         // step2. check ident
         if (!symbolTable.checkSymbolWhenDecl(ident)) { // step3. add symbol
-            symbolTable.addSymbol(new Symbol(ident.getValue(), false, getType(), ident.getLine()));
+            symbolTable.addSymbol(new Symbol(ident.getValue(), false, false, getType(), ident.getLine()));
         }
     }
 }

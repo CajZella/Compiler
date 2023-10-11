@@ -43,7 +43,7 @@ public class FuncDef extends AstNode {
         if (!symbolTable.checkSymbolWhenDecl(ident)) {
             DataType returnType = funcType.isVoid() ? new VoidType() : new IntegerType(32);
             FunctionType functionType = new FunctionType(null == funcFParams ? null : funcFParams.getTypes(), returnType);
-            symbolTable.addSymbol(new Symbol(ident.getValue(), false, functionType, ident.getLine()));
+            symbolTable.addSymbol(new Symbol(ident.getValue(), false, true, functionType, ident.getLine()));
         }
         // step2. FunFParams check
         SymbolTable childTable = new SymbolTable(symbolTable);

@@ -17,6 +17,7 @@ public class ConstDecl extends AstNode {
     public ArrayList<ConstDef> getConstDefs() { return constDefs; }
     public void checkSema(SymbolTable symbolTable) {
         for (ConstDef constDef : constDefs) {
+            constDef.setGlobal(isGlobal);
             constDef.checkSema(symbolTable);
         }
     }

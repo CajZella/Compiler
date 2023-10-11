@@ -25,6 +25,7 @@ public class CompUnit extends AstNode {
     public MainFuncDef getMainFuncDef() { return mainFuncDef; }
     public void checkSema(SymbolTable symbolTable) {
         for (Decl decl : decls) {
+            decl.setGlobal(true);
             decl.checkSema(symbolTable);
         }
         for (FuncDef funcDef : funcDefs) {

@@ -19,8 +19,10 @@ public class Decl extends AstNode {
     public VarDecl getVarDecl() { return varDecl; }
     public void checkSema(SymbolTable symbolTable) {
         if (isConstDecl()) {
+            constDecl.setGlobal(isGlobal);
             constDecl.checkSema(symbolTable);
         } else {
+            varDecl.setGlobal(isGlobal);
             varDecl.checkSema(symbolTable);
         }
     }

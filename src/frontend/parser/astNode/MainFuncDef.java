@@ -30,7 +30,7 @@ public class MainFuncDef extends AstNode {
         if (!symbolTable.checkSymbolWhenDecl(ident)) {
             DataType returnType = new IntegerType(32);
             FunctionType functionType = new FunctionType(null, returnType);
-            symbolTable.addSymbol(new Symbol(ident.getValue(), false, functionType, ident.getLine()));
+            symbolTable.addSymbol(new Symbol(ident.getValue(), false, true, functionType, ident.getLine()));
         }
         // step2. build child symbol table
         SymbolTable childTable = new SymbolTable(symbolTable);

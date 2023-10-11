@@ -25,6 +25,7 @@ public class VarDecl extends AstNode {
     }
     public void checkSema(SymbolTable symbolTable) {
         for (VarDef varDef : varDefs) {
+            varDef.setGlobal(isGlobal);
             varDef.checkSema(symbolTable);
         }
     }

@@ -1,5 +1,6 @@
 package frontend.parser.astNode;
 
+import frontend.symbolTable.Initializer;
 import frontend.symbolTable.SymbolTable;
 
 import java.util.ArrayList;
@@ -31,8 +32,25 @@ public class InitVal extends AstNode {
             exp.checkSema(symbolTable);
         } else {
             for (InitVal initVal : initVals) {
+                initVal.setGlobal(isGlobal);
                 initVal.checkSema(symbolTable);
             }
         }
+    }
+    public Initializer getInit() {
+        Initializer init;
+        if (isExp()) {
+            if (isGlobal)
+                init = new Initializer.IntInitializer(exp.getOpResult());
+            else
+                init = new Initializer.ExpInitializer(exp);
+        } else {
+            Initializer.ArrayInitializer tmp = new Initializer.ArrayInitializer();
+            for (InitVal initVal : initVals) {
+                tmp.addInit(initVal.getInit());
+            }
+            init = tmp;
+        }
+        return init;
     }
 }

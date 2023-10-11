@@ -64,7 +64,14 @@ public class LVal extends AstNode {
     public boolean hasExps() { return !exps.isEmpty(); }
     public ArrayList<Exp> getExps() { return exps; }
     public Symbol getSymbol() { return symbol; }
-    public int getOpResult() {
-        return 0; // todo: calculate LVal's result，require Symbol's initializer
+    public int getOpResult() { // calculate LVal's result，require Symbol's initializer
+        assert null == symbol.getInitializer(): "calculate uninitialized lval during sema.";
+        if (hasExps()) {
+            if (exps.size() == 1)
+                return symbol.getInitializer().getInit(exps.get(0).getOpResult());
+            else
+                return symbol.getInitializer().getInit(exps.get(0).getOpResult(), exps.get(1).getOpResult());
+        } else
+            return symbol.getInitializer().getInit();
     }
 }

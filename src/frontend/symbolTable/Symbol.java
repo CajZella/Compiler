@@ -22,4 +22,5 @@ public class Symbol {
     public boolean isConst() { return this.isConst; }
     public Type getType() { return this.type; }
     public int getLine() { return this.line; }
+    public Initializer getInitializer() { return this.initializer; }
 }

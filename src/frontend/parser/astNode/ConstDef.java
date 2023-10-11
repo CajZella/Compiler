@@ -49,7 +49,7 @@ public class ConstDef extends AstNode {
             } else { // IntegerType
                 type = new IntegerType(32);
             }
-            Symbol symbol = new Symbol(ident.getValue(), true, type, ident.getLine());
+            Symbol symbol = new Symbol(ident.getValue(), true, isGlobal, type, ident.getLine());
             symbol.setInitializer(constInitVal.getInit());
             symbolTable.addSymbol(symbol);
         }
