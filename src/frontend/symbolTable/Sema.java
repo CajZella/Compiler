@@ -13,4 +13,5 @@ public class Sema {
     public void run() {
         compUnit.checkSema(symbolTable);
     }
+    public SymbolTable getSymbolTable() { return symbolTable; }
 }

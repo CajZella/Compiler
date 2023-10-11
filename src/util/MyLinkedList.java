@@ -6,6 +6,10 @@ public class MyLinkedList<T extends  MyLinkedNode> implements Iterable<T> {
     private T head = null;
     private T tail = null;
     private int size = 0;
+    public MyLinkedList() {}
+    public MyLinkedList(MyLinkedList<T> list) {
+        addAll(list);
+    }
     public boolean isEmpty() { return this.size == 0; }
     public int size() { return this.size; }
     public T getHead() { return this.head; }

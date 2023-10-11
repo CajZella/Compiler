@@ -7,6 +7,8 @@ public class Exp extends AstNode {
         super(GrammarType.Exp);
     }
     public void checkSema(SymbolTable symbolTable) {
-        ((AddExp)elements.get(0)).checkSema(symbolTable);
+        getAddExp().checkSema(symbolTable);
     }
+    public AddExp getAddExp() { return (AddExp)elements.get(0); }
+    public int getOpResult() { return getAddExp().getOpResult(); }
 }

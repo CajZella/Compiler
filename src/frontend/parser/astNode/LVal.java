@@ -64,4 +64,7 @@ public class LVal extends AstNode {
     public boolean hasExps() { return !exps.isEmpty(); }
     public ArrayList<Exp> getExps() { return exps; }
     public Symbol getSymbol() { return symbol; }
+    public int getOpResult() {
+        return 0; // todo: calculate LVal's result，require Symbol's initializer
+    }
 }

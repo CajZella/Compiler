@@ -43,13 +43,14 @@ public class ConstDef extends AstNode {
             if (hasConstExps()) { // ArrayType
                 ArrayList<Integer> dims = new ArrayList<>();
                 for(ConstExp constExp : constExps) {
-                    dims.add(0, constExp.getResult());
+                    dims.add(0, constExp.getOpResult());
                 }
                 type = new ArrayType(dims, new IntegerType(32));
             } else { // IntegerType
                 type = new IntegerType(32);
             }
             Symbol symbol = new Symbol(ident.getValue(), true, type, ident.getLine());
+            symbol.setInitializer(constInitVal.getInit());
             symbolTable.addSymbol(symbol);
         }
     }

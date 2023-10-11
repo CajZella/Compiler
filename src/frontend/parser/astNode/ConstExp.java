@@ -7,10 +7,9 @@ public class ConstExp extends AstNode {
     public ConstExp(){
         super(GrammarType.ConstExp);
     }
-    public int getResult() { return 0; } // todo
-    public void checkSema(SymbolTable symbolTable) {
-        ((AddExp)elements.get(0)).checkSema(symbolTable);
-    }
+    public AddExp getExp() { return (AddExp)elements.get(0); }
+    public int getOpResult() { return getExp().getOpResult(); }
+    public void checkSema(SymbolTable symbolTable) { getExp().checkSema(symbolTable); }
 //    public void setAddExp(AddExp addExp) { this.addExp = addExp; }
 //    public AddExp getAddExp() { return addExp; }
 }

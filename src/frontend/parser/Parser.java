@@ -567,7 +567,7 @@ public class Parser {
     /* LVal -> Ident ('[' Exp ']')* */
     public LVal parseLVal() throws ParserException {
         LVal lVal = new LVal();
-        lVal.setIdent(tokenManager.getNextToken(WordType.IDENFR)); // Ident //todo
+        lVal.setIdent(tokenManager.getNextToken(WordType.IDENFR)); // Ident
         while (tokenManager.checkTokenType(0, WordType.LBRACK)) { // ('[' Exp ']')*
             tokenManager.getNextToken(); // '['
             lVal.addExp(parseExp()); // Exp
@@ -660,7 +660,7 @@ public class Parser {
         UnaryExp unaryExp = new UnaryExp();
         if (tokenManager.checkTokenType(0, WordType.IDENFR) && tokenManager.checkTokenType(1, WordType.LPARENT)) { // Ident '(' (FuncRParams)? ')'
             unaryExp.setCallFunc();
-            unaryExp.setIdent(tokenManager.getNextToken()); // Ident //todo
+            unaryExp.setIdent(tokenManager.getNextToken()); // Ident
             tokenManager.getNextToken(); // '('
             if (!tokenManager.checkTokenType(0, WordType.RPARENT)) { // (FuncRParams)?
                 try {

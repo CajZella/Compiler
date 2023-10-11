@@ -74,4 +74,18 @@ public class UnaryExp extends AstNode {
             unaryExp.checkSema(symbolTable);
         }
     }
+    public int getOpResult() {
+        if (isPrimaryExpType()) {
+            return primaryExp.getOpResult();
+        } else if (isCallFuncType()) {
+            throw new RuntimeException("CallFuncType isn't constant, so it has no opResult");
+        } else {
+            switch (unaryOp.getUnaryOp().getType()) {
+                case PLUS -> { return unaryExp.getOpResult(); }
+                case MINU -> { return -unaryExp.getOpResult(); }
+                case NOT -> { return unaryExp.getOpResult() == 0 ? 1 : 0; }
+                default -> { return 0; }
+            }
+        }
+    }
 }

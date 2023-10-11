@@ -1,9 +1,6 @@
 package frontend.parser.astNode;
 
-import frontend.ErrorHandle.ErrorLog;
-import frontend.ErrorHandle.ErrorType;
 import frontend.lexer.Token;
-import frontend.symbolTable.Initial;
 import frontend.symbolTable.Symbol;
 import frontend.symbolTable.SymbolTable;
 import ir.types.ArrayType;
@@ -65,7 +62,7 @@ public class VarDef extends AstNode {
             if (hasConstExps()) { // ArrayType
                 ArrayList<Integer> dims = new ArrayList<>();
                 for(ConstExp constExp : constExps) {
-                    dims.add(0, constExp.getResult());
+                    dims.add(0, constExp.getOpResult());
                 }
                 type = new ArrayType(dims, new IntegerType(32));
             } else { // IntegerType

@@ -37,7 +37,7 @@ public class FuncFParam extends AstNode {
         } else {
             type = new IntegerType(32);
             for (int i = constExps.size() - 1; i > 0; i--) {
-                type = new ArrayType(type, constExps.get(i).getResult());
+                type = new ArrayType(type, constExps.get(i).getOpResult());
             }
             type = new PointerType(type);
         }

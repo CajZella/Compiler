@@ -25,7 +25,6 @@ public abstract class AstNode {
     public void addElement(AstNode element) {
         elements.add(element);
     }
-
     public AstNode get(int index) {
         return elements.get(index);
     }
@@ -38,6 +37,8 @@ public abstract class AstNode {
     public boolean isLAndExp() { return grammarType == GrammarType.LAndExp; }
     public boolean isLVal() { return grammarType == GrammarType.LVal; }
     public boolean isUnaryExp() { return grammarType == GrammarType.UnaryExp; }
+    public boolean isExp() { return grammarType == GrammarType.Exp; }
+    public boolean isNumber() { return grammarType == GrammarType.Number; }
     public String toString() {
         return String.format("<%s>", grammarType.toString());
     }

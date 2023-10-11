@@ -9,6 +9,7 @@ public class IntegerType extends DataType {
     public boolean isIntegerTy(int bitWidth) {
         return this.bitWidth == bitWidth;
     }
+    public int getBitWidth() { return this.bitWidth; }
     @Override
     public String toString() { return "i" + bitWidth; }
     @Override
