@@ -46,8 +46,7 @@ public class MyLinkedList<T extends  MyLinkedNode> implements Iterable<T> {
     }
     public void insertAtTail(T node) {
         if (isEmpty()) {
-            head = node;
-            tail = node;
+            head = tail = node;
         } else {
             tail.insertAfter(node);
             tail = node;
@@ -56,8 +55,7 @@ public class MyLinkedList<T extends  MyLinkedNode> implements Iterable<T> {
     }
     public void insertAtHead(T node) {
         if (isEmpty()) {
-            head = node;
-            tail = node;
+            head = tail = node;
         } else {
             head.insertBefore(node);
             head = node;
@@ -65,37 +63,41 @@ public class MyLinkedList<T extends  MyLinkedNode> implements Iterable<T> {
         size++;
     }
     public void remove(T node) {
-        if (size == 1 && head == node) { clear(); }
-        else if (head == node) { head = (T)node.getNext(); }
+        if (head == node) { head = (T)node.getNext(); }
         else if (tail == node) { tail = (T)node.getPrev(); }
         node.remove();
         size--;
     }
     public void addAll(MyLinkedList<T> list) {
-        Iterator<T> iterator = iterator();
-        while (iterator.hasNext()) {
-            insertAtTail(iterator.next());
+        if (list.isEmpty()) return;
+        if (isEmpty()) {
+            head = list.getHead();
+        } else {
+            tail.setNext(list.getHead());
+            list.getHead().setPrev(tail);
         }
+        tail = list.getTail();
+        size += list.size();
+
     }
     public Iterator<T> iterator() { return new MyIterator();}
     public class MyIterator implements Iterator<T> {
-        T cur = head;
+        private T next = head;
+        private T cur = null;
         @Override
-        public boolean hasNext() {
-            return cur.hasNext();
-        }
+        public boolean hasNext() { return null != next; }
         @Override
         public T next() {
-            cur = (T)cur.getNext();
+            assert !hasNext();
+            cur = next;
+            next = (T)next.getNext();
             return cur;
         }
         @Override
         public  void remove() {
-            if (size == 1 && head == cur) { clear(); }
-            else if (head == cur) head = (T)cur.getNext();
-            else if (tail == cur) tail = (T)cur.getPrev();
-            cur.remove();
-            size--;
+            assert null == cur;
+            MyLinkedList.this.remove(cur);
+            cur = null;
         }
     }
 }

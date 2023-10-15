@@ -30,7 +30,7 @@ public class Parser {
         }
         /* MainFuncDef */
         if (tokenManager.checkTokenType(1, WordType.MAINTK)) {
-            compUnit.setMainFuncDef(parseMainFuncDef());
+            compUnit.addFuncDef(parseMainFuncDef());
         }
         LexParseLog.add(compUnit.toString());
         return compUnit;
@@ -75,22 +75,30 @@ public class Parser {
     }
 
     /* MainFuncDef -> 'int' 'main' '(' ')' Block */
-    public MainFuncDef parseMainFuncDef() throws ParserException {
-        MainFuncDef mainFuncDef = new MainFuncDef();
-        FuncType funcType = new FuncType();
-        funcType.addElement(tokenManager.getNextToken(WordType.INTTK));
-        mainFuncDef.setFuncType(funcType); // 'int'
-        mainFuncDef.setIdent(tokenManager.getNextToken(WordType.MAINTK)); // 'main'
+    public FuncDef parseMainFuncDef() throws ParserException {
+        FuncDef funcDef = new FuncDef();
+        funcDef.setFuncType(parseFuncType()); // FuncType
+        funcDef.setIdent(tokenManager.getNextToken(WordType.IDENFR)); // Ident
         tokenManager.getNextToken(WordType.LPARENT); // '('
+        if(!tokenManager.checkTokenType(0, WordType.RPARENT)) { // FuncFParams
+            try {
+                tokenManager.openBackup();
+                FuncFParams funcFParams = parseFuncFParams();
+                funcDef.setFuncFParams(funcFParams);
+                tokenManager.closeBackup();
+            } catch (ParserException e) {
+                tokenManager.rollBack();
+            }
+        }
         try {
             tokenManager.getNextToken(WordType.RPARENT); // ')'
         } catch (ParserException e) {
             Token token = tokenManager.makeupToken(WordType.RPARENT);
             ErrorLog.addError(ErrorType.RPARENT_MISSED, token.getLine());
         }
-        mainFuncDef.setBlock(parseBlock()); // Block
-        LexParseLog.add(mainFuncDef.toString());
-        return mainFuncDef;
+        funcDef.setBlock(parseBlock()); // Block
+        LexParseLog.add(funcDef.toString());
+        return funcDef;
     }
 
     /* ConstDecl -> 'const' BType ConstDef (',' ConstDef )* ';' */

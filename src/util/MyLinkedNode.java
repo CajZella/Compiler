@@ -1,12 +1,14 @@
 package util;
 
-public abstract class MyLinkedNode {
+public class MyLinkedNode {
     private MyLinkedNode next = null;
     private MyLinkedNode prev = null;
     public boolean hasNext() { return this.next != null; }
     public boolean hasPrev() { return this.prev != null; }
     public MyLinkedNode getNext() { return this.next; }
     public MyLinkedNode getPrev() { return this.prev; }
+    public void setNext(MyLinkedNode node) { this.next = node; }
+    public void setPrev(MyLinkedNode node) { this.prev = node; }
     public void insertBefore(MyLinkedNode node) {
         if (this.prev != null) {
             this.prev.next = node;

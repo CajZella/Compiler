@@ -1,10 +1,11 @@
 package ir.instrs;
 
 import ir.BasicBlock;
+import ir.Value;
 
 public class Ret extends Instr {
-    public Ret(BasicBlock pBB) {
-        super(ValueType.ret, null, null, pBB);
+    public Ret(BasicBlock pBB, Value operand) {
+        super(ValueType.ret, null, pBB, operand);
     }
     @Override
     public String toString() {

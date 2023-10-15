@@ -1,6 +1,7 @@
 package ir.instrs;
 
 import ir.BasicBlock;
+import ir.Value;
 import ir.types.IntegerType;
 
 public class Icmp extends Instr {
@@ -8,12 +9,12 @@ public class Icmp extends Instr {
         eq, ne, sgt, sge, slt, sle,
     }
     private IcmpOp op;
-    public Icmp(int num, IntegerType type, BasicBlock pBB, IcmpOp op) {
-        super(ValueType.icmp, String.format("%%d", num), type, pBB);
+    public Icmp(IcmpOp op, BasicBlock pBB, Value...operands) {
+        super(ValueType.icmp, new IntegerType(1), pBB, operands);
         this.op = op;
     }
     @Override
     public String toString() {
-        return String.format("%s = icmp %s %s %s, %s", name, op, getOperand(0).getType(), getOperand(0), getOperand(1));
+        return String.format("%s = icmp %s %s %s, %s", name, op, getOperand(0).getType(), getOperand(0).getName(), getOperand(1).getName());
     }
 }

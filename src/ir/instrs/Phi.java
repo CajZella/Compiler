@@ -1,6 +1,7 @@
 package ir.instrs;
 
 import ir.BasicBlock;
+import ir.Value;
 import ir.types.Type;
 
 /*
@@ -14,8 +15,8 @@ import ir.types.Type;
  */
 //todo: 或许生成中间代码时可以先不管phi指令
 public class Phi extends Instr {
-    public Phi(int num, Type type, BasicBlock pBB) {
-        super(ValueType.phi, String.format("%%d", num), type, pBB);
+    public Phi(Type type, BasicBlock pBB, Value...operands) {
+        super(ValueType.phi, type, pBB, operands);
     }
     @Override
     public String toString() {

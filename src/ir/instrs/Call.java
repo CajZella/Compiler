@@ -12,8 +12,8 @@ import java.util.ArrayList;
     %7 = call i32 @aaa(i32 %5, i32 %6)
  */
 public class Call extends Instr {
-    public Call(int num, DataType type, BasicBlock pBB) {
-        super(ValueType.call, type.isVoidTy() ? null : String.format("%%d", num), type, pBB);
+    public Call(DataType type, BasicBlock pBB, Value...operands) {
+        super(ValueType.call, type, pBB, operands);
     }
     @Override
     public String toString() {

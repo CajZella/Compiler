@@ -1,6 +1,7 @@
 package frontend.parser.astNode;
 
 import frontend.symbolTable.SymbolTable;
+import ir.Value;
 
 import java.util.ArrayList;
 

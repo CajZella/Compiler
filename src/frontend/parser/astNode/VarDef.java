@@ -1,7 +1,6 @@
 package frontend.parser.astNode;
 
 import frontend.lexer.Token;
-import frontend.symbolTable.Initializer;
 import frontend.symbolTable.Symbol;
 import frontend.symbolTable.SymbolTable;
 import ir.types.ArrayType;
@@ -71,10 +70,8 @@ public class VarDef extends AstNode {
                 type = new IntegerType(32);
             }
             Symbol symbol = new Symbol(ident.getValue(), false, isGlobal, type, ident.getLine());
-            if (hasInitVal())
-                symbol.setInitializer(initVal.getInit());
-            else if (isGlobal)
-                symbol.setInitializer(new Initializer.ZeroInitializer());
+            if (hasInitVal() && isGlobal)
+                symbol.setConstantInit(initVal.getConstInit(type));
             symbolTable.addSymbol(symbol);
         }
     }

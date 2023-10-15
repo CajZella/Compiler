@@ -64,7 +64,8 @@ public class FuncDef extends AstNode {
                     if (!stmt.isReturnStmt()) {
                         ErrorLog.addError(ErrorType.NON_RETURN_FUNC, block.getRbraceLine());
                     }
-                }
+                } else
+                    ErrorLog.addError(ErrorType.NON_RETURN_FUNC, block.getRbraceLine());
             }
         }
     }

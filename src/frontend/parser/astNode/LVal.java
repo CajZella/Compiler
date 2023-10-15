@@ -5,6 +5,8 @@ import frontend.ErrorHandle.ErrorType;
 import frontend.lexer.Token;
 import frontend.symbolTable.Symbol;
 import frontend.symbolTable.SymbolTable;
+import ir.constants.ConstantArray;
+import ir.constants.ConstantInt;
 import ir.types.ArrayType;
 import ir.types.DataType;
 import ir.types.IntegerType;
@@ -65,13 +67,16 @@ public class LVal extends AstNode {
     public ArrayList<Exp> getExps() { return exps; }
     public Symbol getSymbol() { return symbol; }
     public int getOpResult() { // calculate LVal's result，require Symbol's initializer
-        assert null == symbol.getInitializer(): "calculate uninitialized lval during sema.";
-        if (hasExps()) {
+        assert null == symbol.getConstantInit() && !symbol.isGlobal() :  "calculate uninitialized lval during sema.";
+        if (isGlobal && null == symbol.getConstantInit())
+            return 0;
+        else if (hasExps()) {
+            ConstantArray constantArray = (ConstantArray)symbol.getConstantInit();
             if (exps.size() == 1)
-                return symbol.getInitializer().getInit(exps.get(0).getOpResult());
+                return constantArray.getVal(exps.get(0).getOpResult());
             else
-                return symbol.getInitializer().getInit(exps.get(0).getOpResult(), exps.get(1).getOpResult());
+                return constantArray.getVal(exps.get(0).getOpResult(), exps.get(1).getOpResult());
         } else
-            return symbol.getInitializer().getInit();
+            return ((ConstantInt)symbol.getConstantInit()).getVal();
     }
 }

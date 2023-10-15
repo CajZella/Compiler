@@ -7,8 +7,8 @@ import ir.types.PointerType;
     <result> = alloca <type>
  */
 public class Alloca extends Instr {
-    public Alloca(int num, PointerType type, BasicBlock pBB) {
-        super(ValueType.alloca, String.format("%%d", num), type, pBB);
+    public Alloca(PointerType type, BasicBlock pBB) {
+        super(ValueType.alloca, type, pBB);
     }
     @Override
     public String toString() {

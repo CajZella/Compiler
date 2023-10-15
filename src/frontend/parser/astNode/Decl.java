@@ -1,6 +1,7 @@
 package frontend.parser.astNode;
 
 import frontend.symbolTable.SymbolTable;
+import ir.Value;
 
 public class Decl extends AstNode {
     private ConstDecl constDecl = null;

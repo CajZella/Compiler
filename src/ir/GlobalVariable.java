@@ -16,6 +16,6 @@ public class GlobalVariable extends Value {
     public Constant getInitializer() { return this.initializer; }
     @Override
     public String toString() {
-        return String.format("@%s = dso_local %s %s %s", this.name, isConstant ? "constant" : "global", this.type, this.initializer);
+        return String.format("%s = dso_local %s %s %s", this.name, isConstant ? "constant" : "global", this.type, this.initializer);
     }
 }

@@ -5,6 +5,8 @@ import frontend.ErrorHandle.ErrorType;
 import frontend.lexer.Token;
 import frontend.symbolTable.Symbol;
 import frontend.symbolTable.SymbolTable;
+import ir.GlobalVariable;
+import ir.Value;
 import ir.types.ArrayType;
 import ir.types.DataType;
 import ir.types.IntegerType;
@@ -50,7 +52,7 @@ public class ConstDef extends AstNode {
                 type = new IntegerType(32);
             }
             Symbol symbol = new Symbol(ident.getValue(), true, isGlobal, type, ident.getLine());
-            symbol.setInitializer(constInitVal.getInit());
+            symbol.setConstantInit(constInitVal.getConstInit(type));
             symbolTable.addSymbol(symbol);
         }
     }

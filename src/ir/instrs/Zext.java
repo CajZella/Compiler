@@ -1,11 +1,12 @@
 package ir.instrs;
 
 import ir.BasicBlock;
+import ir.Value;
 import ir.types.Type;
 
 public class Zext extends Instr {
-    public Zext(int num, Type type, BasicBlock pBB) {
-        super(ValueType.zext, String.format("%%d", num), type, pBB);
+    public Zext(Type type, BasicBlock pBB, Value operand) {
+        super(ValueType.zext, type, pBB, operand);
     }
     @Override
     public String toString() {

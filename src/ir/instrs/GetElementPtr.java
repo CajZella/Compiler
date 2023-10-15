@@ -1,10 +1,8 @@
 package ir.instrs;
 
 import ir.BasicBlock;
+import ir.Value;
 import ir.types.PointerType;
-
-import java.security.cert.PolicyNode;
-import java.util.ArrayList;
 
 /*
     calculate address
@@ -26,9 +24,9 @@ import java.util.ArrayList;
         %ptr = getelementptr [5 x [5 x i32]], [5 x [5 x i32]]* %array, i32 0, i32 1, i32 2 ;指向array[1][2]的指针
  */
 public class GetElementPtr extends Instr {
-    private ArrayList<Integer> idxs;
-    public GetElementPtr(int num, PointerType type, BasicBlock pBB, ArrayList<Integer> idxs) {
-        super(ValueType.getelementptr, String.format("%%d", num), type, pBB);
+    private Value[] idxs;
+    public GetElementPtr(PointerType type, BasicBlock pBB, Value operand, Value...idxs) {
+        super(ValueType.getelementptr, type, pBB, operand);
         this.idxs = idxs;
     }
     @Override
@@ -37,8 +35,8 @@ public class GetElementPtr extends Instr {
         builder.append(String.format("%s = getelementptr %s, %s %s, i32 0", name,
                 ((PointerType)getOperand(0).getType()).getReferencedType(),
                 getOperand(0).getType(), getOperand(0).getName()));
-        for (Integer idx : idxs) {
-            builder.append(String.format(", i32 %d", idx));
+        for (Value idx : idxs) {
+            builder.append(String.format(", i32 %s", idx.getName()));
         }
         return builder.toString();
     }

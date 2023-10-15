@@ -17,6 +17,7 @@ public abstract class Value extends MyLinkedNode {
         sub,
         mul,
         sdiv,
+        srem,
         icmp,
         and,
         or,
@@ -30,9 +31,11 @@ public abstract class Value extends MyLinkedNode {
         trunc,
         br,
         ret,
+        module,
     }
     protected ValueType valueTy;
     protected String name = null; // 可能为空字符串
+    protected static int num = 0; // 用于生成唯一的名字
     private MyLinkedList<Use> useList = new MyLinkedList<>(); // def-use，使用某个Value的User列表
     protected Type type; // LLVM value是有类型的
     public Value(ValueType valueTy, String name, Type type) {
@@ -40,6 +43,7 @@ public abstract class Value extends MyLinkedNode {
         this.type = type;
         this.name = name;
     }
+    public void clearNum() { num = 0; }
     public Type getType() { return this.type; }
     public boolean hasName() { return null != this.name; }
     public String getName() { return this.name; }

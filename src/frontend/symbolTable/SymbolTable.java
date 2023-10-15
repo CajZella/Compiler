@@ -7,16 +7,18 @@ import util.MyLinkedList;
 import util.MyLinkedNode;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 // 方便错误处理和帮助生成ir
 // 每张symbol是一个分程序scope
-public class SymbolTable extends MyLinkedNode {
+public class SymbolTable {
     private final HashMap<String, Symbol> table;
     private final SymbolTable parent;
-    private MyLinkedList<SymbolTable> childTable;
+    private int index = 0;
+    private LinkedList<SymbolTable> childTable;
     public SymbolTable(SymbolTable parent) {
         this.table = new HashMap<>();
-        this.childTable = new MyLinkedList<>();
+        this.childTable = new LinkedList<>();
         this.parent = parent;
         if (null != parent) parent.addChild(this);
     }
@@ -41,6 +43,10 @@ public class SymbolTable extends MyLinkedNode {
     }
 
     public SymbolTable getParent() { return this.parent; }
-    public SymbolTable getFirstChild() {return childTable.getHead(); }
-    public void addChild(SymbolTable table) { childTable.insertAtTail(table);}
+    public SymbolTable getSonNextTab() {
+        if (childTable.isEmpty() || index == childTable.size()) return null;
+        return childTable.get(index++);
+    }
+    public void addChild(SymbolTable table) { childTable.add(table); }
+    public HashMap<String, Symbol> getTable() { return table; }
 }

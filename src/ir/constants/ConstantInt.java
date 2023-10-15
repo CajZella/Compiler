@@ -10,7 +10,7 @@ import ir.types.Type;
 public class ConstantInt extends Constant {
     private int val;
     public ConstantInt(Type type, int val) {
-        super(ValueType.ConstantInt, type);
+        super(ValueType.ConstantInt, Integer.toString(val), type);
         this.val = val;
     }
     public int getVal() { return this.val; }

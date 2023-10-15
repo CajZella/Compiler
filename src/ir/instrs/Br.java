@@ -1,14 +1,15 @@
 package ir.instrs;
 
 import ir.BasicBlock;
+import ir.Value;
 
 /*
     br i1 <cond>, label <iftrue>, label <iffalse>
     br label <dest>
  */
 public class Br extends Instr {
-    public Br(BasicBlock pBB) {
-        super(ValueType.br, null, null, pBB);
+    public Br(BasicBlock pBB, Value...operands) {
+        super(ValueType.br, null, pBB, operands);
     }
     @Override
     public String toString() {

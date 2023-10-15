@@ -1,6 +1,7 @@
 package frontend.parser.astNode;
 
 import frontend.symbolTable.SymbolTable;
+import ir.Value;
 import ir.types.DataType;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public abstract class AstNode {
         this.grammarType = grammarType;
         elements = new ArrayList<>();
     }
+    public int size() { return elements.size(); }
     public DataType getDataType() {return elements.get(0).getDataType();}
     public void setFuncType(FuncType funcType) {
         this.funcType = funcType;
@@ -30,6 +32,7 @@ public abstract class AstNode {
     public AstNode get(int index) {
         return elements.get(index);
     }
+    public ArrayList<AstNode> getElements() { return elements; }
     public AstNode getLast() { return elements.get(elements.size() - 1); }
 
     public boolean isStmt() { return grammarType == GrammarType.Stmt; }

@@ -22,5 +22,6 @@ public abstract class Stmt extends AstNode {
         this.stmtType = stmtType;
     }
     public boolean isReturnStmt() { return stmtType == StmtType.StmtReturn; }
+    public StmtType getStmtType() { return stmtType; }
     public abstract void checkSema(SymbolTable symbolTable);
 }

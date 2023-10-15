@@ -9,8 +9,8 @@ import ir.types.Type;
  * dataType %tot
 */
 public class Argument extends Value {
-    public Argument(int num, DataType dataType) {
-        super(ValueType.Argument, String.format("%%d", num), dataType);
+    public Argument(DataType dataType) {
+        super(ValueType.Argument, "%ar" + num++, dataType);
     }
     @Override
     public String toString() {

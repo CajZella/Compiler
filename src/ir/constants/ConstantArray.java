@@ -13,17 +13,25 @@ import java.util.ArrayList;
  */
 public class ConstantArray extends Constant {
     private ArrayList<Constant> vals;
-    public ConstantArray(Type type, ArrayList<Constant> vals) {
-        super(ValueType.ConstantArray, type);
-        this.vals = vals;
+    public ConstantArray(Type type) {
+        super(ValueType.ConstantArray, null, type);
+        this.vals = new ArrayList<>();
     }
     public ArrayList<Constant> getVals() { return this.vals; }
-    public int getVal(ArrayList<Integer> idxs) {
+    public void addVal(Constant val) { this.vals.add(val); }
+    public int getVal(int... idxs) {
         Constant constant = this;
-        for (Integer idx : idxs) {
+        for (int idx : idxs) {
             constant = ((ConstantArray)constant).getVals().get(idx);
         }
         return ((ConstantInt)constant).getVal();
+    }
+    public ConstantInt getBase(int...idxs) {
+        Constant constant = this;
+        for (int idx : idxs) {
+            constant = ((ConstantArray)constant).getVals().get(idx);
+        }
+        return (ConstantInt)constant;
     }
     @Override
     public String toString() {

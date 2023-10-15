@@ -1,7 +1,11 @@
 package frontend.parser.astNode;
 
-import frontend.symbolTable.Initializer;
 import frontend.symbolTable.SymbolTable;
+import ir.constants.Constant;
+import ir.constants.ConstantArray;
+import ir.constants.ConstantInt;
+import ir.types.ArrayType;
+import ir.types.Type;
 
 import java.util.ArrayList;
 
@@ -37,20 +41,20 @@ public class InitVal extends AstNode {
             }
         }
     }
-    public Initializer getInit() {
-        Initializer init;
-        if (isExp()) {
-            if (isGlobal)
-                init = new Initializer.IntInitializer(exp.getOpResult());
-            else
-                init = new Initializer.ExpInitializer(exp);
-        } else {
-            Initializer.ArrayInitializer tmp = new Initializer.ArrayInitializer();
+    public Constant getConstInit(Type type) {
+        if (isExp() && isGlobal) {
+            return new ConstantInt(type, exp.getOpResult());
+        } else if (!isExp()) {
+            ConstantArray constantArray = new ConstantArray(type);
             for (InitVal initVal : initVals) {
-                tmp.addInit(initVal.getInit());
+                if (initVal.isExp())
+                    constantArray.addVal(new ConstantInt(((ArrayType)type).getElementType(),
+                            initVal.getExp().getOpResult()));
+                else
+                    constantArray.addVal(initVal.getConstInit(((ArrayType)type).getElementType()));
             }
-            init = tmp;
+            return constantArray;
         }
-        return init;
+        return null;
     }
 }

@@ -1,6 +1,13 @@
-int f1()
-{}
-
+const int x = 2;
+int a[x][2];
+int func1(int u, int v) { return 2; }
+int func(int hh[], int aa) {
+    const int tt = 2;
+    int x = 5, z;
+    int u[2];
+    int t[1][5]={{1,2,3,func1(x, z),x}};
+    return 0;
+}
 int main() {
-    
+    return 0;
 }

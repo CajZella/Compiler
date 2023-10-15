@@ -1,6 +1,7 @@
 package ir.instrs;
 
 import ir.BasicBlock;
+import ir.Value;
 import ir.types.Type;
 
 /*
@@ -8,8 +9,8 @@ import ir.types.Type;
     将ty的value的type缩减为ty2
  */
 public class Trunc extends Instr {
-    public Trunc(int num, Type type, BasicBlock pBB) {
-        super(ValueType.trunc, String.format("%%d", num), type, pBB);
+    public Trunc(Type type, BasicBlock pBB, Value operand) {
+        super(ValueType.trunc, type, pBB, operand);
     }
     @Override
     public String toString() {

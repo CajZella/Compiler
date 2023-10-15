@@ -1,5 +1,8 @@
 package frontend.symbolTable;
 
+import frontend.parser.astNode.ConstExp;
+import ir.Value;
+import ir.constants.Constant;
 import ir.types.Type;
 
 public class Symbol {
@@ -8,7 +11,8 @@ public class Symbol {
     private final boolean isGlobal;
     private final Type type;
     private final int line;
-    private Initializer initializer = null;
+    private Constant constantInit = null;
+    private Value irPtr = null;
 
     public Symbol(String ident, boolean isConst, boolean isGlobal, Type type,  int line) {
         this.ident = ident;
@@ -17,10 +21,13 @@ public class Symbol {
         this.line = line;
         this.isGlobal = isGlobal;
     }
-    public void setInitializer(Initializer initializer) { this.initializer = initializer; }
+    public void setIrPtr(Value irPtr) { this.irPtr = irPtr; }
+    public void setConstantInit(Constant init) { this.constantInit = init; }
     public String getIdent() { return this.ident; }
     public boolean isConst() { return this.isConst; }
     public Type getType() { return this.type; }
     public int getLine() { return this.line; }
-    public Initializer getInitializer() { return this.initializer; }
+    public Constant getConstantInit() { return this.constantInit; }
+    public boolean isGlobal() { return isGlobal; }
+    public Value getIrPtr() { return this.irPtr; }
 }
