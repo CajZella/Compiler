@@ -13,6 +13,7 @@ public abstract class Value extends MyLinkedNode {
         GlobalVariable,
         ConstantInt,
         ConstantArray,
+        ConstantStr,
         add,
         sub,
         mul,

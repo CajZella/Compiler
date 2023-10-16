@@ -27,7 +27,8 @@ int main() {
             system(command);
             sprintf(command, "lli-10 out.ll < %s/input%d.txt > %s", path1, j, ans_file);
             system(command);
-            sprintf(command, "fc %s/output%d.txt %s >> %s", path1, j, ans_file, log_file);
+            sprintf(command, "diff -ZB %s/output%d.txt %s >> %s", path1, j, ans_file, log_file);
+            system(command);
         }
         ch++;
     }

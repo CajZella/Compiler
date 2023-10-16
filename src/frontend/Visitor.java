@@ -14,6 +14,7 @@ import ir.Value;
 import ir.constants.Constant;
 import ir.constants.ConstantArray;
 import ir.constants.ConstantInt;
+import ir.constants.ConstantStr;
 import ir.instrs.Alloca;
 import ir.instrs.Alu;
 import ir.instrs.Br;
@@ -34,6 +35,8 @@ import ir.types.Type;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Visitor {
     private Module module;
@@ -229,7 +232,7 @@ public class Visitor {
             switch (unaryOp.getUnaryOp().getType()) {
                 case PLUS -> {}
                 case MINU -> value = new Alu(Value.ValueType.sub, (IntegerType) value.getType(), curBB,
-                        value, new ConstantInt(new IntegerType(32), 0));
+                        new ConstantInt(new IntegerType(32), 0), value);
                 case NOT -> value = new Icmp(Icmp.IcmpOp.eq, curBB, value, new ConstantInt(new IntegerType(32), 0));
                 default -> {}
             }
@@ -504,27 +507,60 @@ public class Visitor {
         } else
             new Ret(curBB);
     }
+    public void printStr(String str) {
+        String regrex = "\\\\n";
+        Pattern pattern = Pattern.compile(regrex);
+        Matcher matcher = pattern.matcher(str);
+        int count = 0;
+        while (matcher.find()) {
+            count++;
+        }
+        String str1 = str.replaceAll("\\\\n", "\\\\0A");
+        str1 = str1 + "\\00";
+        ArrayType arrayType = new ArrayType(new IntegerType(8), str.length() + 1 - count);
+        ConstantStr constantStr = new ConstantStr(str1, arrayType);
+        GlobalVariable globalVariable = new GlobalVariable(new PointerType(arrayType), constantStr);
+        module.addGlobalVariable(globalVariable);
+        Function putstr = module.getFunction("putstr");
+        GetElementPtr getElementPtr = new GetElementPtr(new PointerType(new IntegerType(8)), curBB, globalVariable, new ConstantInt(new IntegerType(32), 0), new ConstantInt(new IntegerType(32), 0));
+        new Call(((FunctionType) putstr.getType()).getReturnType(), curBB, putstr, getElementPtr);
+    }
     private void visitStmtPrintf(StmtPrintf stmtPrintf) {
         Function putint = module.getFunction("putint");
         Function putch = module.getFunction("putch");
         String formatString = stmtPrintf.getFormatString().getValue();
+        formatString = formatString.substring(1, formatString.length() - 1);
         ArrayList<Exp> exps = stmtPrintf.getExps();
-        int cnt = 0;
-        for (int i = 1; i < formatString.length() - 1; i++) {
-            if (formatString.charAt(i) == '%') {
-                Value value = visitExp(exps.get(cnt++));
-                new Call(((FunctionType) putint.getType()).getReturnType(), curBB, putint, value);
-                i++;
-            } else if (formatString.charAt(i) == '\\') {
-                Value value = new ConstantInt(new IntegerType(32), '\n');
-                new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value);
-                i++;
-            }
-            else {
+        String regrex = "%d";
+        Pattern pattern = Pattern.compile(regrex);
+        Matcher matcher = pattern.matcher(formatString);
+        ArrayList<Value> values = new ArrayList<>();
+        for (Exp exp : exps)
+            values.add(visitExp(exp));
+        int i = 0, j, cnt = 0;
+        while (matcher.find()) {
+            j = matcher.start();
+            if (i == j - 1) {
                 Value value = new ConstantInt(new IntegerType(32), formatString.charAt(i));
                 new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value);
+            } else if (i < j) {
+                if (i + 2 == j && formatString.charAt(i) == '\\') {
+                    Value value = new ConstantInt(new IntegerType(32), 10);
+                    new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value);
+                } else
+                    printStr(formatString.substring(i, j));
             }
+            new Call(((FunctionType) putint.getType()).getReturnType(), curBB, putint, values.get(cnt++));
+            i = matcher.end();
         }
+        if (i == formatString.length() - 1) {
+            Value value = new ConstantInt(new IntegerType(32), formatString.charAt(i));
+            new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value);
+        } else if (i == formatString.length() - 2 && formatString.charAt(i) == '\\') {
+            Value value = new ConstantInt(new IntegerType(32), 10);
+            new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value);
+        } else if (i < formatString.length() - 1)
+            printStr(formatString.substring(i));
     }
     private Value typeConversion(Value value, Type type) {
         if (value.getType().isIntegerTy(1)) {
