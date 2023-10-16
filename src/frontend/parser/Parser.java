@@ -78,18 +78,8 @@ public class Parser {
     public FuncDef parseMainFuncDef() throws ParserException {
         FuncDef funcDef = new FuncDef();
         funcDef.setFuncType(parseFuncType()); // FuncType
-        funcDef.setIdent(tokenManager.getNextToken(WordType.IDENFR)); // Ident
+        funcDef.setIdent(tokenManager.getNextToken(WordType.MAINTK)); // Main
         tokenManager.getNextToken(WordType.LPARENT); // '('
-        if(!tokenManager.checkTokenType(0, WordType.RPARENT)) { // FuncFParams
-            try {
-                tokenManager.openBackup();
-                FuncFParams funcFParams = parseFuncFParams();
-                funcDef.setFuncFParams(funcFParams);
-                tokenManager.closeBackup();
-            } catch (ParserException e) {
-                tokenManager.rollBack();
-            }
-        }
         try {
             tokenManager.getNextToken(WordType.RPARENT); // ')'
         } catch (ParserException e) {
@@ -638,7 +628,7 @@ public class Parser {
     public PrimaryExp parsePrimaryExp() throws ParserException {
         PrimaryExp primaryExp = new PrimaryExp();
         if (tokenManager.checkTokenType(0, WordType.LPARENT)) { // '(' Exp ')'
-            primaryExp.addElement(tokenManager.getNextToken()); // '('
+            tokenManager.getNextToken(); // '('
             primaryExp.addElement(parseExp()); // Exp
             try {
                 tokenManager.getNextToken(WordType.RPARENT); // ')'

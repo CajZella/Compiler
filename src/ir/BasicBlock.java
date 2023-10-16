@@ -14,6 +14,7 @@ public class BasicBlock extends Value {
     public BasicBlock(Function parent) {
         super(ValueType.BasicBlock, "%b" + num++, new LabelType());
         this.pFunction = parent;
+        this.pFunction.addBlock(this);
         this.instrs = new MyLinkedList<>();
     }
     public Function getParent() { return this.pFunction; }

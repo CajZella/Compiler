@@ -4,7 +4,7 @@ import ir.BasicBlock;
 import ir.Value;
 
 public class Ret extends Instr {
-    public Ret(BasicBlock pBB, Value operand) {
+    public Ret(BasicBlock pBB, Value... operand) {
         super(ValueType.ret, null, pBB, operand);
     }
     @Override

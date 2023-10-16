@@ -14,6 +14,12 @@ public class FunctionType extends Type {
         } else { this.argumentTypes = argumentTypes; }
         this.returnType = returnType;
     }
+    public FunctionType(DataType returnType) {
+        super(TypeID.FunctionTyID);
+        this.argumentTypes = new ArrayList<>();
+        this.returnType = returnType;
+    }
+    public void setArgumentTypes(ArrayList<DataType> argumentTypes) { this.argumentTypes.addAll(argumentTypes); }
     public ArrayList<DataType> getArgumentTypes() { return this.argumentTypes; }
     public DataType getReturnType() { return this.returnType; }
     @Override

@@ -40,16 +40,18 @@ public class FuncDef extends AstNode {
     }
     public void checkSema(SymbolTable symbolTable) {
         // step1. function symbol
+        DataType returnType = funcType.isVoid() ? new VoidType() : new IntegerType(32);
+        FunctionType functionType = new FunctionType(returnType);
         if (!symbolTable.checkSymbolWhenDecl(ident)) {
-            DataType returnType = funcType.isVoid() ? new VoidType() : new IntegerType(32);
-            FunctionType functionType = new FunctionType(null == funcFParams ? null : funcFParams.getTypes(), returnType);
             symbolTable.addSymbol(new Symbol(ident.getValue(), false, true, functionType, ident.getLine()));
         }
         // step2. FunFParams check
         SymbolTable childTable = new SymbolTable(symbolTable);
         if (hasFuncFParams()) {
             funcFParams.checkSema(childTable);
+            functionType.setArgumentTypes(funcFParams.getTypes());
         }
+
         // step3. Block check
         block.setFuncType(funcType);
         block.checkSema(childTable);
@@ -66,6 +68,26 @@ public class FuncDef extends AstNode {
                     }
                 } else
                     ErrorLog.addError(ErrorType.NON_RETURN_FUNC, block.getRbraceLine());
+            }
+        } else {
+            if (block.getBlockItems().isEmpty()) {
+                BlockItem blockItem = new BlockItem();
+                blockItem.addElement(new StmtReturn());
+                block.addBlockItem(blockItem);
+            } else {
+                BlockItem blockItem = block.getBlockItems().get(block.getBlockItems().size() - 1);
+                if (blockItem.isStmt()) {
+                    Stmt stmt = blockItem.getStmt();
+                    if (!stmt.isReturnStmt()) {
+                        blockItem = new BlockItem();
+                        blockItem.addElement(new StmtReturn());
+                        block.addBlockItem(blockItem);
+                    }
+                } else {
+                    blockItem = new BlockItem();
+                    blockItem.addElement(new StmtReturn());
+                    block.addBlockItem(blockItem);
+                }
             }
         }
     }

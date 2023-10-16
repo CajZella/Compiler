@@ -21,6 +21,7 @@ import ir.instrs.Call;
 import ir.instrs.GetElementPtr;
 import ir.instrs.Icmp;
 import ir.instrs.Load;
+import ir.instrs.Ret;
 import ir.instrs.Store;
 import ir.instrs.Trunc;
 import ir.instrs.Zext;
@@ -54,7 +55,6 @@ public class Visitor {
         if (compUnit.hasDecls())
             for (Decl decl : compUnit.getDecls())
                 visitDecl(decl);
-        curTab = rootTab.getSonNextTab();
         for (FuncDef funcDef : compUnit.getFuncDefs()) {
             visitFuncDef(funcDef);
         }
@@ -71,7 +71,7 @@ public class Visitor {
         String name = constDef.getIdent().getValue();
         Symbol symbol = curTab.getSymbol(name);
         if (symbol.isGlobal()) {
-            GlobalVariable globalVariable = new GlobalVariable(name, symbol.getType(), true, symbol.getConstantInit());
+            GlobalVariable globalVariable = new GlobalVariable(name, new PointerType(symbol.getType()), true, symbol.getConstantInit());
             module.addGlobalVariable(globalVariable);
             symbol.setIrPtr(globalVariable);
         }
@@ -88,16 +88,17 @@ public class Visitor {
                     for (int i = 0; i < dims.get(0); i++) {
                         ConstantInt constantInt = constantArray.getBase(i);
                         GetElementPtr getElementPtr = new GetElementPtr(new PointerType(constantInt.getType()),
-                                curBB, symbol.getIrPtr(), new ConstantInt(new IntegerType(32), i));
+                                curBB, symbol.getIrPtr(), new ConstantInt(new IntegerType(32), 0),
+                                new ConstantInt(new IntegerType(32), i));
                         new Store(curBB, constantInt, getElementPtr);
                     }
                 } else {
-                    for (int i = 0; i < dims.get(0); i++)
-                        for (int j = 0; j < dims.get(1); j++) {
+                    for (int i = 0; i < dims.get(1); i++)
+                        for (int j = 0; j < dims.get(0); j++) {
                             ConstantInt constantInt = constantArray.getBase(i, j);
                             GetElementPtr getElementPtr = new GetElementPtr(new PointerType(constantInt.getType()),
-                                    curBB, symbol.getIrPtr(), new ConstantInt(new IntegerType(32), i),
-                                    new ConstantInt(new IntegerType(32), j));
+                                    curBB, symbol.getIrPtr(), new ConstantInt(new IntegerType(32), 0),
+                                    new ConstantInt(new IntegerType(32), i), new ConstantInt(new IntegerType(32), j));
                             new Store(curBB, constantInt, getElementPtr);
                         }
                 }
@@ -116,7 +117,7 @@ public class Visitor {
                     constant = new ConstantArray(symbol.getType());
             } else
                 constant = symbol.getConstantInit();
-            GlobalVariable globalVariable = new GlobalVariable(name, symbol.getType(), false, constant);
+            GlobalVariable globalVariable = new GlobalVariable(name, new PointerType(symbol.getType()), false, constant);
             module.addGlobalVariable(globalVariable);
             symbol.setIrPtr(globalVariable);
         } else {
@@ -124,15 +125,16 @@ public class Visitor {
             symbol.setIrPtr(ptr);
             if (!varDef.hasInitVal()) return ;
             InitVal initVal = varDef.getInitVal();
-            if (initVal.isExp()) {
+            if (initVal.isExpType()) {
                 Value value = visitExp(initVal.getExp());
                 new Store(curBB, value, ptr);
             } else {
                 ArrayList<InitVal> initVals = initVal.getInitVals();
-                if (initVals.get(0).isExp()) {
+                if (initVals.get(0).isExpType()) {
                     for (int i = 0; i < initVals.size(); i++) {
                         Value tmp = visitExp(initVals.get(i).getExp());
-                        GetElementPtr getElementPtr = new GetElementPtr(new PointerType(tmp.getType()), curBB, ptr, new ConstantInt(new IntegerType(32), i));
+                        GetElementPtr getElementPtr = new GetElementPtr(new PointerType(tmp.getType()), curBB, ptr,
+                                new ConstantInt(new IntegerType(32), 0), new ConstantInt(new IntegerType(32), i));
                         new Store(curBB, tmp, getElementPtr);
                     }
                 } else {
@@ -142,7 +144,9 @@ public class Visitor {
                         for (int j = 0; j < sonInitVals.size(); j++) {
                             Value tmp = visitExp(sonInitVals.get(j).getExp());
                             GetElementPtr getElementPtr = new GetElementPtr(new PointerType(tmp.getType()), curBB, ptr,
-                                    new ConstantInt(new IntegerType(32), i), new ConstantInt(new IntegerType(32), j));
+                                    new ConstantInt(new IntegerType(32), 0),
+                                    new ConstantInt(new IntegerType(32), i),
+                                    new ConstantInt(new IntegerType(32), j));
                             new Store(curBB, tmp, getElementPtr);
                         }
                     }
@@ -186,9 +190,7 @@ public class Visitor {
         else
             visitStmt(blockItem.getStmt());
     }
-    private Value visitExp(Exp exp) {
-        return visitAddExp(exp.getAddExp());
-    }
+    private Value visitExp(Exp exp) { return visitAddExp(exp.getAddExp()); }
     private Value visitAddExp(AddExp addExp) {
         Value value = visitMulExp((MulExp) addExp.get(0));
         for (int i = 2; i < addExp.size(); i += 2) {
@@ -236,34 +238,78 @@ public class Visitor {
             return visitCall(unaryExp);
     }
     private Value visitPrimaryExp(PrimaryExp primaryExp) {
-        if (primaryExp.isExp())
+        if (primaryExp.isExpType())
             return visitExp(primaryExp.getExp());
-        else if (primaryExp.isLVal())
-            return visitLVal(primaryExp.getLVal());
+        else if (primaryExp.isLValType()) {
+            LVal lVal = primaryExp.getLVal();
+            Value value = visitLVal(lVal, false);
+            return value;
+        }
         else
             return visitNumber(primaryExp.getNumber());
     }
-    private Value visitLVal(LVal lVal) {
+    private Value visitLVal(LVal lVal, boolean isAddr) {
         String name = lVal.getIdent().getValue();
         Symbol symbol = curTab.getSymbol(name);
+        if (null == symbol.getIrPtr())
+            symbol = curTab.getParent().getSymbol(name);
         Value ptr = symbol.getIrPtr();
-        if (lVal.hasExps()) {
+        if (symbol.getType().isPointerTy())
+            ptr = new Load((PointerType) symbol.getType(), curBB, ptr);
+        if (!lVal.hasExps()) {
+            if (symbol.getType().isArrayTy())
+                return new GetElementPtr(new PointerType(((ArrayType) symbol.getType()).getElementType()), curBB, ptr,
+                        new ConstantInt(new IntegerType(32), 0), new ConstantInt(new IntegerType(32), 0));
+            else{
+                if (isAddr || symbol.getType().isPointerTy()) return ptr;
+                else {
+                    if (null == ptr) {
+                        int x=1;
+                    }
+                    return new Load((DataType) (symbol.getType()), curBB, ptr);
+                }
+            }
+        } else {
             ArrayList<Value> values = new ArrayList<>();
             for (Exp exp : lVal.getExps())
                 values.add(visitExp(exp));
             Type type = symbol.getType();
-            for (int i = 0; i < values.size(); i++)
-                type = ((ArrayType)type).getElementType();
-            GetElementPtr getElementPtr = new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
-            if (type.isIntegerTy(32))
-                return new Load((IntegerType)type, curBB, getElementPtr);
-            else
-                return getElementPtr;
-        } else {
-            if (symbol.getType().isIntegerTy(32))
-                return new Load((IntegerType)symbol.getType(), curBB, ptr);
-            else
-                return ptr;
+            GetElementPtr getElementPtr;
+            if (type.isArrayTy()) {
+                for (int i = 0; i < values.size(); i++)
+                    type = ((ArrayType) type).getElementType();
+                values.add(0, new ConstantInt(new IntegerType(32), 0));
+                if (isAddr)
+                    return new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
+                else {
+                    if (type.isIntegerTy()) {
+                        getElementPtr = new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
+                        return new Load((IntegerType) type, curBB, getElementPtr);
+                    } else {
+                        values.add(new ConstantInt(new IntegerType(32), 0));
+                        type = ((ArrayType)type).getElementType();
+                        return new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
+                    }
+                }
+            } else {
+                type = ((PointerType) type).getReferencedType();
+                if (lVal.getExps().size() == 2) {
+                    type = ((ArrayType) type).getElementType();
+                }
+                if (isAddr)
+                    return new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
+                else {
+                    if (type.isIntegerTy()) {
+                        getElementPtr = new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
+                        return new Load((DataType) type, curBB, getElementPtr);
+                    } else {
+                        values.add(new ConstantInt(new IntegerType(32), 0));
+                        type = ((ArrayType)type).getElementType();
+                        return new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
+                    }
+                }
+            }
+
         }
     }
     private Value visitNumber(Number number) {
@@ -276,8 +322,9 @@ public class Visitor {
         FunctionType functionType = (FunctionType) symbol.getType();
         ArrayList<Value> args = new ArrayList<>();
         args.add(symbol.getIrPtr());
-        for (Exp exp : funcRParams.getExps())
+        for (Exp exp : funcRParams.getExps()) {
             args.add(visitExp(exp));
+        }
         return new Call(functionType.getReturnType(), curBB, args.toArray(new Value[args.size()]));
     }
     private Value visitLOrExp(LOrExp lOrExp, BasicBlock trueBB, BasicBlock falseBB) { // todo: 短路求值debug重点
@@ -285,14 +332,14 @@ public class Visitor {
         BasicBlock nextBB;
         for (int i = 0; i < lOrExp.size() - 1; i += 2) {
             nextBB = new BasicBlock(curFunc);
-            value = visitLAndExp((LAndExp) lOrExp.get(i), trueBB, nextBB);
+            value = visitLAndExp((LAndExp) lOrExp.get(i), nextBB);
             new Br(curBB, value, trueBB, nextBB);
             curBB = nextBB;
         }
-        value = visitLAndExp((LAndExp) lOrExp.get(lOrExp.size() - 1), trueBB, falseBB);
+        value = visitLAndExp((LAndExp) lOrExp.get(lOrExp.size() - 1), falseBB);
         return value;
     }
-    private Value visitLAndExp(LAndExp lAndExp, BasicBlock trueBB, BasicBlock falseBB) { // todo: 短路求值debug重点
+    private Value visitLAndExp(LAndExp lAndExp, BasicBlock falseBB) { // todo: 短路求值debug重点
         Value value;
         BasicBlock nextBB;
         for (int i = 0; i < lAndExp.size() - 1; i += 2) {
@@ -302,7 +349,6 @@ public class Visitor {
             curBB = nextBB;
         }
         value = visitEqExp((EqExp) lAndExp.get(lAndExp.size() - 1));
-        new Br(curBB, value, trueBB, falseBB);
         return value;
     }
     private Value visitEqExp(EqExp eqExp) {
@@ -360,7 +406,7 @@ public class Visitor {
     }
     private void visitStmtAssign(StmtAssign stmtAssign) {
         Value value = visitExp(stmtAssign.getExp());
-        Value ptr = visitLVal(stmtAssign.getLVal());
+        Value ptr = visitLVal(stmtAssign.getLVal(), true);
         value = typeConversion(value, ((PointerType) ptr.getType()).getReferencedType());
         new Store(curBB, value, ptr);
     }
@@ -391,7 +437,7 @@ public class Visitor {
     }
     private void visitStmtForAssign(LVal lVal, Exp exp) {
         Value value = visitExp(exp);
-        Value ptr = visitLVal(lVal);
+        Value ptr = visitLVal(lVal, true);
         value = typeConversion(value, ((PointerType) ptr.getType()).getReferencedType());
         new Store(curBB, value, ptr);
     }
@@ -406,8 +452,11 @@ public class Visitor {
             visitStmtForAssign(stmtFor.getForStmt1().getLVal(), stmtFor.getForStmt1().getExp());
         new Br(curBB, condBB);
         curBB = condBB;
-        Value cond = visitLOrExp(stmtFor.getCond().getlOrExp(), bodyBB, mergeBB);
-        new Br(curBB, cond, bodyBB, mergeBB);
+        if (stmtFor.hasCond()) {
+            Value cond = visitLOrExp(stmtFor.getCond().getlOrExp(), bodyBB, mergeBB);
+            new Br(curBB, cond, bodyBB, mergeBB);
+        } else
+            new Br(curBB, bodyBB);
         curBB = bodyBB;
         visitStmt(stmtFor.getStmt());
         new Br(curBB, stepBB);
@@ -445,15 +494,15 @@ public class Visitor {
     private void visitStmtGetInt(StmtGetint stmtGetint) {
         Function function = module.getFunction("getint");
         Value value = new Call(((FunctionType) function.getType()).getReturnType(), curBB, function);
-        Value ptr = visitLVal(stmtGetint.getLVal());
+        Value ptr = visitLVal(stmtGetint.getLVal(), true);
         new Store(curBB, value, ptr);
     }
     private void visitStmtReturn(StmtReturn stmtReturn) {
         if (stmtReturn.hasExp()) {
             Value value = visitExp(stmtReturn.getExp());
-            new Br(curBB, value);
+            new Ret(curBB, value);
         } else
-            new Br(curBB);
+            new Ret(curBB);
     }
     private void visitStmtPrintf(StmtPrintf stmtPrintf) {
         Function putint = module.getFunction("putint");
@@ -461,12 +510,17 @@ public class Visitor {
         String formatString = stmtPrintf.getFormatString().getValue();
         ArrayList<Exp> exps = stmtPrintf.getExps();
         int cnt = 0;
-        for (int i = 0; i < formatString.length(); i++) {
+        for (int i = 1; i < formatString.length() - 1; i++) {
             if (formatString.charAt(i) == '%') {
                 Value value = visitExp(exps.get(cnt++));
                 new Call(((FunctionType) putint.getType()).getReturnType(), curBB, putint, value);
                 i++;
-            } else {
+            } else if (formatString.charAt(i) == '\\') {
+                Value value = new ConstantInt(new IntegerType(32), '\n');
+                new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value);
+                i++;
+            }
+            else {
                 Value value = new ConstantInt(new IntegerType(32), formatString.charAt(i));
                 new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value);
             }

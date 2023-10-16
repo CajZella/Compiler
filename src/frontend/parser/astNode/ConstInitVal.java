@@ -36,7 +36,7 @@ public class ConstInitVal extends AstNode {
         } else {
             ConstantArray constantArray = new ConstantArray(type);
             for (ConstInitVal constInitVal : constInitVals) {
-                if (constInitVal.isExp())
+                if (constInitVal.isConstExp())
                     constantArray.addVal(new ConstantInt(((ArrayType)type).getElementType(),
                             constInitVal.getConstExp().getOpResult()));
                 else

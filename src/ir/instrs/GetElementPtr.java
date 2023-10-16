@@ -32,7 +32,7 @@ public class GetElementPtr extends Instr {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(String.format("%s = getelementptr %s, %s %s, i32 0", name,
+        builder.append(String.format("%s = getelementptr %s, %s %s", name,
                 ((PointerType)getOperand(0).getType()).getReferencedType(),
                 getOperand(0).getType(), getOperand(0).getName()));
         for (Value idx : idxs) {

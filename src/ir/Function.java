@@ -1,6 +1,7 @@
 package ir;
 
 import ir.constants.Constant;
+import ir.types.DataType;
 import ir.types.FunctionType;
 import ir.valueSymtab.ValueSymtab;
 import util.MyLinkedList;
@@ -55,14 +56,12 @@ public class Function extends Value {
             builder.append("}\n");
         } else {
             builder.append(String.format("declare %s %s(", ((FunctionType) type).getReturnType(), name));
-            for (int i = 0; i < this.arguments.size(); i++) {
-                Argument argument = this.arguments.get(i);
-                builder.append(String.format("%s", argument.getType()));
-                if (i != this.arguments.size() - 1) {
-                    builder.append(", ");
-                }
+            ArrayList<DataType> argumentTypes = ((FunctionType)type).getArgumentTypes();
+            for (int i = 0; i < argumentTypes.size(); i++) {
+               DataType dataType = argumentTypes.get(i);
+                builder.append(String.format("%s", dataType));
             }
-            builder.append(")");
+            builder.append(")\n");
         }
         return builder.toString();
     }

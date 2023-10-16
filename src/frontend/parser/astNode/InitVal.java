@@ -22,7 +22,7 @@ public class InitVal extends AstNode {
     public void setExp(Exp exp) {
         this.exp = exp;
     }
-    public boolean isExp() {
+    public boolean isExpType() {
         return exp != null;
     }
     public Exp getExp() {
@@ -32,7 +32,7 @@ public class InitVal extends AstNode {
         return initVals;
     }
     public void checkSema(SymbolTable symbolTable) {
-        if (isExp()) {
+        if (isExpType()) {
             exp.checkSema(symbolTable);
         } else {
             for (InitVal initVal : initVals) {
@@ -42,12 +42,12 @@ public class InitVal extends AstNode {
         }
     }
     public Constant getConstInit(Type type) {
-        if (isExp() && isGlobal) {
+        if (isExpType() && isGlobal) {
             return new ConstantInt(type, exp.getOpResult());
-        } else if (!isExp()) {
+        } else if (!isExpType()) {
             ConstantArray constantArray = new ConstantArray(type);
             for (InitVal initVal : initVals) {
-                if (initVal.isExp())
+                if (initVal.isExpType())
                     constantArray.addVal(new ConstantInt(((ArrayType)type).getElementType(),
                             initVal.getExp().getOpResult()));
                 else
