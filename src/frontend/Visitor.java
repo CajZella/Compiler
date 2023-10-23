@@ -450,7 +450,7 @@ public class Visitor {
         BasicBlock stepBB = new BasicBlock(curFunc);
         BasicBlock mergeBB = new BasicBlock(curFunc);
         loopStack.add(mergeBB);
-        loopStack.add(condBB);
+        loopStack.add(stepBB);
         if (stmtFor.hasForStmt1())
             visitStmtForAssign(stmtFor.getForStmt1().getLVal(), stmtFor.getForStmt1().getExp());
         new Br(curBB, condBB);

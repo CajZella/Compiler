@@ -77,7 +77,9 @@ public class Parser {
     /* MainFuncDef -> 'int' 'main' '(' ')' Block */
     public FuncDef parseMainFuncDef() throws ParserException {
         FuncDef funcDef = new FuncDef();
-        funcDef.setFuncType(parseFuncType()); // FuncType
+        FuncType funcType = new FuncType();
+        funcType.addElement(tokenManager.getNextToken(WordType.INTTK)); // 'int'
+        funcDef.setFuncType(funcType); // FuncType
         funcDef.setIdent(tokenManager.getNextToken(WordType.MAINTK)); // Main
         tokenManager.getNextToken(WordType.LPARENT); // '('
         try {
@@ -87,7 +89,7 @@ public class Parser {
             ErrorLog.addError(ErrorType.RPARENT_MISSED, token.getLine());
         }
         funcDef.setBlock(parseBlock()); // Block
-        LexParseLog.add(funcDef.toString());
+        LexParseLog.add("<" + GrammarType.MainFuncDef + ">");
         return funcDef;
     }
 
