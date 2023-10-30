@@ -38,6 +38,7 @@ public class ArrayType extends Type {
     public ArrayList<Integer> getDims() { return dims; }
     public int getDimsSize() { return dims.size(); }
     public int getLength() { return this.length; }
+    public int size() { return this.length * this.elementType.size(); }
     @Override
     public String toString() {
         return "[" + length + " x " + elementType + "]";

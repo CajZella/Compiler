@@ -18,4 +18,7 @@ public class IntegerType extends DataType {
         Type objType = (Type) obj;
         return objType.isIntegerTy(bitWidth);
     }
+    public int size() {
+        return (bitWidth - 1) / 8 + 1;
+    }
 }

@@ -14,7 +14,7 @@ public class GlobalVariable extends Value {
         this.initializer = initializer;
     }
     public GlobalVariable(Type type, Constant initializer) {
-        super(ValueType.GlobalVariable, String.format("@.str.%d", stringCnt++), type);
+        super(ValueType.GlobalVariable, String.format("@str.%d", stringCnt++), type);
         this.isConstant = true;
         this.isString = true;
         this.initializer = initializer;

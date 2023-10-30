@@ -21,4 +21,5 @@ public class PointerType extends DataType {
             return false;
         }
     }
+    public int size() { return 4; }
 }

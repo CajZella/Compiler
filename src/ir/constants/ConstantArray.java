@@ -33,6 +33,16 @@ public class ConstantArray extends Constant {
         }
         return (ConstantInt)constant;
     }
+    public String toMipsString() {
+        StringBuilder builder = new StringBuilder();
+        for (Constant val : vals) {
+            if (val instanceof ConstantInt)
+                builder.append(String.format("\n\t.word\t%s", ((ConstantInt)val).getVal()));
+            else
+                builder.append(((ConstantArray)val).toMipsString());
+        }
+        return builder.toString();
+    }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

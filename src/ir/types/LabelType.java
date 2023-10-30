@@ -14,4 +14,8 @@ public class LabelType extends Type {
         if (!(obj instanceof Type)) { return false; }
         return ((Type)obj).isLabelTy();
     }
+    public int size() {
+        assert false: "label type has no size.";
+        return 0;
+    }
 }

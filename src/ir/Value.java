@@ -45,9 +45,11 @@ public abstract class Value extends MyLinkedNode {
         this.name = name;
     }
     public void clearNum() { num = 0; }
+    public ValueType getValueTy() { return this.valueTy; }
     public Type getType() { return this.type; }
     public boolean hasName() { return null != this.name; }
     public String getName() { return this.name; }
+    public String getMipsName() { return this.name.substring(1); }
     public void addUse(Use use) { useList.insertAtTail(use); }
     public void removeUser(Use use) { useList.remove(use); }
     /*

@@ -1,5 +1,6 @@
 package settings;
 
+import backend.BackEnd;
 import frontend.ErrorHandle.ErrorLog;
 import frontend.LexParseLog;
 import frontend.parser.Parser;
@@ -20,6 +21,10 @@ public class Configure {
                 MyIO.writeFile(Config.targetFile, LexParseLog.print());
             if (Config.isLLVMIROutput)
                 MyIO.writeFile(Config.LLVMFile, ManageFrontend.getModule().toString());
+            BackEnd.setModule(ManageFrontend.getModule());
+            BackEnd.run();
+            if (Config.isMIPSOutput)
+                MyIO.writeFile(Config.MIPSFile, BackEnd.getMipsModule().toString());
         }
         MyIO.closeReadFiles();
     }

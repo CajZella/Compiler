@@ -32,6 +32,7 @@ public class Function extends Value {
     public void addSym(String name, Value value) { this.symtab.insertValueSym(name, value); }
     public boolean isEmpty() { return this.blocks.isEmpty(); }
     public int size() { return this.blocks.size(); }
+    public MyLinkedList<BasicBlock> getBlocks() { return this.blocks; }
     public BasicBlock getEntryBlock() { return this.blocks.getHead(); }
     public ArrayList<Argument> getArguments() { return this.arguments; }
     public ValueSymtab getSymtab() { return this.symtab; }

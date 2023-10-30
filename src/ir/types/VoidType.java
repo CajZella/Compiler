@@ -12,4 +12,8 @@ public class VoidType extends DataType {
         if (!(obj instanceof Type)) { return false; }
         return ((Type)obj).isVoidTy();
     }
+    public int size() {
+        assert false: "void type has no size.";
+        return 0;
+    }
 }

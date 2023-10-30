@@ -8,6 +8,11 @@ public class ConstantStr extends Constant {
         super(ValueType.ConstantStr, null, type);
         this.val = val;
     }
+    public String toMipsString() {
+        String str = val.replaceAll("\\\\0A", "\\\\n");
+        str = "\"" + str.replaceAll("\\\\00", "") + "\"";
+        return str;
+    }
     public String getVal() { return this.val; }
     @Override
     public String toString() {

@@ -27,6 +27,7 @@ public class BasicBlock extends Value {
     public Instr getEntryInstr() { return this.instrs.getHead(); }
     public boolean isEmpty() { return this.instrs.isEmpty(); }
     public int size() { return this.instrs.size(); }
+    public MyLinkedList<Instr> getInstrs() { return this.instrs; }
     public void dropAllReferences() { //todo
         for (Instr instr : instrs) {
             instr.dropAllReferences();

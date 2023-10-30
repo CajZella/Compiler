@@ -22,4 +22,5 @@ public abstract class Type {
     public abstract boolean isIntegerTy(int bitWidth);
     public boolean isEmptyTy() { return null == this.typeID; }
     public abstract boolean equals(Object object);
+    public abstract int size();
 }

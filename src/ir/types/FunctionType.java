@@ -50,4 +50,8 @@ public class FunctionType extends Type {
             return false;
         }
     }
+    public int size() {
+        assert false: "function type has no size.";
+        return 0;
+    }
 }
