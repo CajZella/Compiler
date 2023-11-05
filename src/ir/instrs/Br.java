@@ -11,6 +11,7 @@ public class Br extends Instr {
     public Br(BasicBlock pBB, Value...operands) {
         super(ValueType.br, null, pBB, operands);
     }
+    public boolean isCondBr() { return operandsSize() != 1; }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

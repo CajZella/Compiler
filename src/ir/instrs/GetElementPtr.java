@@ -4,6 +4,8 @@ import ir.BasicBlock;
 import ir.Value;
 import ir.types.PointerType;
 
+import java.util.ArrayList;
+
 /*
     calculate address
     <result> = getelemeterptr <ty>, <ty>* <ptrval>, {<ty> <index>}*
@@ -28,6 +30,13 @@ public class GetElementPtr extends Instr {
     public GetElementPtr(PointerType type, BasicBlock pBB, Value operand, Value...idxs) {
         super(ValueType.getelementptr, type, pBB, operand);
         this.idxs = idxs;
+    }
+    public ArrayList<Value> getIdxs() {
+        ArrayList<Value> idxs = new ArrayList<>();
+        for (Value idx : this.idxs) {
+            idxs.add(idx);
+        }
+        return idxs;
     }
     @Override
     public String toString() {

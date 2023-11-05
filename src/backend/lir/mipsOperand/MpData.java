@@ -1,37 +1,40 @@
 package backend.lir.mipsOperand;
 
-import ir.constants.Constant;
-import ir.constants.ConstantArray;
-import ir.constants.ConstantInt;
-import ir.constants.ConstantStr;
-import ir.types.DataType;
-import ir.types.Type;
+import java.util.ArrayList;
 
 public class MpData extends MpOpd {
     // int, array, string
     private String name;
-    private int type = 0; // 0: int; 1: array .word; 2: array .space; 3: string .asciiz
-    private Constant initial;
-    private Type dataType;
-    public MpData(String name, Constant constant, Type dataType) {
+    private int size;
+    private String str = null;
+    private ArrayList<Integer> vals = null;
+    public MpData(String name, String str) {
         this.name = name;
-        this.initial = constant;
-        this.dataType = dataType;
+        this.str = str.replaceAll("\\\\0A", "\\\\n");
+        this.str = this.str.substring(0, str.length() - 4);
+    }
+    public MpData(String name, int size) {
+        this.name = name;
+        this.size = size;
+    }
+    public MpData(String name, ArrayList<Integer> vals) {
+        this.name = name;
+        this.vals = vals;
+    }
+    public String toDataString() {
+        StringBuilder builder = new StringBuilder();
+        if (null != str)
+            builder.append(String.format("%s:\n\t.asciiz %s\n", name, str));
+        else if (null != vals) {
+            builder.append(String.format("%s:", name));
+            for (Integer val : vals)
+                builder.append(String.format("\n\t.word %d", val));
+            builder.append("\n");
+        } else
+            builder.append(String.format("%s:\n\t.space\t%d\n", name, size));
+        return builder.toString();
     }
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        if (initial instanceof ConstantInt) {
-            ConstantInt constantInt = (ConstantInt) initial;
-            builder.append(String.format("%s:\n\t.word %d\n", name, constantInt.getVal()));
-        } else if (initial instanceof ConstantArray) {
-            ConstantArray constantArray = (ConstantArray) initial;
-            if (constantArray.getVals().isEmpty())
-                builder.append(String.format("%s:\n\t.space\t%d\n", name, dataType.size()));
-            else
-                builder.append(String.format("%s:%s\n", name, constantArray.toMipsString()));
-        } else {
-            builder.append(String.format("%s:\n\t.asciiz %s\n", name, ((ConstantStr)initial).toMipsString()));
-        }
-        return builder.toString();
+        return name;
     }
 }

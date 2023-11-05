@@ -14,7 +14,7 @@ public class MpModule {
         StringBuilder builder = new StringBuilder();
         builder.append(".data\n");
         for (MpData data : mpDatas)
-            builder.append(data);
+            builder.append(data.toDataString());
         builder.append("\n\n.text\n");
         for (MpFunction function : mpFunctions) {
             builder.append(function + "\n");

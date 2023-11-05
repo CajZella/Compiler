@@ -1,4 +1,4 @@
 package backend.lir.mipsOperand;
 
-public class MpOpd {
+public abstract class MpOpd {
 }

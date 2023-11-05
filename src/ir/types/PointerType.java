@@ -21,5 +21,6 @@ public class PointerType extends DataType {
             return false;
         }
     }
-    public int size() { return 4; }
+    //todo
+    public int size() { return referencedType.size(); }
 }

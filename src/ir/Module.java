@@ -19,16 +19,16 @@ public class Module extends Value { // todo: 或许module继承value不合理，
         functions = new LinkedList<>();
         globalVariables = new LinkedList<>();
         symtab = new ValueSymtab(null);
-        this.addFunction(new Function("getint", new FunctionType(new ArrayList<>(), new IntegerType(32)), false));
+        this.addFunction(new Function("getint", new FunctionType(new ArrayList<>(), new IntegerType(32)), true));
         this.addFunction(new Function("putint", new FunctionType(new ArrayList<>() {{
             add(new IntegerType(32));
-        }}, new VoidType()), false));
+        }}, new VoidType()), true));
         this.addFunction(new Function("putstr", new FunctionType(new ArrayList<>() {{
             add(new PointerType(new IntegerType(8)));
-        }}, new VoidType()), false));
+        }}, new VoidType()), true));
         this.addFunction(new Function("putch", new FunctionType(new ArrayList<>() {{
             add(new IntegerType(32));
-        }}, new VoidType()), false));
+        }}, new VoidType()), true));
 
     }
     public void addFunction(Function function) {

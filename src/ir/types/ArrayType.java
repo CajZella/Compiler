@@ -36,6 +36,17 @@ public class ArrayType extends Type {
     public Type getElementType() { return this.elementType; }
     public DataType getBaseType() { return this.baseType; }
     public ArrayList<Integer> getDims() { return dims; }
+    public ArrayList<Integer> getDimSizes() {
+        ArrayList<Integer> dimSizes = new ArrayList<>();
+        int tmp = 4;
+        for (int i = dims.size() - 1; i >= 0; i--) {
+            dimSizes.add(0, tmp);
+            int dim = dims.get(i);
+            tmp *= dim;
+        }
+        dimSizes.add(0, tmp);
+        return dimSizes;
+    }
     public int getDimsSize() { return dims.size(); }
     public int getLength() { return this.length; }
     public int size() { return this.length * this.elementType.size(); }

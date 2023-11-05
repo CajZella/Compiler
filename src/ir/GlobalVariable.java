@@ -19,6 +19,7 @@ public class GlobalVariable extends Value {
         this.isString = true;
         this.initializer = initializer;
     }
+    public boolean isString() { return this.isString; }
     public boolean isConstant() { return isConstant; }
     public boolean hasInitializer() { return null != this.initializer; }
     public Constant getInitializer() { return this.initializer; }

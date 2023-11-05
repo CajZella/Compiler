@@ -13,6 +13,7 @@ public class Icmp extends Instr {
         super(ValueType.icmp, new IntegerType(1), pBB, operands);
         this.op = op;
     }
+    public IcmpOp getOp() { return op; }
     @Override
     public String toString() {
         return String.format("%s = icmp %s %s %s, %s", name, op, getOperand(0).getType(), getOperand(0).getName(), getOperand(1).getName());

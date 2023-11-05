@@ -7,6 +7,7 @@ public class Ret extends Instr {
     public Ret(BasicBlock pBB, Value... operand) {
         super(ValueType.ret, null, pBB, operand);
     }
+    public boolean hasReturnValue() { return operandsSize() != 0; }
     @Override
     public String toString() {
         if (isOperandsEmpty()) {

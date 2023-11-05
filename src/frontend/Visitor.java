@@ -162,7 +162,7 @@ public class Visitor {
         // 创建function的初始化
         String name = funcDef.getIdent().getValue();
         Symbol symbol = curTab.getSymbol(name);
-        curFunc = new Function(name, (FunctionType) symbol.getType(), true);
+        curFunc = new Function(name, (FunctionType) symbol.getType(), false);
         module.addFunction(curFunc);
         curFunc.clearNum();
         symbol.setIrPtr(curFunc);

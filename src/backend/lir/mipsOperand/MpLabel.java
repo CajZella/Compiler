@@ -1,5 +1,6 @@
 package backend.lir.mipsOperand;
 
+// include function, block, data
 public class MpLabel {
     private static int count = 0;
     private String name;
