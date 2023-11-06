@@ -18,10 +18,12 @@ import backend.lir.mipsOperand.MpData;
 import backend.lir.MpFunction;
 import backend.lir.MpModule;
 import backend.lir.mipsOperand.MpImm;
+import backend.lir.mipsOperand.MpLabel;
 import backend.lir.mipsOperand.MpOpd;
 import backend.lir.mipsOperand.MpPhyReg;
 import backend.lir.mipsOperand.MpReg;
 import backend.lir.mipsOperand.MpStackOffset;
+import ir.Argument;
 import ir.BasicBlock;
 import ir.Function;
 import ir.GlobalVariable;
@@ -51,6 +53,7 @@ import util.MyLinkedList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 // 不涉及栈的管理，这需要在寄存器分配后，在这里还是用虚拟寄存器
@@ -76,7 +79,7 @@ public class CodeGen {
     /*
      * irValue到mipsOperand的映射
      * 作用：后续指令需要用到先前的寄存器值，方便查找
-     * mipsOperand包括 reg 和 argument, MpImm, MpStackOffset
+     * mipsOperand包括 reg 和 MpImm, MpStackOffset
      */
     private HashMap<Value, MpOpd> val2opd = new HashMap<>();
     /*
@@ -112,6 +115,16 @@ public class CodeGen {
             for (BasicBlock basicBlock : basicBlocks) {
                 MpBlock mipsBlock = new MpBlock(basicBlock.getMipsName(), mipsFunction);
                 bb2mb.put(basicBlock, mipsBlock);
+            }
+            // 建立控制流图，为活动变量分析做准备
+            for (BasicBlock basicBlock : basicBlocks) {
+                MpBlock mipsBlock = bb2mb.get(basicBlock);
+                HashSet<BasicBlock> precBBs = basicBlock.getPrecBBs();
+                for (BasicBlock precBB : precBBs) {
+                    MpBlock precMB = bb2mb.get(precBB);
+                    mipsBlock.addPrecMB(precMB);
+                    precMB.addSuccMB(mipsBlock);
+                }
             }
         }
         // todo: 中端建控制流图，生成phi，后端消除phi
@@ -154,23 +167,24 @@ public class CodeGen {
         }
         curMF.setStackSize(offset);
         MpBlock tempMB =bb2mb.get(basicBlocks.getHead());
-//        // 取出参数
-//        for (int i = 0; i < curIF.getArguments().size(); i++) {
-//            if (i < 4) {
-//                MpReg src = new MpReg(MpPhyReg.getReg(3 + i));
-//                MpReg dst = new MpReg();
-//                new MpMove(tempMB, dst, src);
-//                val2opd.put(curIF.getArguments().get(i), dst);
-//            } else {
-//                MpReg dst = new MpReg();
-//                val2opd.put(curIF.getArguments().get(i), dst);
-//                new MpLoad(tempMB, dst, new MpReg(MpPhyReg.$sp), new MpImm((i - 4) * 4));
-//            }
-//        }
-        new MpAlu(MpInstr.MipsInstrType.addiu, tempMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(-offset));
+        // 取出参数
+        int argSize = curIF.getArguments().size();
+        for (int i = 0; i < argSize; i++) {
+            if (i < 4) {
+                MpReg src = new MpReg(MpPhyReg.getReg(4 + i));
+                val2opd.put(curIF.getArguments().get(i), src);
+            } else
+                val2opd.put(curIF.getArguments().get(i), new MpStackOffset(new MpReg(MpPhyReg.$sp), new MpImm((i - 4) * 4)));
+        }
+        MpAlu mpAlu = new MpAlu(MpInstr.MipsInstrType.addiu, tempMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(-offset));
+        tempMB.addMpInstr(mpAlu);
         // 在函数开始时先将$ra保存在栈中 todo: 待优化，若函数内没有jal指令，即没有调用其他函数，可以不用保存$ra
-        new MpStore(tempMB, new MpReg(MpPhyReg.$ra), new MpReg(MpPhyReg.$sp), new MpImm(0));
+        if (!curIF.isMain()) {
+            MpStore mpStore = new MpStore(tempMB, new MpReg(MpPhyReg.$ra), new MpReg(MpPhyReg.$sp), new MpImm(0));
+            tempMB.addMpInstr(mpStore);
+        }
         curMFOffset = 4;
+
         for (BasicBlock basicBlock : basicBlocks) {
             curIB = basicBlock;
             curMB = bb2mb.get(curIB);
@@ -207,39 +221,33 @@ public class CodeGen {
         }
     }
     private void genZextInstr(Zext instr) {
-        MpReg src = (MpReg) val2opd.get(instr.getOperand(0));
+        MpOpd src = val2opd.get(instr.getOperand(0));
         val2opd.put(instr, src);
     }
     private void genTruncInstr(Trunc instr) {
-        MpReg src = (MpReg) val2opd.get(instr.getOperand(0));
+        MpOpd src = val2opd.get(instr.getOperand(0));
         val2opd.put(instr, src);
     }
     /*
      *
      */
     private void genAllocaInstr(Alloca instr) {
-        if (instr.getType().isIntegerTy()) {
-            MpReg dst = new MpReg();
-            val2opd.put(instr, dst);
-        } else {
-            MpStackOffset offset = new MpStackOffset(new MpReg(MpPhyReg.$sp), new MpImm(curMFOffset));
-            val2opd.put(instr, offset);
-        }
+        MpStackOffset offset = new MpStackOffset(new MpReg(MpPhyReg.$sp), new MpImm(curMFOffset));
+        val2opd.put(instr, offset);
         curMFOffset += instr.getType().size();
     }
     private void genLoadInstr(Load instr) {
         Value irPtr = instr.getOperand(0);
-        if (irPtr instanceof GetElementPtr) {
+        if (irPtr instanceof GlobalVariable) {
             MpReg dst = new MpReg();
             val2opd.put(instr, dst);
-            MpStackOffset mipsSO = (MpStackOffset) val2opd.get(irPtr);
-            new MpLoad(curMB, dst, mipsSO.getBase(), mipsSO.getOffset());
-        } else if (irPtr instanceof GlobalVariable) {
-            MpReg dst = new MpReg();
-            val2opd.put(instr, dst);
-            new MpLoad(curMB, dst, gv2md.get(irPtr));
+            curMB.addMpInstr(new MpLoad(curMB, dst, gv2md.get(irPtr)));
         } else {
-            val2opd.put(instr, val2opd.get(irPtr));
+            MpOpd mipsPtr = val2opd.get(irPtr);
+            MpReg dst = new MpReg();
+            val2opd.put(instr, dst);
+            MpStackOffset mipsSO = (MpStackOffset) mipsPtr;
+            curMB.addMpInstr(new MpLoad(curMB, dst, mipsSO.getBase(), mipsSO.getOffset()));
         }
     }
     private void genStoreInstr(Store instr) {
@@ -248,21 +256,22 @@ public class CodeGen {
         MpOpd val = genOperand(irVal);
         if (val instanceof MpImm) {
             MpReg tmp = new MpReg();
-            new MpLoadImm(curMB, tmp, (MpImm) val);
+            curMB.addMpInstr(new MpLoadImm(curMB, tmp, (MpImm) val));
             val = tmp;
         }
-        if (irPtr instanceof GetElementPtr) {
-            MpStackOffset mipsSO = (MpStackOffset) val2opd.get(irPtr);
-            new MpStore(curMB, (MpReg) val, mipsSO.getBase(), mipsSO.getOffset());
-        }  else if (irPtr instanceof GlobalVariable) {
-            new MpStore(curMB, (MpReg) val, gv2md.get(irPtr));
+        if (irPtr instanceof GlobalVariable) {
+            curMB.addMpInstr(new MpStore(curMB, (MpReg) val, gv2md.get(irPtr)));
+        } else {
+            MpOpd mipsPtr = val2opd.get(irPtr);
+            MpStackOffset mipsSO = (MpStackOffset) mipsPtr;
+            curMB.addMpInstr(new MpStore(curMB, (MpReg) val, mipsSO.getBase(), mipsSO.getOffset()));
         }
     }
     private void genBrInstr(Br instr) {
         if (!instr.isCondBr()) {
             BasicBlock bb = (BasicBlock) instr.getOperand(0);
             MpBlock mb = bb2mb.get(bb);
-            new MpJump(MpInstr.MipsInstrType.j, curMB, mb.getLabel());
+            curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.j, curMB, mb.getLabel()));
         } else { // irCond = icmp
            Icmp irCond = (Icmp) instr.getOperand(0);
            MpOpd mipsCond = genOperand(irCond);
@@ -270,22 +279,22 @@ public class CodeGen {
            MpBlock falseBB = bb2mb.get(instr.getOperand(2));
            if (mipsCond instanceof MpImm) {
                if (((MpImm)mipsCond).getVal() > 0)
-                   new MpJump(MpInstr.MipsInstrType.j, curMB, trueBB.getLabel());
+                   curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.j, curMB, trueBB.getLabel()));
                else
-                   new MpJump(MpInstr.MipsInstrType.j, curMB, falseBB.getLabel());
+                   curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.j, curMB, falseBB.getLabel()));
            } else {
                MpCmp mipsCmp = (MpCmp) curMB.getLastMpInstr();
                curMB.removeInstr(mipsCmp);
                switch (mipsCmp.getInstrType()) {
-                   case seq -> new MpBranch(MpInstr.MipsInstrType.beq, curMB, mipsCmp.getSourceReg(), mipsCmp.getTarget(), trueBB.getLabel());
-                   case sne -> new MpBranch(MpInstr.MipsInstrType.bne, curMB, mipsCmp.getSourceReg(), mipsCmp.getTarget(), trueBB.getLabel());
-                   case slt -> new MpBranch(MpInstr.MipsInstrType.blt, curMB, mipsCmp.getSourceReg(), mipsCmp.getTarget(), trueBB.getLabel());
-                   case sle -> new MpBranch(MpInstr.MipsInstrType.ble, curMB, mipsCmp.getSourceReg(), mipsCmp.getTarget(), trueBB.getLabel());
-                   case sgt -> new MpBranch(MpInstr.MipsInstrType.bgt, curMB, mipsCmp.getSourceReg(), mipsCmp.getTarget(), trueBB.getLabel());
-                   case sge -> new MpBranch(MpInstr.MipsInstrType.bge, curMB, mipsCmp.getSourceReg(), mipsCmp.getTarget(), trueBB.getLabel());
+                   case seq -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.beq, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
+                   case sne -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.bne, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
+                   case slt -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.blt, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
+                   case sle -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.ble, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
+                   case sgt -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.bgt, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
+                   case sge -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.bge, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
                    default -> {}
                }
-               new MpJump(MpInstr.MipsInstrType.j, curMB, falseBB.getLabel());
+               curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.j, curMB, falseBB.getLabel()));
            }
         }
     }
@@ -295,21 +304,21 @@ public class CodeGen {
      * 2. 无返回值，直接跳转
      */
     private void genRetInstr(Ret instr) {
-        if (curIF.getMipsName().equals("main")) {
-            new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), new MpImm(10));
-            new MpSyscall(curMB);
+        if (curIF.isMain()) {
+            curMB.addMpInstr(new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), new MpImm(10)));
+            curMB.addMpInstr(new MpSyscall(curMB));
             return;
         }
-        new MpAlu(MpInstr.MipsInstrType.addiu, curMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(curMF.getStackSize()));
         if (instr.hasReturnValue()) {
             MpOpd ret = genOperand(instr.getOperand(0));
             if (ret instanceof MpImm)
-                new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), (MpImm) ret);
+                curMB.addMpInstr(new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), (MpImm) ret));
             else
-                new MpMove(curMB, new MpReg(MpPhyReg.$v0), (MpReg) ret);
+                curMB.addMpInstr(new MpMove(curMB, new MpReg(MpPhyReg.$v0), (MpReg) ret));
         }
-        new MpLoad(curMB, new MpReg(MpPhyReg.$ra), new MpReg(MpPhyReg.$sp), new MpImm(0));
-        new MpJump(MpInstr.MipsInstrType.jr, curMB, new MpReg(MpPhyReg.$ra));
+        curMB.addMpInstr(new MpLoad(curMB, new MpReg(MpPhyReg.$ra), new MpReg(MpPhyReg.$sp), new MpImm(0)));
+        curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(curMF.getStackSize())));
+        curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.jr, curMB, new MpReg(MpPhyReg.$ra)));
     }
     /*
      * 生成操作数：考虑寄存器和立即数两种类型
@@ -320,7 +329,7 @@ public class CodeGen {
         MpOpd dst = val2opd.get(irVal);
         if (dst instanceof MpStackOffset) {
             MpReg tmp = new MpReg();
-            new MpLoad(curMB, tmp, ((MpStackOffset) dst).getBase(), ((MpStackOffset) dst).getOffset());
+            curMB.addMpInstr(new MpLoad(curMB, tmp, ((MpStackOffset) dst).getBase(), ((MpStackOffset) dst).getOffset()));
             return tmp;
         } else return dst;
 
@@ -333,26 +342,28 @@ public class CodeGen {
             if (i <= 4) {
                 MpReg dst = new MpReg(MpPhyReg.getReg(3 + i));
                 if (irArg instanceof ConstantInt)
-                    new MpLoadImm(curMB, dst, new MpImm(((ConstantInt) irArg).getVal()));
+                    curMB.addMpInstr(new MpLoadImm(curMB, dst, new MpImm(((ConstantInt) irArg).getVal())));
                 else {
                     MpOpd arg = val2opd.get(irArg);
                     if (arg instanceof MpStackOffset) {
                         MpReg base = ((MpStackOffset) arg).getBase();
                         MpImm soOffset = ((MpStackOffset) arg).getOffset();
                         if (irArg.getType().isIntegerTy())
-                            new MpLoad(curMB, dst, base, soOffset);
+                            curMB.addMpInstr(new MpLoad(curMB, dst, base, soOffset));
                         else if (soOffset.getVal() == 0)
-                            new MpMove(curMB, dst, base);
+                            curMB.addMpInstr(new MpMove(curMB, dst, base));
                         else
-                            new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, base, soOffset);
-                    } else
-                        new MpMove(curMB, new MpReg(MpPhyReg.getReg(3 + i)), (MpReg) arg);
+                            curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, base, soOffset));
+                    } else if (arg instanceof MpImm)
+                        curMB.addMpInstr(new MpLoadImm(curMB, dst, (MpImm) arg));
+                    else
+                        curMB.addMpInstr(new MpMove(curMB, new MpReg(MpPhyReg.getReg(3 + i)), (MpReg) arg));
                 }
             } else {
                 offset -= 4;
                 if (irArg instanceof ConstantInt) {
-                    new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), new MpImm(((ConstantInt) irArg).getVal()));
-                    new MpStore(curMB, new MpReg(MpPhyReg.$v0), new MpReg(MpPhyReg.$sp), new MpImm(offset));
+                    curMB.addMpInstr(new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), new MpImm(((ConstantInt) irArg).getVal())));
+                    curMB.addMpInstr(new MpStore(curMB, new MpReg(MpPhyReg.$v0), new MpReg(MpPhyReg.$sp), new MpImm(offset)));
                 }
                 else {
                     MpReg dst = new MpReg();
@@ -361,42 +372,42 @@ public class CodeGen {
                         MpReg base = ((MpStackOffset) arg).getBase();
                         MpImm soOffset = ((MpStackOffset) arg).getOffset();
                         if (irArg.getType().isIntegerTy()) {
-                            new MpLoad(curMB, dst, base, soOffset);
-                            new MpStore(curMB, dst, new MpReg(MpPhyReg.$sp), new MpImm(offset));
+                            curMB.addMpInstr(new MpLoad(curMB, dst, base, soOffset));
+                            curMB.addMpInstr(new MpStore(curMB, dst, new MpReg(MpPhyReg.$sp), new MpImm(offset)));
                         }
                         else if (soOffset.getVal() == 0)
-                            new MpStore(curMB, base, new MpReg(MpPhyReg.$sp), new MpImm(offset));
+                            curMB.addMpInstr(new MpStore(curMB, base, new MpReg(MpPhyReg.$sp), new MpImm(offset)));
                         else {
-                            new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, base, soOffset);
-                            new MpStore(curMB, dst, new MpReg(MpPhyReg.$sp), new MpImm(offset));
+                            curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, base, soOffset));
+                            curMB.addMpInstr(new MpStore(curMB, dst, new MpReg(MpPhyReg.$sp), new MpImm(offset)));
                         }
                     } else
-                        new MpStore(curMB, (MpReg) arg, new MpReg(MpPhyReg.$sp), new MpImm(offset));
+                        curMB.addMpInstr(new MpStore(curMB, (MpReg) arg, new MpReg(MpPhyReg.$sp), new MpImm(offset)));
                 }
 
             }
         }
         if (irFunc.isBuiltin()) {
             switch (irFunc.getMipsName()) {
-                case "getint" -> new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), new MpImm(5));
-                case "putint" -> new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), new MpImm(1));
-                case "putstr" -> new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), new MpImm(4));
-                case "putch" -> new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), new MpImm(11));
+                case "getint" -> curMB.addMpInstr(new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), new MpImm(5)));
+                case "putint" -> curMB.addMpInstr(new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), new MpImm(1)));
+                case "putstr" -> curMB.addMpInstr(new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), new MpImm(4)));
+                case "putch" -> curMB.addMpInstr(new MpLoadImm(curMB, new MpReg(MpPhyReg.$v0), new MpImm(11)));
                 default -> {}
             }
-            new MpSyscall(curMB);
+            curMB.addMpInstr(new MpSyscall(curMB));
         } else {
             if (offset != 0)
-                new MpAlu(MpInstr.MipsInstrType.addiu, curMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(offset));
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(offset)));
             MpFunction callee = f2mf.get(irFunc);
-            new MpJump(MpInstr.MipsInstrType.jal, curMB, callee.getLabel());
+            curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.jal, curMB, callee.getLabel()));
             if (offset != 0)
-                new MpAlu(MpInstr.MipsInstrType.addiu, curMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(-offset));
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(-offset)));
         }
         if (instr.getType().isIntegerTy()) {
             MpReg dst = new MpReg();
             val2opd.put(instr, dst);
-            new MpMove(curMB, dst, new MpReg(MpPhyReg.$v0));
+            curMB.addMpInstr(new MpMove(curMB, dst, new MpReg(MpPhyReg.$v0)));
         }
     }
     private void genIcmpInstr(Icmp instr) {
@@ -422,39 +433,39 @@ public class CodeGen {
             switch (instr.getOp()) {
                 case eq -> {
                     if (lhs instanceof MpImm)
-                        new MpCmp(MpInstr.MipsInstrType.seq, curMB, dst, (MpReg) rhs, lhs);
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.seq, curMB, dst, (MpReg) rhs, lhs));
                     else
-                        new MpCmp(MpInstr.MipsInstrType.seq, curMB, dst, (MpReg) lhs, rhs);
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.seq, curMB, dst, (MpReg) lhs, rhs));
                 }
                 case ne -> {
                     if (lhs instanceof MpImm)
-                        new MpCmp(MpInstr.MipsInstrType.sne, curMB, dst, (MpReg) rhs, lhs);
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.sne, curMB, dst, (MpReg) rhs, lhs));
                     else
-                        new MpCmp(MpInstr.MipsInstrType.sne, curMB, dst, (MpReg) lhs, rhs);
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.sne, curMB, dst, (MpReg) lhs, rhs));
                 }
                 case slt -> {
                     if (lhs instanceof MpImm)
-                        new MpCmp(MpInstr.MipsInstrType.sgt, curMB, dst, (MpReg) rhs, lhs);
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.sgt, curMB, dst, (MpReg) rhs, lhs));
                     else
-                        new MpCmp(MpInstr.MipsInstrType.slt, curMB, dst, (MpReg) lhs, rhs);
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.slt, curMB, dst, (MpReg) lhs, rhs));
                 }
                 case sle -> {
                     if (lhs instanceof MpImm)
-                        new MpCmp(MpInstr.MipsInstrType.sge, curMB, dst, (MpReg) rhs, lhs);
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.sge, curMB, dst, (MpReg) rhs, lhs));
                     else
-                        new MpCmp(MpInstr.MipsInstrType.sle, curMB, dst, (MpReg) lhs, rhs);
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.sle, curMB, dst, (MpReg) lhs, rhs));
                 }
                 case sgt -> {
                     if (lhs instanceof MpImm)
-                        new MpCmp(MpInstr.MipsInstrType.slt, curMB, dst, (MpReg) rhs, lhs);
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.slt, curMB, dst, (MpReg) rhs, lhs));
                     else
-                        new MpCmp(MpInstr.MipsInstrType.sgt, curMB, dst, (MpReg) lhs, rhs);
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.sgt, curMB, dst, (MpReg) lhs, rhs));
                 }
                 case sge -> {
                     if (lhs instanceof MpImm)
-                        new MpCmp(MpInstr.MipsInstrType.sle, curMB, dst, (MpReg) rhs, lhs);
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.sle, curMB, dst, (MpReg) rhs, lhs));
                     else
-                        new MpCmp(MpInstr.MipsInstrType.sge, curMB, dst, (MpReg) lhs, rhs);
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.sge, curMB, dst, (MpReg) lhs, rhs));
                 }
             }
         }
@@ -476,11 +487,11 @@ public class CodeGen {
             MpReg dst = new MpReg();
             val2opd.put(instr, dst);
             if (lhs instanceof MpImm) {
-                new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) rhs, (MpImm)lhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) rhs, (MpImm)lhs));
             } else if (rhs instanceof MpImm) {
-                new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) lhs, (MpImm) rhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) lhs, (MpImm) rhs));
             } else {
-                new MpAlu(MpInstr.MipsInstrType.addu, curMB, dst, (MpReg) lhs, (MpReg) rhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addu, curMB, dst, (MpReg) lhs, (MpReg) rhs));
             }
         }
     }
@@ -499,13 +510,13 @@ public class CodeGen {
             MpReg dst = new MpReg();
             val2opd.put(instr, dst);
             if (lhs instanceof MpImm) {
-                ((MpImm)lhs).setVal(-((MpImm)lhs).getVal());
-                new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) rhs, (MpImm)lhs);
+                curMB.addMpInstr(new MpLoadImm(curMB, dst, (MpImm)lhs));
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, dst, (MpReg) rhs));
             } else if (rhs instanceof MpImm) {
                 ((MpImm)rhs).setVal(-((MpImm)rhs).getVal());
-                new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) lhs, (MpImm) rhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) lhs, (MpImm) rhs));
             } else {
-                new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, (MpReg) lhs, (MpReg) rhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, (MpReg) lhs, (MpReg) rhs));
             }
         }
     }
@@ -545,12 +556,12 @@ public class CodeGen {
             MpReg dst = new MpReg();
             val2opd.put(instr, dst);
             if (lhs instanceof MpImm) {
-                new MpLoadImm(curMB, dst, (MpImm)lhs);
-                new MpAlu(MpInstr.MipsInstrType.div, curMB, dst, dst, (MpReg) rhs);
+                curMB.addMpInstr(new MpLoadImm(curMB, dst, (MpImm)lhs));
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.div, curMB, dst, dst, (MpReg) rhs));
             } else if (rhs instanceof MpImm) {
-                new MpAlu(MpInstr.MipsInstrType.div, curMB, dst, (MpReg) lhs, (MpImm) rhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.div, curMB, dst, (MpReg) lhs, (MpImm) rhs));
             } else {
-                new MpAlu(MpInstr.MipsInstrType.div, curMB, dst, (MpReg) lhs, (MpReg) rhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.div, curMB, dst, (MpReg) lhs, (MpReg) rhs));
             }
         }
     }
@@ -569,15 +580,16 @@ public class CodeGen {
             MpReg dst = new MpReg();
             val2opd.put(instr, dst);
             if (lhs instanceof MpImm) {
-                new MpLoadImm(curMB, dst, (MpImm)lhs);
-                new MpAlu(MpInstr.MipsInstrType.div, curMB, dst, (MpReg) rhs);
-                new MpMfhi(curMB, dst);
+                curMB.addMpInstr(new MpLoadImm(curMB, dst, (MpImm)lhs));
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.div, curMB, dst, (MpReg) rhs));
+                curMB.addMpInstr(new MpMfhi(curMB, dst));
             } else if (rhs instanceof MpImm) {
-                new MpAlu(MpInstr.MipsInstrType.div, curMB, (MpReg) lhs, (MpImm) rhs);
-                new MpMfhi(curMB, dst);
+                curMB.addMpInstr(new MpLoadImm(curMB, dst, (MpImm)rhs));
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.div, curMB, (MpReg) lhs, dst));
+                curMB.addMpInstr(new MpMfhi(curMB, dst));
             } else {
-                new MpAlu(MpInstr.MipsInstrType.div, curMB, (MpReg) lhs, (MpReg) rhs);
-                new MpMfhi(curMB, dst);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.div, curMB, (MpReg) lhs, (MpReg) rhs));
+                curMB.addMpInstr(new MpMfhi(curMB, dst));
             }
         }
     }
@@ -598,11 +610,11 @@ public class CodeGen {
             MpReg dst = new MpReg();
             val2opd.put(instr, dst);
             if (lhs instanceof MpImm) {
-                new MpAlu(MpInstr.MipsInstrType.andi, curMB, dst, (MpReg) rhs, (MpImm)lhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.andi, curMB, dst, (MpReg) rhs, (MpImm)lhs));
             } else if (rhs instanceof MpImm) {
-                new MpAlu(MpInstr.MipsInstrType.andi, curMB, dst, (MpReg) lhs, (MpImm) rhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.andi, curMB, dst, (MpReg) lhs, (MpImm) rhs));
             } else {
-                new MpAlu(MpInstr.MipsInstrType.and, curMB, dst, (MpReg) lhs, (MpReg) rhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.and, curMB, dst, (MpReg) lhs, (MpReg) rhs));
             }
         }
     }
@@ -623,11 +635,11 @@ public class CodeGen {
             MpReg dst = new MpReg();
             val2opd.put(instr, dst);
             if (lhs instanceof MpImm) {
-                new MpAlu(MpInstr.MipsInstrType.ori, curMB, dst, (MpReg) rhs, (MpImm)lhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.ori, curMB, dst, (MpReg) rhs, (MpImm)lhs));
             } else if (rhs instanceof MpImm) {
-                new MpAlu(MpInstr.MipsInstrType.ori, curMB, dst, (MpReg) lhs, (MpImm) rhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.ori, curMB, dst, (MpReg) lhs, (MpImm) rhs));
             } else {
-                new MpAlu(MpInstr.MipsInstrType.or, curMB, dst, (MpReg) lhs, (MpReg) rhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.or, curMB, dst, (MpReg) lhs, (MpReg) rhs));
             }
         }
     }
@@ -645,14 +657,14 @@ public class CodeGen {
         Value irPtr = instr.getOperand(0);
         /* step1. 预处理base 和 offset */
         if (irPtr instanceof GlobalVariable) {
-            base = new MpReg(MpPhyReg.$v0);
+            base = new MpReg();
             offset = new MpImm(0);
-            new MpLoadAddr(curMB, base, gv2md.get(irPtr));
+            curMB.addMpInstr(new MpLoadAddr(curMB, base, gv2md.get(irPtr)));
         } else {
             MpOpd ptr = val2opd.get(irPtr);
             if (ptr instanceof MpStackOffset) {
                 base = ((MpStackOffset) ptr).getBase();
-                offset = ((MpStackOffset) ptr).getOffset();
+                offset = ((MpStackOffset) ptr).getOffset().clone();
             }
             else {
                 base = ((MpReg) ptr);
@@ -665,7 +677,7 @@ public class CodeGen {
         Type irPtrType = ((PointerType)irPtr.getType()).getReferencedType();
         if (irPtrType.isIntegerTy()) {
             dimSizes = new ArrayList<>();
-            dimSizes.add(0);
+            dimSizes.add(4);
         } else
             dimSizes = ((ArrayType)irPtrType).getDimSizes();
         /* 计算base和offset */
@@ -674,13 +686,15 @@ public class CodeGen {
             if (irIdx instanceof ConstantInt)
                 offset.addVal(((ConstantInt) irIdx).getVal() * dimSizes.get(i));
             else {
-                MpReg idx = (MpReg) genOperand(irIdx);
-                if (null == preBase) {
+                MpOpd idx =  genOperand(irIdx);
+                if (idx instanceof MpImm) {
+                    offset.addVal(((MpImm) idx).getVal() * dimSizes.get(i));
+                } else {
                     preBase = base;
                     base = new MpReg();
+                    mulOptimize(base, (MpReg) idx, new MpImm(dimSizes.get(i)));
+                    curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addu, curMB, base, preBase, base));
                 }
-                mulOptimize(base, idx, new MpImm(dimSizes.get(i)));
-                new MpAlu(MpInstr.MipsInstrType.addu, curMB, base, preBase, base);
             }
         }
         MpStackOffset mipsSO = new MpStackOffset(base, offset);
@@ -696,13 +710,17 @@ public class CodeGen {
     private void mulOptimize(MpReg dst, MpReg lhs, MpOpd rhs) {
         if (rhs instanceof MpImm) {
             int rhsVal = ((MpImm)rhs).getVal();
-            if ((rhsVal & (rhsVal - 1)) == 0) {
-                new MpShift(MpInstr.MipsInstrType.sll, curMB, dst, lhs, new MpImm(Integer.numberOfTrailingZeros(rhsVal)));
+            if (rhsVal == 0) {
+                curMB.addMpInstr(new MpLoadImm(curMB, dst, new MpImm(0)));
+            } else if (rhsVal == 1) {
+                curMB.addMpInstr(new MpMove(curMB, dst, lhs));
+            } else if ((rhsVal & (rhsVal - 1)) == 0) {
+                curMB.addMpInstr(new MpShift(MpInstr.MipsInstrType.sll, curMB, dst, lhs, new MpImm(Integer.numberOfTrailingZeros(rhsVal))));
             } else {
-                new MpAlu(MpInstr.MipsInstrType.mul, curMB, dst, lhs, (MpImm) rhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.mul, curMB, dst, lhs, (MpImm) rhs));
             }
         } else {
-            new MpAlu(MpInstr.MipsInstrType.mul, curMB, dst, lhs, (MpReg) rhs);
+            curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.mul, curMB, dst, lhs, (MpReg) rhs));
         }
     }
     private void divOptimize(MpReg dst, MpReg lhs, MpOpd rhs) {}

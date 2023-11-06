@@ -9,28 +9,17 @@ import backend.lir.mipsOperand.MpReg;
 import java.util.ArrayList;
 
 public class MpBranch extends MpInstr {
-    private MpReg sourceReg;
-    private MpOpd target;
+    private MpImm src2Imm = null;
     private MpLabel label;
-    public MpBranch(MipsInstrType type, MpBlock block, MpReg sourceReg, MpOpd target, MpLabel label) {
+    public MpBranch(MipsInstrType type, MpBlock block, MpReg src1Reg, MpOpd src2, MpLabel label) {
         super(type, block);
-        replaceSrc1(sourceReg);
-        if (target instanceof MpReg)
-            replaceSrc2((MpReg) target);
-        else this.target = target;
+        replaceSrc1(src1Reg);
+        if (src2 instanceof MpReg)
+            replaceSrc2((MpReg) src2);
+        else this.src2Imm = (MpImm) src2;
         this.label = label;
     }
-    public void replaceSrc1(MpReg reg) {
-        addUseReg(sourceReg, reg);
-        sourceReg = reg;
-    }
-    public void replaceSrc2(MpReg reg) {
-        if (target instanceof MpReg) {
-            addUseReg((MpReg) target, reg);
-            target = reg;
-        }
-    }
     public String toString() {
-        return String.format("%s %s, %s, %s", instrType, sourceReg, target, label);
+        return String.format("%s %s, %s, %s", instrType, src1Reg, null == src2Reg ? src2Imm : src2Reg, label);
     }
 }

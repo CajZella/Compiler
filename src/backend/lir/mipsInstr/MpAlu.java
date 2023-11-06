@@ -7,9 +7,6 @@ import backend.lir.mipsOperand.MpReg;
 import java.util.ArrayList;
 
 public class MpAlu extends MpInstr {
-    private MpReg destReg = null; // rd
-    private MpReg sourceReg = null; // rs
-    private MpReg targetReg = null; // rt
     private MpImm imm = null; // immediate
     private boolean isRI;
     public MpAlu(MipsInstrType type, MpBlock block, MpReg rd, MpReg rs, MpReg rt) {
@@ -32,31 +29,15 @@ public class MpAlu extends MpInstr {
         replaceSrc2(rt);
         this.isRI = false;
     }
-    public MpAlu(MipsInstrType type, MpBlock block, MpReg rs, MpImm imm) {
-        super(type, block);
-        replaceSrc1(rs);
-        this.imm = imm;
-        this.isRI = true;
-    }
-    public void replaceDst(MpReg reg) {
-        addDefReg(destReg, reg);
-        destReg = reg;
-    }
-    public void replaceSrc1(MpReg reg) {
-        addUseReg(sourceReg, reg);
-        sourceReg = reg;
-    }
-    public void replaceSrc2(MpReg reg) {
-        addUseReg(targetReg, reg);
-        targetReg = reg;
-    }
+
+    public MpImm getImm() { return imm; }
     public String toString() {
-        return null == destReg ?
+        return null == dstReg ?
                 (isRI ?
-                        String.format("%s %s, %s", instrType, sourceReg, imm) :
-                        String.format("%s %s, %s", instrType, sourceReg, targetReg)) :
+                        String.format("%s %s, %s", instrType, src1Reg, imm) :
+                        String.format("%s %s, %s", instrType, src1Reg, src2Reg)) :
                 (isRI ?
-                        String.format("%s %s, %s, %s", instrType, destReg, sourceReg, imm) :
-                        String.format("%s %s, %s, %s", instrType, destReg, sourceReg, targetReg));
+                        String.format("%s %s, %s, %s", instrType, dstReg, src1Reg, imm) :
+                        String.format("%s %s, %s, %s", instrType, dstReg, src1Reg, src2Reg));
     }
 }

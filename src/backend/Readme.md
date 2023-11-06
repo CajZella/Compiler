@@ -4,7 +4,49 @@
    1. 寄存器分配
    2. 数组的处理
    3. 函数调用
-指令选择、指令调度、寄存器分配
+   指令选择、指令调度、寄存器分配
+## FIFO 寄存器分配(跨函数寄存器分配)
+```java
+LinkedList<MpReg> physicalRegs = new LinkedList<>(); // 物理寄存器
+HashMap<MpReg, MpReg> phyRegMap = new HashMap<>(); // 虚拟寄存器 -> 物理寄存器
+HashMap<MpReg, MpStackOffset> stackMap = new HashMap<>(); // 虚拟寄存器 -> 栈偏移
+int stackOffset = 0 + function.getOffset(); // 栈偏移
+int p = 0;
+for(基本块b) {
+    for(指令i) {
+        for (使用寄存器useVR) {
+            if (useVR在物理寄存器中)
+                useVR = regMap.get(useVR);
+            else {// useReg在栈中
+            	MpReg pr = getPhyReg();
+                new Load pr, stackOffset($sp);
+                stackMap.remove();
+                phyRegMap.put();
+                setReg();
+            }
+        }   
+        for (定义寄存器defVR) {
+            MpReg pr = getPhyReg();
+            phyRegMap.put();
+            setReg();
+        }
+    }
+}
+MpReg getPhyReg() { // 获取一个物理寄存器
+   if (physicalRegs[p]未被分配) {
+       phyRegMap.put(vr, physicalRegs[p]);
+       return physicalRegs[p];
+       p = (p+1)%k;
+   }
+   else {
+       new store physicalRegs[p], stackOffset($sp);
+       stackMap.put(MpReg, MpStackOffset);
+       offset += 4;
+       phyRegMap.remove();
+       return physicalRegs[p];
+   }
+}
+```
 ## 图着色寄存器分配
 ### 冲突图数据结构
 查询冲突图数据结构操作：

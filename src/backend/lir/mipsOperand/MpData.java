@@ -11,7 +11,8 @@ public class MpData extends MpOpd {
     public MpData(String name, String str) {
         this.name = name;
         this.str = str.replaceAll("\\\\0A", "\\\\n");
-        this.str = this.str.substring(0, str.length() - 4);
+        this.str = this.str.substring(0, this.str.length() - 3);
+        this.str = "\"" + this.str + "\"";
     }
     public MpData(String name, int size) {
         this.name = name;

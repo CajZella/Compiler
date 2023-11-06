@@ -39,7 +39,7 @@ public class ArrayType extends Type {
     public ArrayList<Integer> getDimSizes() {
         ArrayList<Integer> dimSizes = new ArrayList<>();
         int tmp = 4;
-        for (int i = dims.size() - 1; i >= 0; i--) {
+        for (int i = 0; i < dims.size(); i++) {
             dimSizes.add(0, tmp);
             int dim = dims.get(i);
             tmp *= dim;

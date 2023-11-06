@@ -10,6 +10,8 @@ public class MpModule {
     public MpModule() {}
     public void addMpData(MpData data) { this.mpDatas.add(data); }
     public void addMpFunction(MpFunction mpFunction) { this.mpFunctions.add(mpFunction); }
+    public LinkedList<MpData> getMpDatas() { return mpDatas; }
+    public LinkedList<MpFunction> getMpFunctions() { return mpFunctions; }
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(".data\n");

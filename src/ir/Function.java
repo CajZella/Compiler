@@ -20,6 +20,7 @@ public class Function extends Value {
         this.blocks = new MyLinkedList<>();
         this.isBuiltin = isBuiltin;
     }
+    public boolean isMain() { return this.name.equals("@main"); }
     public void setSymtab(ValueSymtab symtab) { this.symtab = symtab; }
     public void addArgument(Argument argument) {
         this.arguments.add(argument);
@@ -33,14 +34,13 @@ public class Function extends Value {
     public boolean isEmpty() { return this.blocks.isEmpty(); }
     public int size() { return this.blocks.size(); }
     public MyLinkedList<BasicBlock> getBlocks() { return this.blocks; }
-    public BasicBlock getEntryBlock() { return this.blocks.getHead(); }
     public ArrayList<Argument> getArguments() { return this.arguments; }
     public ValueSymtab getSymtab() { return this.symtab; }
     public boolean isBuiltin() { return this.isBuiltin; }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        if (isBuiltin) {
+        if (!isBuiltin) {
             builder.append(String.format("define dso_local %s %s(", ((FunctionType) type).getReturnType(), name));
             for (int i = 0; i < this.arguments.size(); i++) {
                 Argument argument = this.arguments.get(i);

@@ -7,5 +7,6 @@ public class MpLabel {
     public MpLabel(String name) {
         this.name = (null == name ? "label" + count++ : name);
     }
+    public String getName() { return this.name; }
     public String toString() { return this.name; }
 }

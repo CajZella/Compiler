@@ -8,7 +8,7 @@ int arr[1000 + 2];
 int temp[1000 + 2];
 
 /* FuncDef */
-void divide_and_conquer_sort(int n, int a[], int s, int u, int v) {
+void divide_and_conquer_sort(int n, int a[], int s) {
     if (n == 1) {
         return;
     } else if (n == 2) {
@@ -21,8 +21,8 @@ void divide_and_conquer_sort(int n, int a[], int s, int u, int v) {
         // Divide
         int first_n = n / 2;
         int last_n = n - first_n;
-        divide_and_conquer_sort(first_n, a, s, 1, 1); // transfer size-unknown array a[]
-        divide_and_conquer_sort(last_n, a, s+first_n, 1, 1);
+        divide_and_conquer_sort(first_n, a, s); // transfer size-unknown array a[]
+        divide_and_conquer_sort(last_n, a, s+first_n);
 
         int tpos = 0; // tmp_pos
         int f_pos = 0;
@@ -34,7 +34,7 @@ void divide_and_conquer_sort(int n, int a[], int s, int u, int v) {
                     break;
                 }
             }
-
+            
             if(f_pos == first_n-1) {
                 temp[tpos] = a[last_s+l_pos];
                 tpos = tpos + 1;
@@ -109,7 +109,7 @@ int main() {
             i = i+1;
         }
 
-        divide_and_conquer_sort(n, arr, 0, 1, 1);
+        divide_and_conquer_sort(n, arr, 0);
         printf("The hash of the sorted array is %d.\n", hash(n, arr)); // print2~6
 
         cnt = cnt + 1;
@@ -121,8 +121,8 @@ int main() {
     qpow_ans[2] = quick_pow(13, 3444, qpow_MOD);
     qpow_ans[3] = quick_pow(11, 987, qpow_MOD);
 
-    printf("The answer of quick_pow is: %d %d %d %d.\n",
-        qpow_ans[0], qpow_ans[1],
+    printf("The answer of quick_pow is: %d %d %d %d.\n", 
+        qpow_ans[0], qpow_ans[1], 
         qpow_ans[2], qpow_ans[3]); // print7
 
     int a;
@@ -150,3 +150,4 @@ int main() {
     printf("After a complex calculation: d = %d\n", d); // print10
     return 0;
 }
+

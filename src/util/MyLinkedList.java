@@ -3,26 +3,32 @@ package util;
 import java.util.Iterator;
 
 public class MyLinkedList<T extends  MyLinkedNode> implements Iterable<T> {
-    private T head = null;
-    private T tail = null;
-    private int size = 0;
-    public MyLinkedList() {}
+    private T head;
+    private T tail;
+    private int size;
+    public MyLinkedList() {
+        head = (T) new MyLinkedNode();
+        tail = (T) new MyLinkedNode();
+        head.setNext(tail);
+        tail.setPrev(head);
+        size = 0;
+    }
     public MyLinkedList(MyLinkedList<T> list) {
         addAll(list);
     }
     public boolean isEmpty() { return this.size == 0; }
     public int size() { return this.size; }
-    public T getHead() { return this.head; }
-    public T getTail() { return this.tail; }
+    public T getHead() { return (T) this.head.getNext(); }
+    public T getTail() { return (T)this.tail.getPrev(); }
     public void clear() {
-        head = null;
-        tail = null;
+        head.setNext(tail);
+        tail.setPrev(head);
         size = 0;
     }
     public T contains(T node) {
         if (size == 0) return null;
-        T cur = head;
-        while (cur != node && null != cur) {
+        T cur = (T) head.getNext();
+        while (cur != node && cur != tail) {
             cur = (T)head.getNext();
         }
         if (cur == node) { return cur; }
@@ -45,59 +51,41 @@ public class MyLinkedList<T extends  MyLinkedNode> implements Iterable<T> {
         }
     }
     public void insertAtTail(T node) {
-        if (isEmpty()) {
-            head = tail = node;
-        } else {
-            tail.insertAfter(node);
-            tail = node;
-        }
+        tail.insertBefore(node);
         size++;
     }
     public void insertAtHead(T node) {
-        if (isEmpty()) {
-            head = tail = node;
-        } else {
-            head.insertBefore(node);
-            head = node;
-        }
+        head.insertAfter(node);
         size++;
     }
     public void remove(T node) {
-        if (head == node) { head = (T)node.getNext(); }
-        else if (tail == node) { tail = (T)node.getPrev(); }
         node.remove();
         size--;
     }
     public void addAll(MyLinkedList<T> list) {
         if (list.isEmpty()) return;
-        if (isEmpty()) {
-            head = list.getHead();
-        } else {
-            tail.setNext(list.getHead());
-            list.getHead().setPrev(tail);
-        }
+        tail.getPrev().setNext(list.getHead().getNext());
+        list.getHead().getNext().setPrev(tail.getPrev());
         tail = list.getTail();
         size += list.size();
 
     }
     public Iterator<T> iterator() { return new MyIterator();}
     public class MyIterator implements Iterator<T> {
-        private T next = head;
-        private T cur = null;
+        private T cur = head;
         @Override
-        public boolean hasNext() { return null != next; }
+        public boolean hasNext() { return cur.getNext() != tail; }
+        public boolean hasPrev() { return cur.getPrev() != head; }
         @Override
         public T next() {
             assert !hasNext();
-            cur = next;
-            next = (T)next.getNext();
+            cur = (T) cur.getNext();
             return cur;
         }
         @Override
         public  void remove() {
             assert null == cur;
             MyLinkedList.this.remove(cur);
-            cur = null;
         }
     }
 }

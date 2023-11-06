@@ -4,7 +4,6 @@ import backend.lir.MpBlock;
 import backend.lir.mipsOperand.MpReg;
 import util.MyLinkedNode;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 public abstract class MpInstr extends MyLinkedNode {
@@ -13,7 +12,6 @@ public abstract class MpInstr extends MyLinkedNode {
         addiu,
         and, // rd = rs and rt
         andi,
-        nor,
         or,
         ori,
         subu,
@@ -46,7 +44,6 @@ public abstract class MpInstr extends MyLinkedNode {
 
         j,
         jal,
-        jalr,
         jr,
 
         syscall,
@@ -58,12 +55,32 @@ public abstract class MpInstr extends MyLinkedNode {
     }
     protected MipsInstrType instrType;
     protected MpBlock block;
+    protected MpReg dstReg = null;
+    protected MpReg src1Reg = null;
+    protected MpReg src2Reg = null;
+    public void replaceDst(MpReg reg) {
+        addDefReg(dstReg, reg);
+        dstReg = reg;
+    }
+    public void replaceSrc1(MpReg reg) {
+        addUseReg(src1Reg, reg);
+        src1Reg = reg;
+    }
+    public void replaceSrc2(MpReg reg) {
+        addUseReg(src2Reg, reg);
+        src2Reg = reg;
+    }
+    public boolean hasDstReg() { return null != dstReg && !dstReg.isPrecolored(); }
+    public boolean hasSrc1Reg() { return null != src1Reg && !src1Reg.isPrecolored(); }
+    public boolean hasSrc2Reg() { return null != src2Reg && !src2Reg.isPrecolored(); }
+    public MpReg getDstReg() { return dstReg; }
+    public MpReg getSrc1Reg() { return src1Reg; }
+    public MpReg getSrc2Reg() { return src2Reg; }
     protected HashSet<MpReg> useRegs = new HashSet<>();
     protected HashSet<MpReg> defRegs = new HashSet<>();
     public MpInstr(MipsInstrType instrType, MpBlock block) {
         this.instrType = instrType;
         this.block = block;
-        this.block.addMpBlock(this);
     }
     public void addUseReg(MpReg old, MpReg reg) {
         if (null != old)

@@ -8,22 +8,18 @@ import java.util.ArrayList;
 
 public class MpJump extends MpInstr {
     private MpLabel label = null;
-    private MpReg sourceReg = null;
     public MpJump(MipsInstrType type, MpBlock block, MpLabel label) {
         super(type, block);
         this.label = label;
     }
     public MpJump(MipsInstrType type, MpBlock block, MpReg sourceReg) {
         super(type, block);
-        replaceSrc(sourceReg);
+        replaceSrc1(sourceReg);
     }
-    public void replaceSrc(MpReg Reg) {
-        addUseReg(sourceReg, Reg);
-        sourceReg = Reg;
-    }
+    public MpLabel getLabel() { return label; }
     public String toString() {
         return instrType == MipsInstrType.jr
-                ? String.format("%s %s", instrType, sourceReg)
+                ? String.format("%s %s", instrType, src1Reg)
                 : String.format("%s %s", instrType, label);
     }
 }

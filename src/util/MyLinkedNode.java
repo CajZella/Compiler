@@ -3,8 +3,8 @@ package util;
 public class MyLinkedNode {
     private MyLinkedNode next = null;
     private MyLinkedNode prev = null;
-    public boolean hasNext() { return this.next != null; }
-    public boolean hasPrev() { return this.prev != null; }
+    public boolean hasNext() { return next.getNext() != null; }
+    public boolean hasPrev() { return prev.getPrev() != null; }
     public MyLinkedNode getNext() { return this.next; }
     public MyLinkedNode getPrev() { return this.prev; }
     public void setNext(MyLinkedNode node) { this.next = node; }

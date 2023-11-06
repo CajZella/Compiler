@@ -55,14 +55,14 @@ public class Module extends Value { // todo: 或许module继承value不合理，
     public String toString() {
         StringBuilder builder = new StringBuilder();
         for (Function function : functions)
-            if (!function.isBuiltin())
+            if (function.isBuiltin())
                 builder.append(function);
         for (GlobalVariable globalVariable : globalVariables) {
             builder.append(globalVariable + "\n");
         }
         for (Function function : functions)
-            if (function.isBuiltin())
-            builder.append(function);
+            if (!function.isBuiltin())
+                builder.append(function);
         return builder.toString();
     }
 }

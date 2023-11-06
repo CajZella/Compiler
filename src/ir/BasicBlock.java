@@ -4,6 +4,8 @@ import ir.instrs.Instr;
 import ir.types.LabelType;
 import util.MyLinkedList;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -11,12 +13,18 @@ import java.util.LinkedList;
 public class BasicBlock extends Value {
     private final MyLinkedList<Instr> instrs;
     private final Function pFunction;
+    private HashSet<BasicBlock> precBBs = new HashSet<>();
+    private HashSet<BasicBlock> succBBs = new HashSet<>();
     public BasicBlock(Function parent) {
-        super(ValueType.BasicBlock, "%b" + num++, new LabelType());
+        super(ValueType.BasicBlock, "%" + parent.getMipsName() + "_b" + num++, new LabelType());
         this.pFunction = parent;
         this.pFunction.addBlock(this);
         this.instrs = new MyLinkedList<>();
     }
+    public void addPrecBB(BasicBlock precBB) { this.precBBs.add(precBB); }
+    public void addSuccBB(BasicBlock succBB) { this.succBBs.add(succBB); }
+    public HashSet<BasicBlock> getPrecBBs() { return this.precBBs; }
+    public HashSet<BasicBlock> getSuccBBs() { return this.succBBs; }
     public Function getParent() { return this.pFunction; }
     public void addInstr(Instr instr) {
         this.instrs.insertAtTail(instr);

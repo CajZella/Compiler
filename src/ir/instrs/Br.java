@@ -10,6 +10,15 @@ import ir.Value;
 public class Br extends Instr {
     public Br(BasicBlock pBB, Value...operands) {
         super(ValueType.br, null, pBB, operands);
+        if (operandsSize() == 1) {
+            pBB.addSuccBB((BasicBlock) getOperand(0));
+            ((BasicBlock) getOperand(0)).addPrecBB(pBB);
+        } else {
+            pBB.addSuccBB((BasicBlock) getOperand(1));
+            pBB.addSuccBB((BasicBlock) getOperand(2));
+            ((BasicBlock) getOperand(1)).addPrecBB(pBB);
+            ((BasicBlock) getOperand(2)).addPrecBB(pBB);
+        }
     }
     public boolean isCondBr() { return operandsSize() != 1; }
     @Override

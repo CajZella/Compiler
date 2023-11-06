@@ -10,31 +10,22 @@ import backend.lir.mipsOperand.MpReg;
 import java.util.ArrayList;
 
 public class MpLoad extends MpInstr {
-    private MpOpd base;
-    private MpReg targetReg = null;
+    private MpData base = null;
     private MpImm offset = null;
     public MpLoad(MpBlock block, MpReg targetReg, MpReg base, MpImm offset) {
         super(MipsInstrType.lw, block);
-        replaseDst(targetReg);
-        replaceSrc(base);
+        replaceDst(targetReg);
+        replaceSrc1(base);
         this.offset = offset;
     }
     public MpLoad(MpBlock block, MpReg targetReg, MpData base) {
         super(MipsInstrType.lw, block);
-        replaseDst(targetReg);
+        replaceDst(targetReg);
         this.base = base;
-    }
-    public void replaseDst(MpReg reg) {
-        addDefReg(targetReg, reg);
-        targetReg = reg;
-    }
-    public void replaceSrc(MpReg reg) {
-        addUseReg((MpReg) base, reg);
-        base = reg;
     }
     public String toString() {
         return null == offset ?
-                String.format("%s %s, %s", instrType, targetReg, base) :
-                String.format("%s %s, %s(%s)", instrType, targetReg, offset, base);
+                String.format("%s %s, %s", instrType, dstReg, base) :
+                String.format("%s %s, %s(%s)", instrType, dstReg, offset, src1Reg);
     }
 }
