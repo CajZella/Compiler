@@ -18,12 +18,10 @@ import backend.lir.mipsOperand.MpData;
 import backend.lir.MpFunction;
 import backend.lir.MpModule;
 import backend.lir.mipsOperand.MpImm;
-import backend.lir.mipsOperand.MpLabel;
 import backend.lir.mipsOperand.MpOpd;
 import backend.lir.mipsOperand.MpPhyReg;
 import backend.lir.mipsOperand.MpReg;
 import backend.lir.mipsOperand.MpStackOffset;
-import ir.Argument;
 import ir.BasicBlock;
 import ir.Function;
 import ir.GlobalVariable;
@@ -105,7 +103,7 @@ public class CodeGen {
         Function main = irModule.getFunction("main");
         functions.remove(main);
         functions.addFirst(main);
-        /* 先建函数和基本开，再生成代码 */
+        /* 先建函数和基本块，再生成代码 */
         for (Function function : functions) {
             if (function.isBuiltin()) continue;
             MpFunction mipsFunction = new MpFunction(function.getMipsName());
@@ -158,6 +156,7 @@ public class CodeGen {
     private void genFunction() {
         MyLinkedList<BasicBlock> basicBlocks = curIF.getBlocks();
         int offset = 4; // $ra
+        /* step1. 计算函数所需栈空间 */
         for (BasicBlock basicBlock : basicBlocks) {
             MyLinkedList<Instr> instrs = basicBlock.getInstrs();
             for (Instr instr : instrs) {
@@ -166,7 +165,17 @@ public class CodeGen {
             }
         }
         curMF.setStackSize(offset);
+        /* step2. 函数开栈空间 */
         MpBlock tempMB =bb2mb.get(basicBlocks.getHead());
+        MpAlu mpAlu = new MpAlu(MpInstr.MipsInstrType.addiu, tempMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(-offset));
+        mpAlu.setSPreference();
+        tempMB.addMpInstr(mpAlu);
+        /* step3.在函数开始时先将$ra保存在栈中 todo: 待优化，若函数内没有jal指令，即没有调用其他函数，可以不用保存$ra */
+        if (!curIF.isMain()) {
+            MpStore mpStore = new MpStore(tempMB, new MpReg(MpPhyReg.$ra), new MpReg(MpPhyReg.$sp), new MpImm(0));
+            tempMB.addMpInstr(mpStore);
+        }
+        /* step4. 获取函数形参 */
         // 取出参数
         int argSize = curIF.getArguments().size();
         for (int i = 0; i < argSize; i++) {
@@ -175,19 +184,14 @@ public class CodeGen {
                 val2opd.put(curIF.getArguments().get(i), src);
             } else {
                 MpReg dst = new MpReg();
-                tempMB.addMpInstr(new MpLoad(tempMB, dst, new MpReg(MpPhyReg.$sp), new MpImm(i * 4)));
+                MpLoad mipsLoad = new MpLoad(tempMB, dst, new MpReg(MpPhyReg.$sp), new MpImm(i * 4));
+                mipsLoad.setSPreference();
+                tempMB.addMpInstr(mipsLoad);
                 val2opd.put(curIF.getArguments().get(i), dst);
             }
         }
-        MpAlu mpAlu = new MpAlu(MpInstr.MipsInstrType.addiu, tempMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(-offset));
-        tempMB.addMpInstr(mpAlu);
-        // 在函数开始时先将$ra保存在栈中 todo: 待优化，若函数内没有jal指令，即没有调用其他函数，可以不用保存$ra
-        if (!curIF.isMain()) {
-            MpStore mpStore = new MpStore(tempMB, new MpReg(MpPhyReg.$ra), new MpReg(MpPhyReg.$sp), new MpImm(0));
-            tempMB.addMpInstr(mpStore);
-        }
         curMFOffset = 4;
-
+        /* step5.生成mips指令 */
         for (BasicBlock basicBlock : basicBlocks) {
             curIB = basicBlock;
             curMB = bb2mb.get(curIB);
@@ -223,14 +227,7 @@ public class CodeGen {
             default -> {}
         }
     }
-    private void genZextInstr(Zext instr) {
-        MpOpd src = val2opd.get(instr.getOperand(0));
-        val2opd.put(instr, src);
-    }
-    private void genTruncInstr(Trunc instr) {
-        MpOpd src = val2opd.get(instr.getOperand(0));
-        val2opd.put(instr, src);
-    }
+
     /*
      *
      */
@@ -241,14 +238,12 @@ public class CodeGen {
     }
     private void genLoadInstr(Load instr) {
         Value irPtr = instr.getOperand(0);
+        MpReg dst = new MpReg();
+        val2opd.put(instr, dst);
         if (irPtr instanceof GlobalVariable) {
-            MpReg dst = new MpReg();
-            val2opd.put(instr, dst);
             curMB.addMpInstr(new MpLoad(curMB, dst, gv2md.get(irPtr)));
         } else {
             MpOpd mipsPtr = val2opd.get(irPtr);
-            MpReg dst = new MpReg();
-            val2opd.put(instr, dst);
             MpStackOffset mipsSO = (MpStackOffset) mipsPtr;
             curMB.addMpInstr(new MpLoad(curMB, dst, mipsSO.getBase(), mipsSO.getOffset()));
         }
@@ -320,7 +315,9 @@ public class CodeGen {
                 curMB.addMpInstr(new MpMove(curMB, new MpReg(MpPhyReg.$v0), (MpReg) ret));
         }
         curMB.addMpInstr(new MpLoad(curMB, new MpReg(MpPhyReg.$ra), new MpReg(MpPhyReg.$sp), new MpImm(0)));
-        curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(curMF.getStackSize())));
+        MpAlu mpAlu = new MpAlu(MpInstr.MipsInstrType.addiu, curMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(curMF.getStackSize()));
+        mpAlu.setSPreference();
+        curMB.addMpInstr(mpAlu);
         curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.jr, curMB, new MpReg(MpPhyReg.$ra)));
     }
     /*
@@ -383,10 +380,6 @@ public class CodeGen {
         }
         // step1.腾出寄存器
         MpReg sp = new MpReg(MpPhyReg.$sp);
-        for (int i = 8; i <= 15; i++) {
-            MpStore mipsStore = new MpStore(curMB, new MpReg(MpPhyReg.getReg(i)), sp, new MpImm(-(i-7)*4));
-            curMB.addMpInstr(mipsStore);
-        }
         int curStackSize = - (instr.getNumOperands() - 1) * 4 -32;
         for (int i = 1; i < instr.getNumOperands(); i++) {
             Value irArg = instr.getOperand(i);
@@ -435,6 +428,10 @@ public class CodeGen {
                         curMB.addMpInstr(new MpStore(curMB, (MpReg) arg, new MpReg(MpPhyReg.$sp), new MpImm(curStackSize + (i-1)*4)));
                 }
             }
+        }
+        for (int i = 8; i <= 15; i++) {
+            MpStore mipsStore = new MpStore(curMB, new MpReg(MpPhyReg.getReg(i)), sp, new MpImm(-(i-7)*4));
+            curMB.addMpInstr(mipsStore);
         }
         curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, new MpReg(MpPhyReg.$sp), new MpReg(MpPhyReg.$sp), new MpImm(curStackSize)));
         MpFunction callee = f2mf.get(irFunc);
@@ -739,6 +736,14 @@ public class CodeGen {
         }
         MpStackOffset mipsSO = new MpStackOffset(base, offset);
         val2opd.put(instr, mipsSO);
+    }
+    private void genZextInstr(Zext instr) {
+        MpOpd src = val2opd.get(instr.getOperand(0));
+        val2opd.put(instr, src);
+    }
+    private void genTruncInstr(Trunc instr) {
+        MpOpd src = val2opd.get(instr.getOperand(0));
+        val2opd.put(instr, src);
     }
     /*
      * 生成mul指令

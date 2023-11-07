@@ -46,20 +46,20 @@ public class RegAllocaTemp {
             // 修改function的stack size
             curMF.setStackSize(stackSize);
             MpBlock tempMB = mipsBlocks.getHead();
-            for (MpInstr tempMI : tempMB.getMpInstrs()) {
-                if (tempMI.getInstrType() == MpInstr.MipsInstrType.addiu
-                        && tempMI.getDstReg().equal(sp)) {
-                    ((MpAlu)tempMI).getImm().setVal(-stackSize);
-                    break;
-                }
-            }
-            for (MpBlock mipsBlock : mipsBlocks) {
-                for (MpInstr mipsInstr1 : mipsBlock.getMpInstrs())
-                    if (mipsInstr1.getInstrType() == MpInstr.MipsInstrType.jr) {
-                        MpInstr mipsInstr2 = (MpInstr) mipsInstr1.getPrev();
-                        ((MpAlu) mipsInstr2).getImm().setVal(stackSize);
-                    }
-            }
+//            for (MpInstr tempMI : tempMB.getMpInstrs()) {
+//                if (tempMI.getInstrType() == MpInstr.MipsInstrType.addiu
+//                        && tempMI.getDstReg().equal(sp)) {
+//                    ((MpAlu)tempMI).getImm().setVal(-stackSize);
+//                    break;
+//                }
+//            }
+//            for (MpBlock mipsBlock : mipsBlocks) {
+//                for (MpInstr mipsInstr1 : mipsBlock.getMpInstrs())
+//                    if (mipsInstr1.getInstrType() == MpInstr.MipsInstrType.jr) {
+//                        MpInstr mipsInstr2 = (MpInstr) mipsInstr1.getPrev();
+//                        ((MpAlu) mipsInstr2).getImm().setVal(stackSize);
+//                    }
+//            }
         }
     }
     private void initMain() {

@@ -32,6 +32,11 @@ public class MpAlu extends MpInstr {
 
     public MpImm getImm() { return imm; }
     public String toString() {
+        if (isSPreference) {
+            return imm.getVal() > 0 ?
+                    String.format("addiu %s, %s, %d", dstReg, src1Reg, block.getFunction().getStackSize()) :
+                    String.format("addiu %s, %s, %d", dstReg, src1Reg, -block.getFunction().getStackSize());
+        }
         return null == dstReg ?
                 (isRI ?
                         String.format("%s %s, %s", instrType, src1Reg, imm) :

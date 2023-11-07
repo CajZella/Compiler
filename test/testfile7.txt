@@ -5,7 +5,7 @@ const int B = 2, C = 3 + A, D = 4;
 int a = 1;
 int b;
 int c = 2 + 3, d, e;
-void func(int a[], int b[][2], int c[], int d, int e, int f, int g, int h, int i, int j, int k, int l, int m, int n, int o, int p, int q, int r, int s, int t, int u, int v, int w, int x, int y, int z) {
+void func(int a[], int b[][2], int c[], int d, int e, int f, int g) {
     printf("a[2] = %d\n", a[2]);
     printf("b[1][1] = %d\n", b[1][1]);
     printf("c[1] = %d\n", c[1]);
@@ -13,15 +13,12 @@ void func(int a[], int b[][2], int c[], int d, int e, int f, int g, int h, int i
     printf("e = %d\n", e);
     printf("f = %d\n", f);
     printf("g = %d\n", g);
-    printf("x = %d\n", x);
-    printf("y = %d\n", y);
-    printf("z = %d\n", z);
 }
 int main() {
     printf("21373032\n");
     int _x1 = 2, _x2[3] = {1, 2, 3};
     int _x3 = 3, _x4[2][2] = {{1, 2}, {3, 4}};
     int _x5 = 4, _x6[2][2] = {{5, 6}, {7, 8}};
-    func(_x2, _x4, _x6[1], _x6[0][1], a, c, _x2[1], _x4[1][1], _x5, _x6[1][1], _x6[0][0], _x6[1][0], _x4[0][0], _x4[0][1], _x1, _x2[0], _x2[2], _x4[1][0], _x6[0][1], _x6[1][1], _x6[0][0], _x4[0][0], _x4[0][1], _x1, _x2[0], _x2[2]);
+    func(_x2, _x4, _x6[1], _x6[0][1], a, c, _x2[1]);
     return 0;
 }

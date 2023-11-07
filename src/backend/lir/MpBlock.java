@@ -29,6 +29,7 @@ public class MpBlock extends MyLinkedNode {
     public void removeInstr(MpInstr instr) { mpInstrs.remove(instr); }
     public void addMpInstr(MpInstr mpInstr) { this.mpInstrs.insertAtTail(mpInstr); }
     public MyLinkedList<MpInstr> getMpInstrs() { return mpInstrs; }
+    public MpFunction getFunction() { return function; }
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(null == label ? "" : label + ":\n");

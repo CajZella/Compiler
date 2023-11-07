@@ -58,6 +58,7 @@ public abstract class MpInstr extends MyLinkedNode {
     protected MpReg dstReg = null;
     protected MpReg src1Reg = null;
     protected MpReg src2Reg = null;
+    protected boolean isSPreference = false;
     public void replaceDst(MpReg reg) {
         addDefReg(dstReg, reg);
         dstReg = reg;
@@ -76,6 +77,8 @@ public abstract class MpInstr extends MyLinkedNode {
     public MpReg getDstReg() { return dstReg; }
     public MpReg getSrc1Reg() { return src1Reg; }
     public MpReg getSrc2Reg() { return src2Reg; }
+    public void setSPreference() { isSPreference = true; }
+    public boolean isSPreference() { return isSPreference; }
     protected HashSet<MpReg> useRegs = new HashSet<>();
     protected HashSet<MpReg> defRegs = new HashSet<>();
     public MpInstr(MipsInstrType instrType, MpBlock block) {
