@@ -57,8 +57,10 @@ int main() {
     func2(20, a_);
     func3(a_, c_);
     printf("6.hope 41, your answer: %d.\n", func4(10, a_) + func5(a_, b_) + func6(d_, e_));
-    int u = getint();
-    int v = getint(), i, sum = 0;
+    int u;
+    u = getint();
+    int v, i, sum = 0;
+    v = getint();
     if (u < 10)
         for (i = 0; i < u; i = i + 1) 
             sum = sum + b_[i];

@@ -10,6 +10,6 @@ public class Config {
     public static Boolean isParserOutput = false;
     public static Boolean isErrorOutput = true;
     public static Boolean isLLVMIROutput = false;
-    public static Boolean isMIPSOutput = true;
+    public static Boolean isMIPSOutput =true;
     public static Boolean isMIPSVROutput = false;
 }

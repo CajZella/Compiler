@@ -7,8 +7,10 @@ int b;
 int c = 2 + 3, d, e;
 int main() {
     printf("21373032\n");
-    int _x1 = getint(); // _x1 = 5
-    int _x2 = getint(), _x3; // _x2 = 10
+    int _x1;
+    _x1= getint(); // _x1 = 5
+    int _x2, _x3; // _x2 = 10
+    _x2= = getint();
     int _x4 = 1, _x5 = 2, _x6 = 3;
     printf("1.hope 24, your answer: %d.\n", 4 * 5 + -+-4);
     printf("2.hope 4, your answer: %d.\n", C);

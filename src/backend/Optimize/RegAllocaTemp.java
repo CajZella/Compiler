@@ -134,18 +134,6 @@ public class RegAllocaTemp {
                     phy2vrt.put(phyReg, vrtReg);
                 }
             }
-            if (curMI.getInstrType() == MpInstr.MipsInstrType.jal) { // 函数跳转
-                for (int i = 8; i <= 15; i++) {
-                    MpStore mipsStore = new MpStore(curMB, new MpReg(MpPhyReg.getReg(i)), sp, new MpImm(-(i-7)*4));
-                    curMI.insertBefore(mipsStore);
-                }
-                curMI.insertBefore(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, sp, sp, new MpImm(-4*8)));
-                for (int i = 8; i <= 15; i++) {
-                    MpLoad mipsLoad = new MpLoad(curMB, new MpReg(MpPhyReg.getReg(i)), sp, new MpImm(-(i-7)*4));
-                    curMI.insertAfter(mipsLoad);
-                }
-                curMI.insertAfter(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, sp, sp, new MpImm(4*8)));
-            }
         }
     }
     private MpReg getPhyReg() { // 获取一个空闲物理寄存器

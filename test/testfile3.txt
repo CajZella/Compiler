@@ -26,7 +26,8 @@ int func6(int x[]) { return x[0]; }
 int func7(int x, int y) { return x + y; }
 int main() {
     printf("21373032\n");
-    int n = getint();
+    int n;
+    n = getint();
     int a_[2][2] = {{10, 11}, {9, 19}}, c_[10][2];
     int i, j;
     for (i = 0; i < n; i = i + 1)
