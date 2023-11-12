@@ -1,5 +1,6 @@
 package ir;
 
+import ir.instrs.Br;
 import ir.instrs.Instr;
 import ir.types.LabelType;
 import util.MyLinkedList;
@@ -15,16 +16,28 @@ public class BasicBlock extends Value {
     private final Function pFunction;
     private HashSet<BasicBlock> precBBs = new HashSet<>();
     private HashSet<BasicBlock> succBBs = new HashSet<>();
+    private HashSet<BasicBlock> doms = new HashSet<>(); // 被哪些节点支配
+    private HashSet<BasicBlock> df = new HashSet<>();
+    private HashSet<BasicBlock> idoms = new HashSet<>(); // the blocks that this immediately dominate
+    private BasicBlock idom = null; // who immediately dominate this
     public BasicBlock(Function parent) {
         super(ValueType.BasicBlock, "%" + parent.getMipsName() + "_b" + num++, new LabelType());
         this.pFunction = parent;
         this.pFunction.addBlock(this);
         this.instrs = new MyLinkedList<>();
     }
-    public void addPrecBB(BasicBlock precBB) { this.precBBs.add(precBB); }
-    public void addSuccBB(BasicBlock succBB) { this.succBBs.add(succBB); }
+    public void addPrecBBs(BasicBlock precBBs) { this.precBBs.add(precBBs); }
+    public void addSuccBBs(BasicBlock succBBs) { this.succBBs.add(succBBs); }
     public HashSet<BasicBlock> getPrecBBs() { return this.precBBs; }
     public HashSet<BasicBlock> getSuccBBs() { return this.succBBs; }
+    public void addDom(BasicBlock dom) { this.doms.add(dom); }
+    public HashSet<BasicBlock> getDoms() { return this.doms; }
+    public void addIdom(BasicBlock idom) { this.idoms.add(idom); }
+    public HashSet<BasicBlock> getIdoms() { return this.idoms; }
+    public void setIdom(BasicBlock idom) { this.idom = idom; }
+    public BasicBlock getIdom() { return this.idom; }
+    public void addDF(BasicBlock df) { this.df.add(df); }
+    public HashSet<BasicBlock> getDFs() { return this.df; }
     public Function getParent() { return this.pFunction; }
     public void addInstr(Instr instr) {
         this.instrs.insertAtTail(instr);
@@ -45,9 +58,7 @@ public class BasicBlock extends Value {
     public String toString() {
         StringBuilder builder =  new StringBuilder();
         builder.append(String.format("%s:\n", name.substring(1)));
-        Iterator<Instr> iterator = instrs.iterator();
-        while(iterator.hasNext()) {
-            Instr instr = iterator.next();
+        for (Instr instr : instrs) {
             builder.append("  " + instr.toString() + "\n");
         }
         return builder.toString();

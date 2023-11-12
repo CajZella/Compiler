@@ -336,7 +336,7 @@ public class CodeGen {
     }
     private void genBuiltinCall(Call instr) {
         Function irFunc = (Function) instr.getOperand(0);
-        for (int i = 1; i < instr.getNumOperands(); i++) {
+        for (int i = 1; i < instr.operandsSize(); i++) {
             Value irArg = instr.getOperand(i);
             MpReg dst = new MpReg(MpPhyReg.getReg(3 + i));
             if (irArg instanceof ConstantInt)
@@ -380,8 +380,8 @@ public class CodeGen {
         }
         // step1.腾出寄存器
         MpReg sp = new MpReg(MpPhyReg.$sp);
-        int curStackSize = - (instr.getNumOperands() - 1) * 4 -32;
-        for (int i = 1; i < instr.getNumOperands(); i++) {
+        int curStackSize = - (instr.operandsSize() - 1) * 4 -32;
+        for (int i = 1; i < instr.operandsSize(); i++) {
             Value irArg = instr.getOperand(i);
             if (i <= 4) {
                 MpReg dst = new MpReg(MpPhyReg.getReg(3 + i));
@@ -718,8 +718,8 @@ public class CodeGen {
         } else
             dimSizes = ((ArrayType)irPtrType).getDimSizes();
         /* 计算base和offset */
-        for (int i = 0; i < instr.getIdxs().size(); i++) {
-            Value irIdx = instr.getIdxs().get(i);
+        for (int i = 1; i < instr.operandsSize(); i++) {
+            Value irIdx = instr.getOperand(i);
             if (irIdx instanceof ConstantInt)
                 offset.addVal(((ConstantInt) irIdx).getVal() * dimSizes.get(i));
             else {

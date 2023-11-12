@@ -5,7 +5,7 @@ import util.MyLinkedList;
 import util.MyLinkedNode;
 
 import java.util.HashMap;
-
+// 目前没用
 public class ValueSymtab extends MyLinkedNode {
     private final HashMap<String, Value> symtab;
     private ValueSymtab parent;

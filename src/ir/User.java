@@ -16,10 +16,11 @@ public abstract class User extends Value {
             use(operand);
         }
     }
+    public User() { super(); }
     public void use(Value value) {
         Use use = new Use(this, value);
         this.operands.add(use);
-        value.addUse(use);
+        value.addUser(use);
     }
     public ArrayList<Value> getOperands() {
         ArrayList<Value> values = new ArrayList<Value>();
@@ -35,7 +36,6 @@ public abstract class User extends Value {
         use.setVal(value);
     }
     public int operandsSize() { return this.operands.size(); }
-    public int getNumOperands() { return this.operands.size(); }
     public void dropAllReferences() {
         for (Use use : this.operands) {
             use.getVal().removeUser(use);
@@ -48,5 +48,8 @@ public abstract class User extends Value {
                 use.setVal(to);
             }
         }
+    }
+    public void replaceUsesOfWith(int idx, Value to) {
+        operands.get(idx).setVal(to);
     }
 }

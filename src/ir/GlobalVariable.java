@@ -8,6 +8,7 @@ public class GlobalVariable extends Value {
     private Constant initializer = null; // 一定有, 维度需要补充完整
     private boolean isString = false;
     private static int stringCnt = 0;
+    private boolean isUndef = false;
     public GlobalVariable(String name, Type type, boolean isConstant, Constant initializer) {
         super(ValueType.GlobalVariable, String.format("@%s", name), type);
         this.isConstant = isConstant;
@@ -19,13 +20,27 @@ public class GlobalVariable extends Value {
         this.isString = true;
         this.initializer = initializer;
     }
+    public GlobalVariable(Type type) {
+        super(ValueType.GlobalVariable, "undef", type);
+        this.isUndef = true;
+    }
     public boolean isString() { return this.isString; }
     public boolean isConstant() { return isConstant; }
     public boolean hasInitializer() { return null != this.initializer; }
     public Constant getInitializer() { return this.initializer; }
     @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof GlobalVariable) {
+            GlobalVariable other = (GlobalVariable) obj;
+            return this.name.equals(other.name);
+        }
+        return false;
+    }
+    @Override
     public String toString() {
-        if (isString)
+        if (isUndef)
+            return String.format("%s undef", this.type, this.name);
+        else if (isString)
             return String.format("%s = private unnamed_addr constant %s %s", this.name, this.initializer.getType(), this.initializer);
         else
             return String.format("%s = dso_local %s %s %s", this.name, isConstant ? "constant" : "global", this.initializer.getType(), this.initializer);

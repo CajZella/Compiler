@@ -66,7 +66,7 @@ public class MyLinkedList<T extends  MyLinkedNode> implements Iterable<T> {
         if (list.isEmpty()) return;
         tail.getPrev().setNext(list.getHead().getNext());
         list.getHead().getNext().setPrev(tail.getPrev());
-        tail = list.getTail();
+        tail = list.tail;
         size += list.size();
 
     }

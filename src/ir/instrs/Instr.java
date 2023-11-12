@@ -5,7 +5,7 @@ import ir.User;
 import ir.Value;
 import ir.types.Type;
 
-public abstract class Instr extends User {
+public class Instr extends User {
     private BasicBlock pBB;
     public Instr(ValueType valueTy, Type type, BasicBlock pBB, Value...operands) {
         super(valueTy,
@@ -15,12 +15,14 @@ public abstract class Instr extends User {
                         || valueTy == ValueType.ret) ?
                         null : ("%i" + num++), type, operands);
         this.pBB = pBB;
-        pBB.addInstr(this);
     }
+    public Instr(ValueType valueTy, String name, Type type, BasicBlock pBB, Value...operands) {
+        super(valueTy, name, type, operands);
+        this.pBB = pBB;
+    }
+    public Instr() { super(); }
     public BasicBlock getParent() { return this.pBB; }
     public boolean mayWriteToMemory() { return this.valueTy == ValueType.call || this.valueTy == ValueType.store; }
     public boolean mayReadFromMemory() { return this.valueTy == ValueType.load; }
     public boolean isTerminator() { return this.valueTy == ValueType.br || this.valueTy == ValueType.ret; }
-    @Override
-    public abstract String toString();
 }

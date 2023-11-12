@@ -4,6 +4,9 @@ import ir.BasicBlock;
 import ir.Value;
 import ir.types.Type;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /*
     <result> = phi <ty> [ <val0>, <label0>], ...
     phi指令用于多个基本块之间的数据流，它的结果是基本块中的一个值，这个值是从它的前驱基本块中选择的。
@@ -15,11 +18,29 @@ import ir.types.Type;
  */
 //todo: 或许生成中间代码时可以先不管phi指令
 public class Phi extends Instr {
-    public Phi(Type type, BasicBlock pBB, Value...operands) {
-        super(ValueType.phi, type, pBB, operands);
+    private static int num = 0;
+    private ArrayList<BasicBlock> phiBBs = new ArrayList<>();
+    // private HashMap<Value, BasicBlock> phiMap = new HashMap<>();
+    public Phi(Type type, BasicBlock pBB) {
+        super(ValueType.phi, "%p" + num++, type, pBB);
+    }
+    public void addIncoming(Value value, BasicBlock block) {
+        phiBBs.add(block);
+        use(value);
+    }
+    public boolean hasIncomingFrom(BasicBlock block) {
+        return phiBBs.contains(block);
     }
     @Override
     public String toString() {
-        return "";
+        StringBuilder builder = new StringBuilder();
+        builder.append(String.format("%s = phi %s ", name, getType()));
+        for (int i = 0; i < operandsSize(); i++) {
+            builder.append(String.format("[ %s, %s ]", getOperand(i).getName(), phiBBs.get(i).getName()));
+            if (i != operandsSize() - 1)
+                builder.append(", ");
+        }
+        return builder.toString();
     }
+
 }

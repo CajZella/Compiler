@@ -3,15 +3,16 @@ package settings;
 import backend.BackEnd;
 import frontend.ErrorHandle.ErrorLog;
 import frontend.LexParseLog;
-import frontend.parser.Parser;
-import frontend.parser.astNode.CompUnit;
+import ir.Module;
 import frontend.ManageFrontend;
+import pass.PassManager;
 import util.MyIO;
 
 public class Configure {
     public static void run() {
         MyIO.readSourceFile(Config.sourceFile);
         ManageFrontend.run();
+        Module module = ManageFrontend.getModule();
         if (ErrorLog.hasError()) {
             ErrorLog.sort();
             if (Config.isErrorOutput)
@@ -19,12 +20,16 @@ public class Configure {
         } else {
             if (Config.isParserOutput)
                 MyIO.writeFile(Config.targetFile, LexParseLog.print());
-            if (Config.isLLVMIROutput)
+            if (Config.isLLVMIROutput) {
                 MyIO.writeFile(Config.LLVMFile, ManageFrontend.getModule().toString());
-            BackEnd.setModule(ManageFrontend.getModule());
-            BackEnd.run();
-            if (Config.isMIPSOutput)
+                PassManager.run(module);
+                MyIO.writeFile(Config.LLVMOptFile, ManageFrontend.getModule().toString());
+            }
+            if (Config.isMIPSOutput) {
+                BackEnd.setModule(module);
+                BackEnd.run();
                 MyIO.writeFile(Config.MIPSFile, BackEnd.getMipsModule().toString());
+            }
         }
         MyIO.closeReadFiles();
     }

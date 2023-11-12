@@ -18,15 +18,14 @@ public class Call extends Instr {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        ArrayList<Value> operands1 = getOperands();
         if (type.isVoidTy())
-            builder.append(String.format("call void %s(", operands1.get(0).getName()));
+            builder.append(String.format("call void %s(", getOperand(0).getName()));
         else
-            builder.append(String.format("%s = call %s %s(", getName(), type, operands1.get(0).getName()));
-        for (int i = 1; i < operands1.size(); i++) {
-            Value operand = operands1.get(i);
+            builder.append(String.format("%s = call %s %s(", getName(), type, getOperand(0).getName()));
+        for (int i = 1; i < operandsSize(); i++) {
+            Value operand = getOperand(i);
             builder.append(String.format("%s %s", operand.getType(), operand.getName()));
-            if (i != operands1.size() - 1) {
+            if (i != operandsSize() - 1) {
                 builder.append(", ");
             }
         }

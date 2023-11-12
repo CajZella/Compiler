@@ -9,7 +9,7 @@ int main() {
     const char* llvm_file = "llvm.txt";
     const char* log_file = "log.txt";
     const char* ans_file = "ans.txt";
-    char ch = 'A';
+    char ch = 'C';
     char command[200];
     sprintf(command, "echo -n > %s", log_file);
     system(command);
@@ -23,14 +23,14 @@ int main() {
             system(command);
             sprintf(command, "java -jar Compiler.jar 2>>%s", log_file);
             system(command);
-            sprintf(command, "llvm-link-10 llvm.txt lib.ll -S -o out.ll 2>>%s", log_file);
+            sprintf(command, "llvm-link-10 llvm_opt.txt lib.ll -S -o out.ll 2>>%s", log_file);
             system(command);
             sprintf(command, "lli-10 out.ll < %s/input%d.txt > %s", path1, j, ans_file);
             system(command);
             sprintf(command, "diff -ZB %s/output%d.txt %s >> %s", path1, j, ans_file, log_file);
             system(command);
         }
-        ch++;
+        ch--;
     }
     return 0;
 }

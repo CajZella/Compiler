@@ -21,6 +21,7 @@ import ir.instrs.Br;
 import ir.instrs.Call;
 import ir.instrs.GetElementPtr;
 import ir.instrs.Icmp;
+import ir.instrs.Instr;
 import ir.instrs.Load;
 import ir.instrs.Ret;
 import ir.instrs.Store;
@@ -79,10 +80,12 @@ public class Visitor {
             symbol.setIrPtr(globalVariable);
         }
         else {
-            symbol.setIrPtr(new Alloca(new PointerType(symbol.getType()), curBB));
+            Alloca alloca = new Alloca(new PointerType(symbol.getType()), curBB);
+            curBB.addInstr(alloca);
+            symbol.setIrPtr(alloca);
             if (symbol.getType().isIntegerTy()) {
                 ConstantInt constantInt = (ConstantInt) symbol.getConstantInit();
-                new Store(curBB, constantInt, symbol.getIrPtr());
+                curBB.addInstr(new Store(curBB, constantInt, symbol.getIrPtr()));
             } else {
                 ConstantArray constantArray = (ConstantArray) symbol.getConstantInit();
                 ArrayType arrayType = (ArrayType) constantArray.getType();
@@ -93,7 +96,8 @@ public class Visitor {
                         GetElementPtr getElementPtr = new GetElementPtr(new PointerType(constantInt.getType()),
                                 curBB, symbol.getIrPtr(), new ConstantInt(new IntegerType(32), 0),
                                 new ConstantInt(new IntegerType(32), i));
-                        new Store(curBB, constantInt, getElementPtr);
+                        curBB.addInstr(getElementPtr);
+                        curBB.addInstr(new Store(curBB, constantInt, getElementPtr));
                     }
                 } else {
                     for (int i = 0; i < dims.get(1); i++)
@@ -102,7 +106,8 @@ public class Visitor {
                             GetElementPtr getElementPtr = new GetElementPtr(new PointerType(constantInt.getType()),
                                     curBB, symbol.getIrPtr(), new ConstantInt(new IntegerType(32), 0),
                                     new ConstantInt(new IntegerType(32), i), new ConstantInt(new IntegerType(32), j));
-                            new Store(curBB, constantInt, getElementPtr);
+                            curBB.addInstr(getElementPtr);
+                            curBB.addInstr(new Store(curBB, constantInt, getElementPtr));
                         }
                 }
             }
@@ -125,12 +130,13 @@ public class Visitor {
             symbol.setIrPtr(globalVariable);
         } else {
             Value ptr = new Alloca(new PointerType(symbol.getType()), curBB);
+            curBB.addInstr((Instr) ptr);
             symbol.setIrPtr(ptr);
             if (!varDef.hasInitVal()) return ;
             InitVal initVal = varDef.getInitVal();
             if (initVal.isExpType()) {
                 Value value = visitExp(initVal.getExp());
-                new Store(curBB, value, ptr);
+                curBB.addInstr(new Store(curBB, value, ptr));
             } else {
                 ArrayList<InitVal> initVals = initVal.getInitVals();
                 if (initVals.get(0).isExpType()) {
@@ -138,7 +144,8 @@ public class Visitor {
                         Value tmp = visitExp(initVals.get(i).getExp());
                         GetElementPtr getElementPtr = new GetElementPtr(new PointerType(tmp.getType()), curBB, ptr,
                                 new ConstantInt(new IntegerType(32), 0), new ConstantInt(new IntegerType(32), i));
-                        new Store(curBB, tmp, getElementPtr);
+                        curBB.addInstr(getElementPtr);
+                        curBB.addInstr(new Store(curBB, tmp, getElementPtr));
                     }
                 } else {
                     for (int i = 0; i < initVals.size(); i++) {
@@ -150,7 +157,8 @@ public class Visitor {
                                     new ConstantInt(new IntegerType(32), 0),
                                     new ConstantInt(new IntegerType(32), i),
                                     new ConstantInt(new IntegerType(32), j));
-                            new Store(curBB, tmp, getElementPtr);
+                            curBB.addInstr(getElementPtr);
+                            curBB.addInstr(new Store(curBB, tmp, getElementPtr));
                         }
                     }
                 }
@@ -175,8 +183,10 @@ public class Visitor {
                 Symbol paramSymbol = curTab.getSymbol(paramName);
                 Argument argument = new Argument((DataType) paramSymbol.getType());
                 curFunc.addArgument(argument);
-                paramSymbol.setIrPtr(new Alloca(new PointerType(paramSymbol.getType()), curBB));
-                new Store(curBB, argument, paramSymbol.getIrPtr());
+                Alloca alloca = new Alloca(new PointerType(paramSymbol.getType()), curBB);
+                curBB.addInstr(alloca);
+                paramSymbol.setIrPtr(alloca);
+                curBB.addInstr(new Store(curBB, argument, paramSymbol.getIrPtr()));
             }
         }
         // 创建function的block
@@ -201,8 +211,14 @@ public class Visitor {
             value = typeConversion(value, new IntegerType(32));
             tmp = typeConversion(tmp, new IntegerType(32));
             switch (((Token) addExp.get(i - 1)).getType()) {
-                case PLUS -> value = new Alu(Value.ValueType.add, (IntegerType) value.getType(), curBB, value, tmp);
-                case MINU -> value = new Alu(Value.ValueType.sub, (IntegerType) value.getType(), curBB, value, tmp);
+                case PLUS -> {
+                    value = new Alu(Value.ValueType.add, (IntegerType) value.getType(), curBB, value, tmp);
+                    curBB.addInstr((Instr) value);
+                }
+                case MINU -> {
+                    value = new Alu(Value.ValueType.sub, (IntegerType) value.getType(), curBB, value, tmp);
+                    curBB.addInstr((Instr) value);
+                }
                 default -> {}
             }
         }
@@ -215,9 +231,18 @@ public class Visitor {
             value = typeConversion(value, new IntegerType(32));
             tmp = typeConversion(tmp, new IntegerType(32));
             switch (((Token) mulExp.get(i - 1)).getType()) {
-                case MULT -> value = new Alu(Value.ValueType.mul, (IntegerType) value.getType(), curBB, value, tmp);
-                case DIV -> value = new Alu(Value.ValueType.sdiv, (IntegerType) value.getType(), curBB, value, tmp);
-                case MOD -> value = new Alu(Value.ValueType.srem, (IntegerType) value.getType(), curBB, value, tmp);
+                case MULT -> {
+                    value = new Alu(Value.ValueType.mul, (IntegerType) value.getType(), curBB, value, tmp);
+                    curBB.addInstr((Instr) value);
+                }
+                case DIV -> {
+                    value = new Alu(Value.ValueType.sdiv, (IntegerType) value.getType(), curBB, value, tmp);
+                    curBB.addInstr((Instr) value);
+                }
+                case MOD -> {
+                    value = new Alu(Value.ValueType.srem, (IntegerType) value.getType(), curBB, value, tmp);
+                    curBB.addInstr((Instr) value);
+                }
                 default -> {}
             }
         }
@@ -231,9 +256,15 @@ public class Visitor {
             Value value = visitUnaryExp(unaryExp.getUnaryExp());
             switch (unaryOp.getUnaryOp().getType()) {
                 case PLUS -> {}
-                case MINU -> value = new Alu(Value.ValueType.sub, (IntegerType) value.getType(), curBB,
-                        new ConstantInt(new IntegerType(32), 0), value);
-                case NOT -> value = new Icmp(Icmp.IcmpOp.eq, curBB, value, new ConstantInt(new IntegerType(32), 0));
+                case MINU -> {
+                    value = new Alu(Value.ValueType.sub, (IntegerType) value.getType(), curBB,
+                            new ConstantInt(new IntegerType(32), 0), value);
+                    curBB.addInstr((Instr) value);
+                }
+                case NOT -> {
+                    value = new Icmp(Icmp.IcmpOp.eq, curBB, value, new ConstantInt(new IntegerType(32), 0));
+                    curBB.addInstr((Instr) value);
+                }
                 default -> {}
             }
             return value;
@@ -257,19 +288,22 @@ public class Visitor {
         if (null == symbol.getIrPtr())
             symbol = curTab.getParent().getSymbol(name);
         Value ptr = symbol.getIrPtr();
-        if (symbol.getType().isPointerTy())
+        if (symbol.getType().isPointerTy()) {
             ptr = new Load((PointerType) symbol.getType(), curBB, ptr);
+            curBB.addInstr((Instr) ptr);
+        }
         if (!lVal.hasExps()) {
-            if (symbol.getType().isArrayTy())
-                return new GetElementPtr(new PointerType(((ArrayType) symbol.getType()).getElementType()), curBB, ptr,
+            if (symbol.getType().isArrayTy()) {
+                GetElementPtr getElementPtr = new GetElementPtr(new PointerType(((ArrayType) symbol.getType()).getElementType()), curBB, ptr,
                         new ConstantInt(new IntegerType(32), 0), new ConstantInt(new IntegerType(32), 0));
-            else{
+                curBB.addInstr(getElementPtr);
+                return getElementPtr;
+            } else{
                 if (isAddr || symbol.getType().isPointerTy()) return ptr;
                 else {
-                    if (null == ptr) {
-                        int x=1;
-                    }
-                    return new Load((DataType) (symbol.getType()), curBB, ptr);
+                    Load load = new Load((DataType) (symbol.getType()), curBB, ptr);
+                    curBB.addInstr(load);
+                    return load;
                 }
             }
         } else {
@@ -282,16 +316,24 @@ public class Visitor {
                 for (int i = 0; i < values.size(); i++)
                     type = ((ArrayType) type).getElementType();
                 values.add(0, new ConstantInt(new IntegerType(32), 0));
-                if (isAddr)
-                    return new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
-                else {
+                values.add(0, ptr);
+                if (isAddr) {
+                    getElementPtr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
+                    curBB.addInstr(getElementPtr);
+                    return getElementPtr;
+                } else {
                     if (type.isIntegerTy()) {
-                        getElementPtr = new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
-                        return new Load((IntegerType) type, curBB, getElementPtr);
+                        getElementPtr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
+                        curBB.addInstr(getElementPtr);
+                        Load load = new Load((IntegerType) type, curBB, getElementPtr);
+                        curBB.addInstr(load);
+                        return load;
                     } else {
                         values.add(new ConstantInt(new IntegerType(32), 0));
                         type = ((ArrayType)type).getElementType();
-                        return new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
+                        getElementPtr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
+                        curBB.addInstr(getElementPtr);
+                        return getElementPtr;
                     }
                 }
             } else {
@@ -299,16 +341,24 @@ public class Visitor {
                 if (lVal.getExps().size() == 2) {
                     type = ((ArrayType) type).getElementType();
                 }
-                if (isAddr)
-                    return new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
-                else {
+                values.add(0, ptr);
+                if (isAddr) {
+                    getElementPtr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
+                    curBB.addInstr(getElementPtr);
+                    return getElementPtr;
+                } else {
                     if (type.isIntegerTy()) {
-                        getElementPtr = new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
-                        return new Load((DataType) type, curBB, getElementPtr);
+                        getElementPtr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
+                        curBB.addInstr(getElementPtr);
+                        Load load = new Load((DataType) type, curBB, getElementPtr);
+                        curBB.addInstr(load);
+                        return load;
                     } else {
                         values.add(new ConstantInt(new IntegerType(32), 0));
                         type = ((ArrayType)type).getElementType();
-                        return new GetElementPtr(new PointerType(type), curBB, ptr, values.toArray(new Value[values.size()]));
+                        getElementPtr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
+                        curBB.addInstr(getElementPtr);
+                        return getElementPtr;
                     }
                 }
             }
@@ -328,7 +378,9 @@ public class Visitor {
         for (Exp exp : funcRParams.getExps()) {
             args.add(visitExp(exp));
         }
-        return new Call(functionType.getReturnType(), curBB, args.toArray(new Value[args.size()]));
+        Call call = new Call(functionType.getReturnType(), curBB, args.toArray(new Value[args.size()]));
+        curBB.addInstr(call);
+        return call;
     }
     private Value visitLOrExp(LOrExp lOrExp, BasicBlock trueBB, BasicBlock falseBB) { // todo: 短路求值debug重点
         Value value;
@@ -336,7 +388,7 @@ public class Visitor {
         for (int i = 0; i < lOrExp.size() - 1; i += 2) {
             nextBB = new BasicBlock(curFunc);
             value = visitLAndExp((LAndExp) lOrExp.get(i), nextBB);
-            new Br(curBB, value, trueBB, nextBB);
+            curBB.addInstr(new Br(curBB, value, trueBB, nextBB));
             curBB = nextBB;
         }
         value = visitLAndExp((LAndExp) lOrExp.get(lOrExp.size() - 1), falseBB);
@@ -348,7 +400,7 @@ public class Visitor {
         for (int i = 0; i < lAndExp.size() - 1; i += 2) {
             value = visitEqExp((EqExp) lAndExp.get(i));
             nextBB = new BasicBlock(curFunc);
-            new Br(curBB, value, nextBB, falseBB);
+            curBB.addInstr(new Br(curBB, value, nextBB, falseBB));
             curBB = nextBB;
         }
         value = visitEqExp((EqExp) lAndExp.get(lAndExp.size() - 1));
@@ -361,14 +413,22 @@ public class Visitor {
             value = typeConversion(value, new IntegerType(32));
             tmp = typeConversion(tmp, new IntegerType(32));
             switch (((Token) eqExp.get(i - 1)).getType()) {
-                case EQL -> value = new Icmp(Icmp.IcmpOp.eq, curBB, value, tmp);
-                case NEQ -> value = new Icmp(Icmp.IcmpOp.ne, curBB, value, tmp);
+                case EQL -> {
+                    value = new Icmp(Icmp.IcmpOp.eq, curBB, value, tmp);
+                    curBB.addInstr((Instr) value);
+                }
+                case NEQ -> {
+                    value = new Icmp(Icmp.IcmpOp.ne, curBB, value, tmp);
+                    curBB.addInstr((Instr) value);
+                }
                 default -> {}
             }
         }
-        if (value.getType().isIntegerTy(32))
+        if (value.getType().isIntegerTy(32)) {
             value = new Icmp(Icmp.IcmpOp.ne, curBB, value,
                     new ConstantInt(new IntegerType(32), 0));
+            curBB.addInstr((Instr) value);
+        }
         return value;
     }
     private Value visitRelExp(RelExp relExp) {
@@ -384,6 +444,7 @@ public class Visitor {
                 case GEQ -> value = new Icmp(Icmp.IcmpOp.sge, curBB, value, tmp);
                 default -> {}
             }
+            curBB.addInstr((Instr) value);
         }
         return value;
     }
@@ -411,7 +472,7 @@ public class Visitor {
         Value value = visitExp(stmtAssign.getExp());
         Value ptr = visitLVal(stmtAssign.getLVal(), true);
         value = typeConversion(value, ((PointerType) ptr.getType()).getReferencedType());
-        new Store(curBB, value, ptr);
+        curBB.addInstr(new Store(curBB, value, ptr));
     }
     private void visitStmtExp(StmtExp stmtExp) {
         if (stmtExp.hasExp())
@@ -423,26 +484,26 @@ public class Visitor {
         if (stmtIf.hasElse()) {
             BasicBlock elseBB = new BasicBlock(curFunc);
             Value cond = visitLOrExp(stmtIf.getCond().getlOrExp(), thenBB, elseBB);
-            new Br(curBB, cond, thenBB, elseBB);
+            curBB.addInstr(new Br(curBB, cond, thenBB, elseBB));
             curBB = thenBB;
             visitStmt(stmtIf.getStmtIf());
-            new Br(curBB, mergeBB);
+            curBB.addInstr(new Br(curBB, mergeBB));
             curBB = elseBB;
             visitStmt(stmtIf.getStmtElse());
         } else {
             Value cond = visitLOrExp(stmtIf.getCond().getlOrExp(), thenBB, mergeBB);
-            new Br(curBB, cond, thenBB, mergeBB);
+            curBB.addInstr(new Br(curBB, cond, thenBB, mergeBB));
             curBB = thenBB;
             visitStmt(stmtIf.getStmtIf());
         }
-        new Br(curBB, mergeBB);
+        curBB.addInstr(new Br(curBB, mergeBB));
         curBB = mergeBB;
     }
     private void visitStmtForAssign(LVal lVal, Exp exp) {
         Value value = visitExp(exp);
         Value ptr = visitLVal(lVal, true);
         value = typeConversion(value, ((PointerType) ptr.getType()).getReferencedType());
-        new Store(curBB, value, ptr);
+        curBB.addInstr(new Store(curBB, value, ptr));
     }
     private void visitStmtFor(StmtFor stmtFor) {
         BasicBlock condBB = new BasicBlock(curFunc);
@@ -453,22 +514,22 @@ public class Visitor {
         loopStack.add(stepBB);
         if (stmtFor.hasForStmt1())
             visitStmtForAssign(stmtFor.getForStmt1().getLVal(), stmtFor.getForStmt1().getExp());
-        new Br(curBB, condBB);
+        curBB.addInstr(new Br(curBB, condBB));
         curBB = condBB;
         if (stmtFor.hasCond()) {
             Value cond = visitLOrExp(stmtFor.getCond().getlOrExp(), bodyBB, mergeBB);
-            new Br(curBB, cond, bodyBB, mergeBB);
+            curBB.addInstr(new Br(curBB, cond, bodyBB, mergeBB));
         } else
-            new Br(curBB, bodyBB);
+            curBB.addInstr(new Br(curBB, bodyBB));
         curBB = bodyBB;
         visitStmt(stmtFor.getStmt());
-        new Br(curBB, stepBB);
+        curBB.addInstr(new Br(curBB, stepBB));
         loopStack.removeLast();
         loopStack.removeLast();
         curBB = stepBB;
         if (stmtFor.hasForStmt2())
             visitStmtForAssign(stmtFor.getForStmt2().getLVal(), stmtFor.getForStmt2().getExp());
-        new Br(curBB, condBB);
+        curBB.addInstr(new Br(curBB, condBB));
         curBB = mergeBB;
     }
     private void visitStmtWhile(StmtWhile stmtWhile) {
@@ -477,35 +538,36 @@ public class Visitor {
         BasicBlock mergeBB = new BasicBlock(curFunc);
         loopStack.add(mergeBB);
         loopStack.add(condBB);
-        new Br(curBB, condBB);
+        curBB.addInstr(new Br(curBB, condBB));
         curBB = condBB;
         Value cond = visitLOrExp(stmtWhile.getCond().getlOrExp(), bodyBB, mergeBB);
-        new Br(curBB, cond, bodyBB, mergeBB);
+        curBB.addInstr(new Br(curBB, cond, bodyBB, mergeBB));
         curBB = bodyBB;
         visitStmt(stmtWhile.getStmt());
-        new Br(curBB, condBB);
+        curBB.addInstr(new Br(curBB, condBB));
         loopStack.removeLast();
         loopStack.removeLast();
         curBB = mergeBB;
     }
     private void visitStmtBreak() {
-        new Br(curBB, loopStack.get(loopStack.size() - 2));
+        curBB.addInstr(new Br(curBB, loopStack.get(loopStack.size() - 2)));
     }
     private void visitStmtContinue() {
-        new Br(curBB, loopStack.getLast());
+        curBB.addInstr(new Br(curBB, loopStack.getLast()));
     }
     private void visitStmtGetInt(StmtGetint stmtGetint) {
         Function function = module.getFunction("getint");
         Value value = new Call(((FunctionType) function.getType()).getReturnType(), curBB, function);
+        curBB.addInstr((Instr) value);
         Value ptr = visitLVal(stmtGetint.getLVal(), true);
-        new Store(curBB, value, ptr);
+        curBB.addInstr(new Store(curBB, value, ptr));
     }
     private void visitStmtReturn(StmtReturn stmtReturn) {
         if (stmtReturn.hasExp()) {
             Value value = visitExp(stmtReturn.getExp());
-            new Ret(curBB, value);
+            curBB.addInstr(new Ret(curBB, value));
         } else
-            new Ret(curBB);
+            curBB.addInstr(new Ret(curBB));
     }
     public void printStr(String str) {
         String regrex = "\\\\n";
@@ -523,7 +585,8 @@ public class Visitor {
         module.addGlobalVariable(globalVariable);
         Function putstr = module.getFunction("putstr");
         GetElementPtr getElementPtr = new GetElementPtr(new PointerType(new IntegerType(8)), curBB, globalVariable, new ConstantInt(new IntegerType(32), 0), new ConstantInt(new IntegerType(32), 0));
-        new Call(((FunctionType) putstr.getType()).getReturnType(), curBB, putstr, getElementPtr);
+        curBB.addInstr(getElementPtr);
+        curBB.addInstr(new Call(((FunctionType) putstr.getType()).getReturnType(), curBB, putstr, getElementPtr));
     }
     private void visitStmtPrintf(StmtPrintf stmtPrintf) {
         Function putint = module.getFunction("putint");
@@ -542,37 +605,41 @@ public class Visitor {
             j = matcher.start();
             if (i == j - 1) {
                 Value value = new ConstantInt(new IntegerType(32), formatString.charAt(i));
-                new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value);
+                curBB.addInstr(new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value));
             } else if (i < j) {
                 if (i + 2 == j && formatString.charAt(i) == '\\') {
                     Value value = new ConstantInt(new IntegerType(32), 10);
-                    new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value);
+                    curBB.addInstr(new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value));
                 } else
                     printStr(formatString.substring(i, j));
             }
-            new Call(((FunctionType) putint.getType()).getReturnType(), curBB, putint, values.get(cnt++));
+            curBB.addInstr(new Call(((FunctionType) putint.getType()).getReturnType(), curBB, putint, values.get(cnt++)));
             i = matcher.end();
         }
         if (i == formatString.length() - 1) {
             Value value = new ConstantInt(new IntegerType(32), formatString.charAt(i));
-            new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value);
+            curBB.addInstr(new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value));
         } else if (i == formatString.length() - 2 && formatString.charAt(i) == '\\') {
             Value value = new ConstantInt(new IntegerType(32), 10);
-            new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value);
+            curBB.addInstr(new Call(((FunctionType) putch.getType()).getReturnType(), curBB, putch, value));
         } else if (i < formatString.length() - 1)
             printStr(formatString.substring(i));
     }
     private Value typeConversion(Value value, Type type) {
         if (value.getType().isIntegerTy(1)) {
-            if (type.isIntegerTy(32))
-                return new Zext(new IntegerType(32), curBB, value);
-            else
+            if (type.isIntegerTy(32)) {
+                Zext zext = new Zext(new IntegerType(32), curBB, value);
+                curBB.addInstr(zext);
+                return zext;
+            } else
                 return value;
         }
         else {
-            if (type.isIntegerTy(1))
-                return new Trunc(new IntegerType(1), curBB, value);
-            else
+            if (type.isIntegerTy(1)) {
+                Trunc trunc = new Trunc(new IntegerType(1), curBB, value);
+                curBB.addInstr(trunc);
+                return trunc;
+            } else
                 return value;
         }
     }

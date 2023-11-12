@@ -34,7 +34,7 @@ public class Module extends Value { // todo: 或许module继承value不合理，
     public void addFunction(Function function) {
         functions.add(function);
         function.setSymtab(new ValueSymtab(symtab));
-        symtab.insertValueSym(function.getName(), function);
+        //symtab.insertValueSym(function.getName(), function);
     }
     public void addGlobalVariable(GlobalVariable globalVariable) {
         globalVariables.add(globalVariable);

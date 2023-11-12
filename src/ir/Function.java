@@ -20,20 +20,22 @@ public class Function extends Value {
         this.blocks = new MyLinkedList<>();
         this.isBuiltin = isBuiltin;
     }
+    public void addBlock(BasicBlock block) {
+        this.blocks.insertAtTail(block);
+        this.symtab.insertValueSym(block.getName(), block);
+    }
+    public MyLinkedList<BasicBlock> getBlocks() { return this.blocks; }
+    public boolean isEmpty() { return this.blocks.isEmpty(); }
+    public int size() { return this.blocks.size(); }
+    public BasicBlock getEntryBlock() { return this.blocks.getHead(); }
+
     public boolean isMain() { return this.name.equals("@main"); }
     public void setSymtab(ValueSymtab symtab) { this.symtab = symtab; }
     public void addArgument(Argument argument) {
         this.arguments.add(argument);
         this.symtab.insertValueSym(argument.getName(), argument);
     }
-    public void addBlock(BasicBlock block) {
-        this.blocks.insertAtTail(block);
-        this.symtab.insertValueSym(block.getName(), block);
-    }
     public void addSym(String name, Value value) { this.symtab.insertValueSym(name, value); }
-    public boolean isEmpty() { return this.blocks.isEmpty(); }
-    public int size() { return this.blocks.size(); }
-    public MyLinkedList<BasicBlock> getBlocks() { return this.blocks; }
     public ArrayList<Argument> getArguments() { return this.arguments; }
     public ValueSymtab getSymtab() { return this.symtab; }
     public boolean isBuiltin() { return this.isBuiltin; }

@@ -1,5 +1,7 @@
 package ir;
 
+import ir.instrs.Instr;
+import ir.instrs.Phi;
 import ir.types.Type;
 import util.MyLinkedList;
 import util.MyLinkedNode;
@@ -44,14 +46,16 @@ public abstract class Value extends MyLinkedNode {
         this.type = type;
         this.name = name;
     }
+    public Value() {}
     public void clearNum() { num = 0; }
     public ValueType getValueTy() { return this.valueTy; }
     public Type getType() { return this.type; }
     public boolean hasName() { return null != this.name; }
     public String getName() { return this.name; }
     public String getMipsName() { return this.name.substring(1); }
-    public void addUse(Use use) { useList.insertAtTail(use); }
+    public void addUser(Use use) { useList.insertAtTail(use); }
     public void removeUser(Use use) { useList.remove(use); }
+    public MyLinkedList<Use> getUseList() { return this.useList; }
     /*
         traverses the use list of a Value changing all Users of the current value to refer to “V” instead
      */

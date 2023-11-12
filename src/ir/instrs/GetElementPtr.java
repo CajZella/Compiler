@@ -26,17 +26,8 @@ import java.util.ArrayList;
         %ptr = getelementptr [5 x [5 x i32]], [5 x [5 x i32]]* %array, i32 0, i32 1, i32 2 ;指向array[1][2]的指针
  */
 public class GetElementPtr extends Instr {
-    private Value[] idxs;
-    public GetElementPtr(PointerType type, BasicBlock pBB, Value operand, Value...idxs) {
-        super(ValueType.getelementptr, type, pBB, operand);
-        this.idxs = idxs;
-    }
-    public ArrayList<Value> getIdxs() {
-        ArrayList<Value> idxs = new ArrayList<>();
-        for (Value idx : this.idxs) {
-            idxs.add(idx);
-        }
-        return idxs;
+    public GetElementPtr(PointerType type, BasicBlock pBB, Value... operands) {
+        super(ValueType.getelementptr, type, pBB, operands);
     }
     @Override
     public String toString() {
@@ -44,8 +35,8 @@ public class GetElementPtr extends Instr {
         builder.append(String.format("%s = getelementptr %s, %s %s", name,
                 ((PointerType)getOperand(0).getType()).getReferencedType(),
                 getOperand(0).getType(), getOperand(0).getName()));
-        for (Value idx : idxs) {
-            builder.append(String.format(", i32 %s", idx.getName()));
+        for (int i = 1; i < operandsSize(); i++) {
+            builder.append(String.format(", i32 %s", getOperand(i).getName()));
         }
         return builder.toString();
     }

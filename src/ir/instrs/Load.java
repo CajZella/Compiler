@@ -12,8 +12,11 @@ public class Load extends Instr {
     public Load(DataType type, BasicBlock pBB, Value operand) {
         super(ValueType.load, type, pBB, operand);
     }
+    public Value getPointer() { return getOperand(0); }
     @Override
     public String toString() {
-        return String.format("%s = load %s, %s %s", name, type, getOperand(0).getType(), getOperand(0).getName());
+        return operandsSize() == 0 ?
+                null :
+                String.format("%s = load %s, %s %s", name, type, getOperand(0).getType(), getOperand(0).getName());
     }
 }

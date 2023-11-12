@@ -12,7 +12,9 @@ public class Use extends MyLinkedNode {
     }
     public User getUser() { return this.user; }
     public Value getVal() { return this.val; }
-    public void setVal(Value val) { this.val = val; }
+    public void setVal(Value val) {
+        this.val = val;
+    }
     @Override
     public Use clone() {
         return new Use(user, val);
