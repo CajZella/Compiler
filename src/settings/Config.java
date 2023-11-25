@@ -7,11 +7,12 @@ public class Config {
     public static String LLVMFile = "llvm_ir.txt";
     public static String LLVMOptFile = "llvm_opt.txt";
     public static String MIPSFile = "mips.txt";
+    public static String MIPSVRFile = "mips_vr.txt";
     //public static Boolean isLexerOutput = false;
     public static Boolean isParserOutput = false;
     public static Boolean isErrorOutput = true;
     public static Boolean isLLVMIROutput = true;
-    public static Boolean isMIPSOutput = false;
-    public static Boolean isMIPSVROutput = false;
-    public static Boolean isMake2reg = true;
+    public static Boolean isMIPSOutput = true;
+    public static Boolean isMIPSVROutput = true;
+    public static Boolean isMem2reg = false;
 }

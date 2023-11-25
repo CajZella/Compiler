@@ -1,5 +1,6 @@
 package backend;
 
+import backend.Optimize.DivByConst;
 import backend.lir.MpBlock;
 import backend.lir.mipsInstr.MpAlu;
 import backend.lir.mipsInstr.MpBranch;
@@ -596,7 +597,8 @@ public class CodeGen {
                 curMB.addMpInstr(new MpLoadImm(curMB, dst, (MpImm)lhs));
                 curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.div, curMB, dst, dst, (MpReg) rhs));
             } else if (rhs instanceof MpImm) {
-                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.div, curMB, dst, (MpReg) lhs, (MpImm) rhs));
+                DivByConst divByConst = new DivByConst();
+                divByConst.run((MpReg) lhs, ((MpImm) rhs).getVal(), dst, curMB);
             } else {
                 curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.div, curMB, dst, (MpReg) lhs, (MpReg) rhs));
             }
@@ -621,9 +623,10 @@ public class CodeGen {
                 curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.div, curMB, dst, (MpReg) rhs));
                 curMB.addMpInstr(new MpMfhi(curMB, dst));
             } else if (rhs instanceof MpImm) {
-                curMB.addMpInstr(new MpLoadImm(curMB, dst, (MpImm)rhs));
-                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.div, curMB, (MpReg) lhs, dst));
-                curMB.addMpInstr(new MpMfhi(curMB, dst));
+                DivByConst divByConst = new DivByConst();
+                divByConst.run((MpReg) lhs, ((MpImm) rhs).getVal(), dst, curMB);
+                mulOptimize(dst, dst, rhs);
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, (MpReg) lhs, dst));
             } else {
                 curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.div, curMB, (MpReg) lhs, (MpReg) rhs));
                 curMB.addMpInstr(new MpMfhi(curMB, dst));
@@ -721,7 +724,7 @@ public class CodeGen {
         for (int i = 1; i < instr.operandsSize(); i++) {
             Value irIdx = instr.getOperand(i);
             if (irIdx instanceof ConstantInt)
-                offset.addVal(((ConstantInt) irIdx).getVal() * dimSizes.get(i));
+                offset.addVal(((ConstantInt) irIdx).getVal() * dimSizes.get(i-1));
             else {
                 MpOpd idx =  genOperand(irIdx);
                 if (idx instanceof MpImm) {
@@ -758,15 +761,49 @@ public class CodeGen {
             if (rhsVal == 0) {
                 curMB.addMpInstr(new MpLoadImm(curMB, dst, new MpImm(0)));
             } else if (rhsVal == 1) {
-                curMB.addMpInstr(new MpMove(curMB, dst, lhs));
+                if (lhs != dst)
+                    curMB.addMpInstr(new MpMove(curMB, dst, lhs));
             } else if ((rhsVal & (rhsVal - 1)) == 0) {
                 curMB.addMpInstr(new MpShift(MpInstr.MipsInstrType.sll, curMB, dst, lhs, new MpImm(Integer.numberOfTrailingZeros(rhsVal))));
             } else {
-                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.mul, curMB, dst, lhs, (MpImm) rhs));
+                int cnt = 0;
+                int tmp = rhsVal;
+                int now = 0;
+                while (tmp > 0) {
+                    if ((tmp & 1) == 1)
+                        cnt++;
+                    now++;
+                    tmp >>= 1;
+                }
+                if (cnt == 2) {
+                    tmp = rhsVal;
+                    boolean isFirst = true;
+                    MpReg lhsReg = lhs;
+                    if (lhs == dst) {
+                        lhsReg = new MpReg(MpPhyReg.$v1);
+                        curMB.addMpInstr(new MpMove(curMB, lhsReg, lhs));
+                    }
+                    while (now >= 0) {
+                        now--;
+                        if ((tmp & (1 << now)) != 0) {
+                            if (isFirst) {
+                                curMB.addMpInstr(new MpShift(MpInstr.MipsInstrType.sll, curMB, dst, lhsReg, new MpImm(now)));
+                                isFirst = false;
+                            } else {
+                                if (now == 0)
+                                    curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addu, curMB, dst, dst, lhsReg));
+                                else {
+                                    curMB.addMpInstr(new MpShift(MpInstr.MipsInstrType.sll, curMB, new MpReg(MpPhyReg.$v0), lhsReg, new MpImm(now)));
+                                    curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addu, curMB, dst, dst, new MpReg(MpPhyReg.$v0)));
+                                }
+                            }
+                        }
+                    }
+                } else
+                    curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.mul, curMB, dst, lhs, (MpImm) rhs));
             }
         } else {
             curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.mul, curMB, dst, lhs, (MpReg) rhs));
         }
     }
-    private void divOptimize(MpReg dst, MpReg lhs, MpOpd rhs) {}
 }

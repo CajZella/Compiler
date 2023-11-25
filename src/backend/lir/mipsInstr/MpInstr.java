@@ -17,6 +17,7 @@ public abstract class MpInstr extends MyLinkedNode {
         subu,
         xor,
         mul, //todo:窥孔优化 peephole
+        mult,
         div,
         mfhi,
 

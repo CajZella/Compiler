@@ -4,6 +4,7 @@ import backend.Optimize.RegAllocaTemp;
 import backend.lir.MpModule;
 import ir.Module;
 import settings.Config;
+import util.MyIO;
 
 public class BackEnd {
     private static Module module;
@@ -14,7 +15,7 @@ public class BackEnd {
         codeGen.genModule();
         mipsModule = codeGen.getMipsModule();
         if (Config.isMIPSVROutput)
-            System.out.print(mipsModule.toString());
+            MyIO.writeFile(Config.MIPSVRFile, mipsModule.toString());
         RegAllocaTemp regAllocaTemp = new RegAllocaTemp();
         regAllocaTemp.run(mipsModule);
     }

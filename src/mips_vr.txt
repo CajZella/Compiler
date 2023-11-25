@@ -1,0 +1,193 @@
+.data
+str.0:
+	.asciiz "20373184\n"
+str.1:
+	.asciiz "Wow, you will begin test your program!\n"
+
+
+.text
+main:
+main_b0:
+	addiu $sp, $sp, -100
+	li vr0, 1
+	sw vr0, 4($sp)
+	li vr1, -2
+	sw vr1, 8($sp)
+	li vr2, 3
+	sw vr2, 12($sp)
+	li vr3, 4
+	sw vr3, 16($sp)
+	li vr4, 5
+	sw vr4, 20($sp)
+	li vr5, 6
+	sw vr5, 24($sp)
+	li vr6, 111
+	sw vr6, 28($sp)
+	li vr7, 357
+	sw vr7, 32($sp)
+	li vr8, 38
+	sw vr8, 36($sp)
+	lw vr9, 28($sp)
+	lw vr10, 32($sp)
+	sll vr11, vr10, 1
+	addu vr11, vr11, vr10
+	addu vr12, vr9, vr11
+	sw vr12, 40($sp)
+	li $v0, 5
+	syscall
+	move vr13, $v0
+	sw vr13, 44($sp)
+	li $v0, 5
+	syscall
+	move vr14, $v0
+	sw vr14, 48($sp)
+	li $v0, 5
+	syscall
+	move vr15, $v0
+	sw vr15, 52($sp)
+	li $v0, 5
+	syscall
+	move vr16, $v0
+	sw vr16, 56($sp)
+	li $v0, 5
+	syscall
+	move vr17, $v0
+	sw vr17, 60($sp)
+	li $v0, 5
+	syscall
+	move vr18, $v0
+	sw vr18, 64($sp)
+	la vr19, str.0
+	move $a0, vr19
+	li $v0, 4
+	syscall
+	la vr20, str.1
+	move $a0, vr20
+	li $v0, 4
+	syscall
+	li $a0, 3
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	lw vr21, 20($sp)
+	lw vr22, 24($sp)
+	mul vr23, vr21, vr22
+	move $a0, vr23
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	lw vr24, 4($sp)
+	lw vr25, 8($sp)
+	addu vr26, vr24, vr25
+	lw vr27, 12($sp)
+	mul vr28, vr26, vr27
+	sw vr28, 68($sp)
+	lw vr29, 32($sp)
+	lw vr30, 28($sp)
+	div vr29, vr30
+	mfhi vr31
+	lw vr32, 20($sp)
+	addu vr33, vr31, vr32
+	sw vr33, 72($sp)
+	lw vr34, 40($sp)
+	lw vr35, 36($sp)
+	mul vr36, vr34, vr35
+	lw vr37, 16($sp)
+	subu vr38, vr36, vr37
+	sw vr38, 76($sp)
+	lw vr39, 44($sp)
+	srl vr40, vr39, 1
+	lw vr41, 24($sp)
+	mul vr42, vr40, vr41
+	sw vr42, 80($sp)
+	lw vr43, 48($sp)
+	lw vr44, 52($sp)
+	addiu vr45, vr44, 1
+	mul vr46, vr43, vr45
+	li vr47, 1431655766
+	mult vr47, vr46
+	mfhi vr47
+	slt $v0, vr46, $zero
+	addu vr47, vr47, $v0
+	move $v1, vr47
+	sll vr47, $v1, 1
+	addu vr47, vr47, $v1
+	subu vr47, vr46, vr47
+	sw vr47, 84($sp)
+	lw vr48, 56($sp)
+	li vr49, 0
+	subu vr49, vr49, vr48
+	sw vr49, 88($sp)
+	lw vr50, 60($sp)
+	addiu vr51, vr50, 6
+	sw vr51, 92($sp)
+	lw vr52, 36($sp)
+	move $a0, vr52
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	lw vr53, 40($sp)
+	move $a0, vr53
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	lw vr54, 68($sp)
+	move $a0, vr54
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	lw vr55, 72($sp)
+	move $a0, vr55
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	lw vr56, 76($sp)
+	move $a0, vr56
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	lw vr57, 80($sp)
+	move $a0, vr57
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	lw vr58, 84($sp)
+	move $a0, vr58
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	lw vr59, 88($sp)
+	lw vr60, 92($sp)
+	move $a0, vr59
+	li $v0, 1
+	syscall
+	li $a0, 45
+	li $v0, 11
+	syscall
+	move $a0, vr60
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	li $v0, 10
+	syscall
+
