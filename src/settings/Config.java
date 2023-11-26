@@ -14,5 +14,5 @@ public class Config {
     public static Boolean isLLVMIROutput = true;
     public static Boolean isMIPSOutput = true;
     public static Boolean isMIPSVROutput = true;
-    public static Boolean isMem2reg = false;
+    public static Boolean isLLVMopt = true;
 }

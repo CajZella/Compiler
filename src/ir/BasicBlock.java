@@ -1,14 +1,11 @@
 package ir;
 
-import ir.instrs.Br;
+import pass.PCs;
 import ir.instrs.Instr;
 import ir.types.LabelType;
 import util.MyLinkedList;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 // a single entry single exit section of the code
 public class BasicBlock extends Value {
@@ -20,6 +17,9 @@ public class BasicBlock extends Value {
     private HashSet<BasicBlock> df = new HashSet<>();
     private HashSet<BasicBlock> idoms = new HashSet<>(); // the blocks that this immediately dominate
     private BasicBlock idom = null; // who immediately dominate this
+
+    private PCs pcs = null;
+    private BasicBlock pcBlock = null;
     public BasicBlock(Function parent) {
         super(ValueType.BasicBlock, "%" + parent.getMipsName() + "_b" + num++, new LabelType());
         this.pFunction = parent;
@@ -27,6 +27,7 @@ public class BasicBlock extends Value {
         this.instrs = new MyLinkedList<>();
     }
     public void addPrecBBs(BasicBlock precBBs) { this.precBBs.add(precBBs); }
+    public void setPrecBBs(HashSet<BasicBlock> precBBs) { this.precBBs = precBBs; }
     public void addSuccBBs(BasicBlock succBBs) { this.succBBs.add(succBBs); }
     public HashSet<BasicBlock> getPrecBBs() { return this.precBBs; }
     public HashSet<BasicBlock> getSuccBBs() { return this.succBBs; }
@@ -54,6 +55,10 @@ public class BasicBlock extends Value {
             instr.dropAllReferences();
         }
     }
+    public void setPcs(PCs pcs) { this.pcs = pcs; }
+    public void setPcBlock(BasicBlock pcBlock) { this.pcBlock = pcBlock; }
+    public PCs getPcs() { return pcs; }
+    public BasicBlock getPcBlock() { return pcBlock; }
     @Override
     public String toString() {
         StringBuilder builder =  new StringBuilder();

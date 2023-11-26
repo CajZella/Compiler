@@ -16,7 +16,7 @@ public abstract class User extends Value {
             use(operand);
         }
     }
-    public User() { super(); }
+    public User(String name) { super(name); }
     public void use(Value value) {
         Use use = new Use(this, value);
         this.operands.add(use);

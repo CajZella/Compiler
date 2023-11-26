@@ -45,7 +45,7 @@ public class RegAllocaTemp {
             }
             // 修改function的stack size
             curMF.setStackSize(stackSize);
-            MpBlock tempMB = mipsBlocks.getHead();
+//            MpBlock tempMB = mipsBlocks.getHead();
 //            for (MpInstr tempMI : tempMB.getMpInstrs()) {
 //                if (tempMI.getInstrType() == MpInstr.MipsInstrType.addiu
 //                        && tempMI.getDstReg().equal(sp)) {

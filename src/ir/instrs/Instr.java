@@ -6,7 +6,7 @@ import ir.Value;
 import ir.types.Type;
 
 public class Instr extends User {
-    private BasicBlock pBB;
+    protected BasicBlock pBB;
     public Instr(ValueType valueTy, Type type, BasicBlock pBB, Value...operands) {
         super(valueTy,
                 (valueTy == ValueType.call && type.isVoidTy()
@@ -20,7 +20,7 @@ public class Instr extends User {
         super(valueTy, name, type, operands);
         this.pBB = pBB;
     }
-    public Instr() { super(); }
+    public Instr() { super("%i" + num++); }
     public BasicBlock getParent() { return this.pBB; }
     public boolean mayWriteToMemory() { return this.valueTy == ValueType.call || this.valueTy == ValueType.store; }
     public boolean mayReadFromMemory() { return this.valueTy == ValueType.load; }

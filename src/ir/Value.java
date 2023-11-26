@@ -46,8 +46,7 @@ public abstract class Value extends MyLinkedNode {
         this.type = type;
         this.name = name;
     }
-    public Value() {}
-    public void clearNum() { num = 0; }
+    public Value(String name) { this.name = name; }
     public ValueType getValueTy() { return this.valueTy; }
     public Type getType() { return this.type; }
     public boolean hasName() { return null != this.name; }

@@ -19,11 +19,11 @@ public class Br extends Instr {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         if (operandsSize() == 1) {
-            builder.append(String.format("br label %s", getOperand(0).getName()));
+            builder.append(String.format("br label %s", getDestBB().getName()));
         } else {
             builder.append(String.format("br i1 %s, label %s, label %s",
-                    getOperand(0).getName(), getOperand(1).getName(),
-                    getOperand(2).getName()));
+                    getOperand(0).getName(), getTrueBB().getName(),
+                    getFalseBB().getName()));
         }
         return builder.toString();
     }

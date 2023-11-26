@@ -23,7 +23,6 @@ public class Configure {
             if (Config.isLLVMIROutput) {
                 MyIO.writeFile(Config.LLVMFile, ManageFrontend.getModule().toString());
                 PassManager.run(module);
-                MyIO.writeFile(Config.LLVMOptFile, ManageFrontend.getModule().toString());
             }
             if (Config.isMIPSOutput) {
                 BackEnd.setModule(module);

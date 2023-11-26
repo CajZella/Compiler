@@ -172,7 +172,6 @@ public class Visitor {
         Symbol symbol = curTab.getSymbol(name);
         curFunc = new Function(name, (FunctionType) symbol.getType(), false);
         module.addFunction(curFunc);
-        curFunc.clearNum();
         symbol.setIrPtr(curFunc);
         curBB = new BasicBlock(curFunc);
         // 创建function的参数

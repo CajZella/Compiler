@@ -20,10 +20,6 @@ public class GlobalVariable extends Value {
         this.isString = true;
         this.initializer = initializer;
     }
-    public GlobalVariable(Type type) {
-        super(ValueType.GlobalVariable, "undef", type);
-        this.isUndef = true;
-    }
     public boolean isString() { return this.isString; }
     public boolean isConstant() { return isConstant; }
     public boolean hasInitializer() { return null != this.initializer; }

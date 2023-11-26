@@ -6,11 +6,13 @@ import ir.GlobalVariable;
 import ir.Module;
 import ir.Use;
 import ir.Value;
+import ir.constants.ConstantInt;
 import ir.instrs.Alloca;
 import ir.instrs.Instr;
 import ir.instrs.Load;
 import ir.instrs.Phi;
 import ir.instrs.Store;
+import ir.types.IntegerType;
 import ir.types.PointerType;
 import util.MyLinkedList;
 
@@ -142,7 +144,7 @@ public class Mem2reg {
                     Phi phi = (Phi) defInstr;
                     for (BasicBlock bb : defInstr.getParent().getPrecBBs()) {
                         if (!phi.hasIncomingFrom(bb))
-                            phi.addIncoming(new GlobalVariable(((PointerType) alloca.getType()).getReferencedType()), bb);
+                            phi.addIncoming(new ConstantInt(new IntegerType(32),0), bb);
                     }
                 }
             }
@@ -190,7 +192,7 @@ public class Mem2reg {
      */
     private Value getReachingDef() {
         if (reachingDefStack.isEmpty())
-            return new GlobalVariable(((PointerType) curVal.getType()).getReferencedType());
+            return new ConstantInt(new IntegerType(32), 0);
         else
             return reachingDefStack.peek();
     }

@@ -20,7 +20,6 @@ import java.util.HashMap;
 public class Phi extends Instr {
     private static int num = 0;
     private ArrayList<BasicBlock> phiBBs = new ArrayList<>();
-    // private HashMap<Value, BasicBlock> phiMap = new HashMap<>();
     public Phi(Type type, BasicBlock pBB) {
         super(ValueType.phi, "%p" + num++, type, pBB);
     }
@@ -31,6 +30,7 @@ public class Phi extends Instr {
     public boolean hasIncomingFrom(BasicBlock block) {
         return phiBBs.contains(block);
     }
+    public BasicBlock getBlock(int i) { return phiBBs.get(i); }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

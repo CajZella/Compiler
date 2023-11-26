@@ -1,193 +1,375 @@
 .data
 str.0:
-	.asciiz "20373184\n"
+	.asciiz "in addNum a="
 str.1:
-	.asciiz "Wow, you will begin test your program!\n"
+	.asciiz ",b="
+str.2:
+	.asciiz "in addNum c="
+str.3:
+	.asciiz ",d="
+str.4:
+	.asciiz "in addNum e="
+str.5:
+	.asciiz "e="
+str.6:
+	.asciiz " become even"
+str.7:
+	.asciiz "out i="
+str.8:
+	.asciiz "in addNum out flag="
+str.9:
+	.asciiz "in testMul x="
+str.10:
+	.asciiz " y="
+str.11:
+	.asciiz "in testMul get re="
+str.12:
+	.asciiz "z==0\n"
+str.13:
+	.asciiz "20373780\n"
+str.14:
+	.asciiz "c="
 
 
 .text
 main:
-main_b0:
-	addiu $sp, $sp, -100
-	li vr0, 1
-	sw vr0, 4($sp)
-	li vr1, -2
-	sw vr1, 8($sp)
-	li vr2, 3
-	sw vr2, 12($sp)
-	li vr3, 4
-	sw vr3, 16($sp)
-	li vr4, 5
-	sw vr4, 20($sp)
-	li vr5, 6
-	sw vr5, 24($sp)
-	li vr6, 111
-	sw vr6, 28($sp)
-	li vr7, 357
-	sw vr7, 32($sp)
-	li vr8, 38
-	sw vr8, 36($sp)
-	lw vr9, 28($sp)
-	lw vr10, 32($sp)
-	sll vr11, vr10, 1
-	addu vr11, vr11, vr10
-	addu vr12, vr9, vr11
-	sw vr12, 40($sp)
+main_b107:
+	addiu $sp, $sp, -4
+	la vr0, str.13
+	move $a0, vr0
+	li $v0, 4
+	syscall
+	sw $t0, -4($sp)
+	sw $t1, -8($sp)
+	sw $t2, -12($sp)
+	sw $t3, -16($sp)
+	sw $t4, -20($sp)
+	sw $t5, -24($sp)
+	sw $t6, -28($sp)
+	sw $t7, -32($sp)
+	addiu $sp, $sp, -32
+	jal addNum
+	addiu $sp, $sp, 32
+	lw $t0, -4($sp)
+	lw $t1, -8($sp)
+	lw $t2, -12($sp)
+	lw $t3, -16($sp)
+	lw $t4, -20($sp)
+	lw $t5, -24($sp)
+	lw $t6, -28($sp)
+	lw $t7, -32($sp)
 	li $v0, 5
 	syscall
-	move vr13, $v0
-	sw vr13, 44($sp)
+	move vr1, $v0
 	li $v0, 5
 	syscall
-	move vr14, $v0
-	sw vr14, 48($sp)
+	move vr2, $v0
+	bgt vr1, 20, main_b113
+	move vr5, vr1
+	j main_b131
+main_b113:
+	addiu vr4, vr1, -20
+	move vr5, vr4
+	j main_b114
+main_b114:
+	beq vr5, 20, main_b119
+	j main_b132
+main_b119:
+	j main_b120
+main_b120:
+	move $a0, vr5
+	move $a1, vr2
+	sw $t0, -4($sp)
+	sw $t1, -8($sp)
+	sw $t2, -12($sp)
+	sw $t3, -16($sp)
+	sw $t4, -20($sp)
+	sw $t5, -24($sp)
+	sw $t6, -28($sp)
+	sw $t7, -32($sp)
+	addiu $sp, $sp, -40
+	jal testMul
+	addiu $sp, $sp, 40
+	lw $t0, -4($sp)
+	lw $t1, -8($sp)
+	lw $t2, -12($sp)
+	lw $t3, -16($sp)
+	lw $t4, -20($sp)
+	lw $t5, -24($sp)
+	lw $t6, -28($sp)
+	lw $t7, -32($sp)
+	move vr7, $v0
+	la vr8, str.14
+	move $a0, vr8
+	li $v0, 4
+	syscall
+	move $a0, vr7
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	li $a0, 0
+	sw $t0, -4($sp)
+	sw $t1, -8($sp)
+	sw $t2, -12($sp)
+	sw $t3, -16($sp)
+	sw $t4, -20($sp)
+	sw $t5, -24($sp)
+	sw $t6, -28($sp)
+	sw $t7, -32($sp)
+	addiu $sp, $sp, -36
+	jal single
+	addiu $sp, $sp, 36
+	lw $t0, -4($sp)
+	lw $t1, -8($sp)
+	lw $t2, -12($sp)
+	lw $t3, -16($sp)
+	lw $t4, -20($sp)
+	lw $t5, -24($sp)
+	lw $t6, -28($sp)
+	lw $t7, -32($sp)
+	li $v0, 10
+	syscall
+main_b131:
+	j main_b114
+main_b132:
+	j main_b120
+
+addNum:
+addNum_b0:
+	addiu $sp, $sp, -4
+	sw $ra, 0($sp)
 	li $v0, 5
 	syscall
-	move vr15, $v0
-	sw vr15, 52($sp)
+	move vr9, $v0
 	li $v0, 5
 	syscall
-	move vr16, $v0
-	sw vr16, 56($sp)
-	li $v0, 5
+	move vr10, $v0
+	la vr11, str.0
+	move $a0, vr11
+	li $v0, 4
 	syscall
-	move vr17, $v0
-	sw vr17, 60($sp)
-	li $v0, 5
+	move $a0, vr9
+	li $v0, 1
 	syscall
-	move vr18, $v0
-	sw vr18, 64($sp)
-	la vr19, str.0
+	la vr12, str.1
+	move $a0, vr12
+	li $v0, 4
+	syscall
+	move $a0, vr10
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	addu vr13, vr9, vr10
+	sll vr14, vr13, 1
+	li vr15, 0
+	subu vr15, vr15, vr10
+	la vr16, str.2
+	move $a0, vr16
+	li $v0, 4
+	syscall
+	move $a0, vr14
+	li $v0, 1
+	syscall
+	la vr17, str.3
+	move $a0, vr17
+	li $v0, 4
+	syscall
+	move $a0, vr15
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	addu vr18, vr14, vr15
+	la vr19, str.4
 	move $a0, vr19
 	li $v0, 4
 	syscall
-	la vr20, str.1
-	move $a0, vr20
+	move $a0, vr18
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	li vr20, 0
+	move vr22, vr18
+	li vr21, 0
+	j addNum_b29
+addNum_b29:
+	blt vr21, 3, addNum_b30
+	move vr26, vr20
+	j addNum_b129
+addNum_b30:
+	li vr24, 1431655766
+	mult vr24, vr22
+	mfhi vr24
+	slt $v0, vr22, $zero
+	addu vr24, vr24, $v0
+	move $v1, vr24
+	sll vr24, $v1, 1
+	addu vr24, vr24, $v1
+	subu vr24, vr22, vr24
+	beq vr24, 0, addNum_b34
+	j addNum_b36
+addNum_b31:
+	la vr27, str.5
+	move $a0, vr27
 	li $v0, 4
 	syscall
-	li $a0, 3
+	move $a0, vr22
+	li $v0, 1
+	syscall
+	la vr28, str.6
+	move $a0, vr28
+	li $v0, 4
+	syscall
+	la vr29, str.7
+	move $a0, vr29
+	li $v0, 4
+	syscall
+	move $a0, vr21
 	li $v0, 1
 	syscall
 	li $a0, 10
 	li $v0, 11
 	syscall
-	lw vr21, 20($sp)
-	lw vr22, 24($sp)
-	mul vr23, vr21, vr22
-	move $a0, vr23
+	la vr30, str.8
+	move $a0, vr30
+	li $v0, 4
+	syscall
+	move $a0, vr26
 	li $v0, 1
 	syscall
 	li $a0, 10
 	li $v0, 11
 	syscall
-	lw vr24, 4($sp)
-	lw vr25, 8($sp)
-	addu vr26, vr24, vr25
-	lw vr27, 12($sp)
-	mul vr28, vr26, vr27
-	sw vr28, 68($sp)
-	lw vr29, 32($sp)
-	lw vr30, 28($sp)
-	div vr29, vr30
-	mfhi vr31
-	lw vr32, 20($sp)
-	addu vr33, vr31, vr32
-	sw vr33, 72($sp)
-	lw vr34, 40($sp)
-	lw vr35, 36($sp)
-	mul vr36, vr34, vr35
-	lw vr37, 16($sp)
-	subu vr38, vr36, vr37
-	sw vr38, 76($sp)
-	lw vr39, 44($sp)
-	srl vr40, vr39, 1
-	lw vr41, 24($sp)
-	mul vr42, vr40, vr41
-	sw vr42, 80($sp)
-	lw vr43, 48($sp)
-	lw vr44, 52($sp)
-	addiu vr45, vr44, 1
-	mul vr46, vr43, vr45
-	li vr47, 1431655766
-	mult vr47, vr46
-	mfhi vr47
-	slt $v0, vr46, $zero
-	addu vr47, vr47, $v0
-	move $v1, vr47
-	sll vr47, $v1, 1
-	addu vr47, vr47, $v1
-	subu vr47, vr46, vr47
-	sw vr47, 84($sp)
-	lw vr48, 56($sp)
-	li vr49, 0
-	subu vr49, vr49, vr48
-	sw vr49, 88($sp)
-	lw vr50, 60($sp)
-	addiu vr51, vr50, 6
-	sw vr51, 92($sp)
-	lw vr52, 36($sp)
-	move $a0, vr52
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+addNum_b34:
+	li vr26, 1
+	j addNum_b31
+addNum_b35:
+	addiu vr31, vr21, 1
+	addu vr32, vr22, vr31
+	move vr20, vr20
+	move vr22, vr32
+	move vr21, vr31
+	j addNum_b29
+addNum_b36:
+	li vr33, 1431655766
+	mult vr33, vr22
+	mfhi vr33
+	slt $v0, vr22, $zero
+	addu vr33, vr33, $v0
+	move $v1, vr33
+	sll vr33, $v1, 1
+	addu vr33, vr33, $v1
+	subu vr33, vr22, vr33
+	beq vr33, 1, addNum_b40
+	j addNum_b41
+addNum_b40:
+	move vr21, vr21
+	move vr22, vr22
+	li vr20, 2
+	j addNum_b29
+addNum_b41:
+	j addNum_b35
+addNum_b129:
+	j addNum_b31
+
+testMul:
+testMul_b57:
+	addiu $sp, $sp, -4
+	sw $ra, 0($sp)
+	move vr35, $a0
+	move vr36, $a1
+	la vr37, str.9
+	move $a0, vr37
+	li $v0, 4
+	syscall
+	move $a0, vr35
+	li $v0, 1
+	syscall
+	la vr38, str.10
+	move $a0, vr38
+	li $v0, 4
+	syscall
+	move $a0, vr36
 	li $v0, 1
 	syscall
 	li $a0, 10
 	li $v0, 11
 	syscall
-	lw vr53, 40($sp)
+	blt vr36, 15, testMul_b67
+	j testMul_b69
+testMul_b67:
+	addu vr40, vr35, vr36
+	move vr41, vr40
+	j testMul_b68
+testMul_b68:
+	la vr42, str.11
+	move $a0, vr42
+	li $v0, 4
+	syscall
+	move $a0, vr41
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	move $v0, vr41
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+testMul_b69:
+	ble vr36, 20, testMul_b75
+	j testMul_b77
+testMul_b75:
+	div vr35, vr36
+	mfhi vr44
+	move vr45, vr44
+	j testMul_b76
+testMul_b76:
+	move vr41, vr45
+	j testMul_b68
+testMul_b77:
+	bge vr36, 30, testMul_b83
+	j testMul_b85
+testMul_b83:
+	mul vr47, vr35, vr36
+	move vr48, vr47
+	j testMul_b84
+testMul_b84:
+	move vr45, vr48
+	j testMul_b76
+testMul_b85:
+	div vr49, vr36, vr35
+	subu vr50, vr35, vr49
+	move vr48, vr50
+	j testMul_b84
+
+single:
+single_b99:
+	addiu $sp, $sp, -4
+	sw $ra, 0($sp)
+	move vr51, $a0
+	beq vr51, 0, single_b102
+	j single_b130
+single_b102:
+	la vr53, str.12
 	move $a0, vr53
-	li $v0, 1
+	li $v0, 4
 	syscall
-	li $a0, 10
-	li $v0, 11
-	syscall
-	lw vr54, 68($sp)
-	move $a0, vr54
-	li $v0, 1
-	syscall
-	li $a0, 10
-	li $v0, 11
-	syscall
-	lw vr55, 72($sp)
-	move $a0, vr55
-	li $v0, 1
-	syscall
-	li $a0, 10
-	li $v0, 11
-	syscall
-	lw vr56, 76($sp)
-	move $a0, vr56
-	li $v0, 1
-	syscall
-	li $a0, 10
-	li $v0, 11
-	syscall
-	lw vr57, 80($sp)
-	move $a0, vr57
-	li $v0, 1
-	syscall
-	li $a0, 10
-	li $v0, 11
-	syscall
-	lw vr58, 84($sp)
-	move $a0, vr58
-	li $v0, 1
-	syscall
-	li $a0, 10
-	li $v0, 11
-	syscall
-	lw vr59, 88($sp)
-	lw vr60, 92($sp)
-	move $a0, vr59
-	li $v0, 1
-	syscall
-	li $a0, 45
-	li $v0, 11
-	syscall
-	move $a0, vr60
-	li $v0, 1
-	syscall
-	li $a0, 10
-	li $v0, 11
-	syscall
-	li $v0, 10
-	syscall
+	j single_b103
+single_b103:
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+single_b130:
+	j single_b103
 

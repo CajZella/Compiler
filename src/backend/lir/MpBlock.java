@@ -9,13 +9,14 @@ import java.util.HashSet;
 
 public class MpBlock extends MyLinkedNode {
     //todo:基本块的前驱映射
+    public static int cnt = 0;
     private MpLabel label;
     private MyLinkedList<MpInstr> mpInstrs = new MyLinkedList<>();
     private MpFunction function;
     private HashSet<MpBlock> precMBs = new HashSet<>();
     private HashSet<MpBlock> succMBs = new HashSet<>();
     public MpBlock(String name, MpFunction function) {
-        this.label = null == name ? null : new MpLabel(name);
+        this.label = new MpLabel(name);
         this.function = function;
         this.function.addMpBlock(this);
     }

@@ -48,11 +48,14 @@ import ir.instrs.Zext;
 import ir.types.ArrayType;
 import ir.types.PointerType;
 import ir.types.Type;
+import pass.PCs;
+import settings.Config;
 import util.MyLinkedList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 // 不涉及栈的管理，这需要在寄存器分配后，在这里还是用虚拟寄存器
@@ -182,7 +185,9 @@ public class CodeGen {
         for (int i = 0; i < argSize; i++) {
             if (i < 4) {
                 MpReg src = new MpReg(MpPhyReg.getReg(4 + i));
-                val2opd.put(curIF.getArguments().get(i), src);
+                MpReg dst = new MpReg();
+                tempMB.addMpInstr(new MpMove(curMB, dst, src));
+                val2opd.put(curIF.getArguments().get(i), dst);
             } else {
                 MpReg dst = new MpReg();
                 MpLoad mipsLoad = new MpLoad(tempMB, dst, new MpReg(MpPhyReg.$sp), new MpImm(i * 4));
@@ -192,11 +197,36 @@ public class CodeGen {
             }
         }
         curMFOffset = 4;
-        /* step5.生成mips指令 */
+        /* step6.生成mips指令 */
         for (BasicBlock basicBlock : basicBlocks) {
             curIB = basicBlock;
             curMB = bb2mb.get(curIB);
             genBlock();
+        }
+        /* step7. 处理 parallel copies */
+        if(Config.isLLVMopt)
+            handleParallelCopies();
+    }
+    private void handleParallelCopies() {
+        MyLinkedList<BasicBlock> basicBlocks = curIF.getBlocks();
+        for (BasicBlock basicBlock : basicBlocks) {
+            if (basicBlock.getMipsName().equals("main_b27")) {
+                int x = 1;
+            }
+            PCs pcs = basicBlock.getPcs();
+            if (pcs == null) continue;
+            curMB = bb2mb.get(basicBlock);
+            MpInstr mipsTerminator = curMB.getLastMpInstr();
+            ArrayList<PCs.ParallelCopy> parallelCopies = pcs.getParallelCopies();
+            for (int i = parallelCopies.size() - 1; i >= 0; i--) {
+                PCs.ParallelCopy parallelCopy = parallelCopies.get(i);
+                MpOpd src = genOperand(parallelCopy.src);
+                MpOpd dst = genOperand(parallelCopy.dst);
+                if (src instanceof MpImm)
+                    mipsTerminator.insertBefore(new MpLoadImm(curMB, (MpReg) dst, (MpImm) src));
+                else
+                    mipsTerminator.insertBefore(new MpMove(curMB, (MpReg) dst, (MpReg) src));
+            }
         }
     }
     private void genBlock() {
@@ -328,6 +358,10 @@ public class CodeGen {
         if (irVal instanceof ConstantInt)
             return new MpImm(((ConstantInt)irVal).getVal());
         MpOpd dst = val2opd.get(irVal);
+        if (null == dst) {
+            dst = new MpReg();
+            val2opd.put(irVal, dst);
+        }
         if (dst instanceof MpStackOffset) {
             MpReg tmp = new MpReg();
             curMB.addMpInstr(new MpLoad(curMB, tmp, ((MpStackOffset) dst).getBase(), ((MpStackOffset) dst).getOffset()));
@@ -575,7 +609,7 @@ public class CodeGen {
             mulOptimize(dst, (MpReg) lhs, rhs);
         }
     }
-    /* todo
+    /*
      * 除法优化：
      * 1.若除数是常数
      *   a.若除数是2^k，n/2^k -> n >> k
@@ -606,7 +640,6 @@ public class CodeGen {
     }
     /*
      * 生成srem指令
-     * todo: 除法优化->余数优化
      */
     private void genSremInstr(Alu instr) {
         MpOpd lhs = genOperand(instr.getOperand(0));
@@ -683,7 +716,10 @@ public class CodeGen {
             }
         }
     }
-    private void genPhiInstr(Phi instr) {}
+    private void genPhiInstr(Phi instr) {
+        MpReg dst = new MpReg();
+        val2opd.put(instr, dst);
+    }
     /*
      * gep
      * 全局变量、栈中变量、形参
@@ -753,7 +789,7 @@ public class CodeGen {
      * 1.若两个操作数都是常数，直接计算结果
      * 2.若一个操作数是常数，另一个是变量，判断常数是否是2的倍数，若是，生成sll指令
      * 3.其他情况，生成mul指令
-     * todo: 待优化 若能转化成两条sll指令，可以优化
+     * 若能转化成两条sll指令，可以优化
      */
     private void mulOptimize(MpReg dst, MpReg lhs, MpOpd rhs) {
         if (rhs instanceof MpImm) {
