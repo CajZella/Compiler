@@ -61,16 +61,14 @@ public class Mem2reg {
     }
     private void insertPhi() {
         for (Function function : functions)
-            if (!function.isBuiltin())
-                inserFuncPhi(function);
-    }
-    private void inserFuncPhi(Function function) {
-        curFunc = function;
-        curBBs = curFunc.getBlocks();
-        for (BasicBlock bb : function.getBlocks())
-            for (Instr instr : bb.getInstrs())
-                if (instr instanceof Alloca && !((Alloca) instr).isArrayAlloc())
-                    insertVarPhi((Alloca) instr);
+            if (!function.isBuiltin()) {
+                curFunc = function;
+                curBBs = curFunc.getBlocks();
+                for (BasicBlock bb : function.getBlocks())
+                    for (Instr instr : bb.getInstrs())
+                        if (instr instanceof Alloca && !((Alloca) instr).isArrayAlloc())
+                            insertVarPhi((Alloca) instr);
+            }
     }
     private void insertVarPhi(Alloca alloca) {
         curVal = alloca;
@@ -88,9 +86,6 @@ public class Mem2reg {
                 useBBs.add(instr.getParent());
             }
         }
-        if (alloca.getName().equals("%i47")) {
-            int x = 1;
-        }
         if (useInstrs.isEmpty()) { // no use => delete define
             for (Instr defInstr : defInstrs) {
                 defInstr.dropAllReferences();
@@ -98,7 +93,7 @@ public class Mem2reg {
             }
             alloca.dropAllReferences();
             alloca.remove();
-        } else if (defInstrs.size() == 1) { // 只被定义了一处，若不特殊处理，会生成单一选择的phi todo:未赋值undef
+        } else if (defInstrs.size() == 1) {
             Store defInstr = (Store) defInstrs.iterator().next();
             for (Instr useInstr : useInstrs) {
                 useInstr.replaceAllUsesWith(defInstr.getValue());
@@ -162,9 +157,6 @@ public class Mem2reg {
         Stack<Value> copy = (Stack<Value>) reachingDefStack.clone();
         for (Instr instr : entry.getInstrs()) {
             if (!(instr instanceof Phi) && useInstrs.contains(instr)) { // load val, ptr
-                if (instr.getName().equals("%i14")) {
-                    int x = 1;
-                }
                 Value reachingDef = getReachingDef();
                 instr.replaceAllUsesWith(reachingDef);
             }
