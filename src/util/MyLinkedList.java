@@ -13,9 +13,6 @@ public class MyLinkedList<T extends  MyLinkedNode> implements Iterable<T> {
         tail.setPrev(head);
         size = 0;
     }
-    public MyLinkedList(MyLinkedList<T> list) {
-        addAll(list);
-    }
     public boolean isEmpty() { return this.size == 0; }
     public int size() { return this.size; }
     public T getHead() { return (T) this.head.getNext(); }
@@ -64,11 +61,10 @@ public class MyLinkedList<T extends  MyLinkedNode> implements Iterable<T> {
     }
     public void addAll(MyLinkedList<T> list) {
         if (list.isEmpty()) return;
-        tail.getPrev().setNext(list.getHead().getNext());
-        list.getHead().getNext().setPrev(tail.getPrev());
+        tail.getPrev().setNext(list.getHead());
+        list.getHead().setPrev(tail.getPrev());
         tail = list.tail;
         size += list.size();
-
     }
     public Iterator<T> iterator() { return new MyIterator();}
     public class MyIterator implements Iterator<T> {

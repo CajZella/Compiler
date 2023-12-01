@@ -14,40 +14,39 @@ import util.MyPair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Stack;
 
 /*
  * step1. 全局活跃变量分析（pre:控制流）
  */
 public class RegAlloc {
-    private MpModule mipsModule;
+    private final MpModule mipsModule;
     private MpFunction curMF;
     private int stackSize;
-    private ArrayList<MpReg> precolored;
-    private HashSet<MpReg> initial = new HashSet<>(); // 所有的寄存器
-    private HashSet<MpReg> simplifyWorklist = new HashSet<>(); // 低度数的传送无关的节点表
-    private HashSet<MpReg> freezeWorklist = new HashSet<>(); // 低度数的传送相关的节点表
-    private HashSet<MpReg> spillWorklist = new HashSet<>(); // 高度数的节点表
-    private HashSet<MpReg> spilledNodes = new HashSet<>(); // 需要溢出的节点表
-    private HashSet<MpReg> coalescedNodes = new HashSet<>(); // 合并的节点表
-    private HashSet<MpReg> coloredNodes = new HashSet<>(); // 已着色的节点表
-    private Stack<MpReg> selectStack = new Stack<>(); // 选择栈
+    private final ArrayList<MpReg> precolored;
+    private final HashSet<MpReg> initial = new HashSet<>(); // 所有的寄存器
+    private final HashSet<MpReg> simplifyWorklist = new HashSet<>(); // 低度数的传送无关的节点表
+    private final HashSet<MpReg> freezeWorklist = new HashSet<>(); // 低度数的传送相关的节点表
+    private final HashSet<MpReg> spillWorklist = new HashSet<>(); // 高度数的节点表
+    private final HashSet<MpReg> spilledNodes = new HashSet<>(); // 需要溢出的节点表
+    private final HashSet<MpReg> coalescedNodes = new HashSet<>(); // 合并的节点表
+    private final HashSet<MpReg> coloredNodes = new HashSet<>(); // 已着色的节点表
+    private final Stack<MpReg> selectStack = new Stack<>(); // 选择栈
 
     // 传送指令
-    private HashSet<MpMove> coalescedMoves = new HashSet<>(); // 已经合并的传送指令集合
-    private HashSet<MpMove> constrainedMoves = new HashSet<>(); // 源操作数和目标操作数冲突的传送指令集合
-    private HashSet<MpMove> frozenMoves = new HashSet<>(); // 不再考虑合并的传送指令集合
-    private HashSet<MpMove> worklistMoves = new HashSet<>(); // 有可能合并的传送指令集合
-    private HashSet<MpMove> activeMoves = new HashSet<>(); // 还未做好合并准备的传送指令集合
+    private final HashSet<MpMove> coalescedMoves = new HashSet<>(); // 已经合并的传送指令集合
+    private final HashSet<MpMove> constrainedMoves = new HashSet<>(); // 源操作数和目标操作数冲突的传送指令集合
+    private final HashSet<MpMove> frozenMoves = new HashSet<>(); // 不再考虑合并的传送指令集合
+    private final HashSet<MpMove> worklistMoves = new HashSet<>(); // 有可能合并的传送指令集合
+    private final HashSet<MpMove> activeMoves = new HashSet<>(); // 还未做好合并准备的传送指令集合
 
     // 其他数据结构
-    private HashSet<MyPair<MpReg, MpReg>> adjSet = new HashSet<>(); // 图中冲突边（u，v）的集合
-    private HashMap<MpReg, HashSet<MpReg>> adjList = new HashMap<>(); // 图的邻接表示
-    private HashMap<MpReg, Integer> degree = new HashMap<>(); // 包含每个节点当前度数的数组
-    private HashMap<MpReg, HashSet<MpMove>> moveList = new HashMap<>(); // 从一个节点到与该结点相关的传送指令表的映射
-    private HashMap<MpReg, MpReg> alias = new HashMap<>(); // 传送指令(u,v)合并后，alias[v] = u
-    private HashMap<MpReg, MpReg> color = new HashMap<>(); // 算法为节点选择的颜色
+    private final HashSet<MyPair<MpReg, MpReg>> adjSet = new HashSet<>(); // 图中冲突边（u，v）的集合
+    private final HashMap<MpReg, HashSet<MpReg>> adjList = new HashMap<>(); // 图的邻接表示
+    private final HashMap<MpReg, Integer> degree = new HashMap<>(); // 包含每个节点当前度数的数组
+    private final HashMap<MpReg, HashSet<MpMove>> moveList = new HashMap<>(); // 从一个节点到与该结点相关的传送指令表的映射
+    private final HashMap<MpReg, MpReg> alias = new HashMap<>(); // 传送指令(u,v)合并后，alias[v] = u
+    private final HashMap<MpReg, MpReg> color = new HashMap<>(); // 算法为节点选择的颜色
     private int K;
     public RegAlloc(MpModule mipsModule, ArrayList<MpReg> precolored) {
         this.mipsModule = mipsModule;
@@ -108,17 +107,12 @@ public class RegAlloc {
                     }
                 }
             }
-
-        if (curMF.getLabel().getName().equals("main")) {
+        for (int i = 0; i < 30; i++)
+            color.put(precolored.get(i), precolored.get(i));
+        if (curMF.getLabel().getName().equals("main"))
             K = 23;
-            for (int i = 0; i < 30; i++)
-                color.put(precolored.get(i), precolored.get(i));
-        }
-        else {
+        else
             K = 13;
-            for (int i = 0; i < 30; i++)
-                color.put(precolored.get(i), precolored.get(i));
-        }
         stackSize = curMF.getStackSize();
     }
     private void regAlloc() {
@@ -152,8 +146,7 @@ public class RegAlloc {
             HashSet<MpReg> live = out.get(block);
             MpInstr instr = block.getLastMpInstr(); // 沿控制流反向遍历
             while (true) {
-                if (instr instanceof MpMove) {
-                    MpMove move = (MpMove) instr;
+                if (instr instanceof MpMove move) {
                     live.removeAll(instr.getUseRegs());
                     HashSet<MpReg> regs = new HashSet<>();
                     regs.addAll(instr.getDefRegs());
@@ -211,7 +204,7 @@ public class RegAlloc {
         moves.addAll(activeMoves);
         moves.addAll(worklistMoves);
         if (moveList.containsKey(reg))
-            moves.retainAll(moveList.get(reg));
+            moves.retainAll(moveList.getOrDefault(reg, new HashSet<>()));
         return moves;
     }
     private boolean moveRelated(MpReg reg) {
@@ -225,9 +218,8 @@ public class RegAlloc {
             decrementDegree(reg1);
     }
     private HashSet<MpReg> adjacent(MpReg reg) {
-        HashSet<MpReg> regs = new HashSet<>();
-        regs.addAll(adjList.getOrDefault(reg, new HashSet<>()));
-        regs.removeAll(selectStack);
+        HashSet<MpReg> regs = new HashSet<>(adjList.getOrDefault(reg, new HashSet<>()));
+        selectStack.forEach(regs::remove);
         regs.removeAll(coalescedNodes);
         return regs;
     }
@@ -291,7 +283,7 @@ public class RegAlloc {
                 }
             }
             else {
-                HashSet regs = adjacent(u);
+                HashSet<MpReg> regs = adjacent(u);
                 regs.addAll(adjacent(v));
                 if (conservative(regs)) {
                     coalescedMoves.add(move);
@@ -321,8 +313,10 @@ public class RegAlloc {
         return k < K;
     }
     private MpReg getAlias(MpReg reg) {
-        if (coalescedNodes.contains(reg))
+        if (coalescedNodes.contains(reg)) {
+            assert alias.containsKey(reg);
             return getAlias(alias.get(reg));
+        }
         else
             return reg;
     }
@@ -333,7 +327,9 @@ public class RegAlloc {
             spillWorklist.remove(v);
         coalescedNodes.add(v);
         alias.put(v, u);
-        moveList.get(u).addAll(moveList.get(v));
+        HashSet<MpMove> moves = moveList.getOrDefault(u, new HashSet<>());
+        moves.addAll(moveList.getOrDefault(v, new HashSet<>()));
+        moveList.put(u, moves);
         HashSet<MpReg> regs = new HashSet<>();
         regs.add(v);
         enableMoves(regs);
@@ -348,6 +344,8 @@ public class RegAlloc {
     }
     private void freeze() {
         MpReg reg = freezeWorklist.iterator().next();
+        if (reg.isColored())
+            System.out.println("error");
         freezeWorklist.remove(reg);
         simplifyWorklist.add(reg);
         freezeMoves(reg);
@@ -363,7 +361,7 @@ public class RegAlloc {
                 v = getAlias(y);
             activeMoves.remove(move);
             frozenMoves.add(move);
-            if (nodeMoves(v).isEmpty() && degree.getOrDefault(v, 0) < K) {
+            if (nodeMoves(v).isEmpty() && degree.getOrDefault(v, 0) < K && !v.isColored()) {
                 freezeWorklist.remove(v);
                 simplifyWorklist.add(v);
             }
@@ -396,6 +394,7 @@ public class RegAlloc {
     private void assignColors() {
         while (!selectStack.isEmpty()) {
             MpReg reg = selectStack.pop();
+            assert !reg.isColored();
             ArrayList<MpReg> okColors = new ArrayList<>();
             if (K == 24)
                 for (int i = 25; i >= 3; i--)
@@ -403,10 +402,11 @@ public class RegAlloc {
             else
                 for (int i = 15; i >= 3; i--)
                     okColors.add(precolored.get(i));
-
             for (MpReg w : adjList.getOrDefault(reg, new HashSet<>()))
-                if (coloredNodes.contains(getAlias(w)) || precolored.contains(getAlias(w)))
+                if (coloredNodes.contains(getAlias(w)) || precolored.contains(getAlias(w))) {
+                    assert color.containsKey(getAlias(w));
                     okColors.remove(color.get(getAlias(w)));
+                }
             if (okColors.isEmpty())
                 spilledNodes.add(reg);
             else {
@@ -414,8 +414,10 @@ public class RegAlloc {
                 color.put(reg, okColors.get(0));
             }
         }
-        for (MpReg reg : coalescedNodes)
+        for (MpReg reg : coalescedNodes) {
+            assert !reg.isColored();
             color.put(reg, color.get(getAlias(reg)));
+        }
     }
     private void rewriteProgram() { // process spill nodes:
         HashSet<MpReg> newTemps = new HashSet<>();

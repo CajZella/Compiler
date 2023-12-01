@@ -1,37 +1,266 @@
 .data
+Mod:
+	.word 10007
+dx:
+	.word 1
+	.word 0
+dy:
+	.word 0
+	.word 1
+Map:
+	.word 0
+	.word 1
+	.word 0
+	.word 1
+	.word 0
+	.word 0
+	.word 1
+	.word 1
+	.word 1
+	.word 1
+	.word 1
+	.word 1
+	.word 1
+	.word 1
+	.word 1
+	.word 1
+	.word 0
+	.word 1
+	.word 0
+	.word 1
+	.word 1
+	.word 1
+	.word 1
+	.word 0
+	.word 1
+strP:
+	.space	8
+ans:
+	.word 0
+base:
+	.word 0
+val:
+	.space	100
+str.0:
+	.asciiz "19373459\n"
+str.1:
+	.asciiz "val20: "
+str.2:
+	.asciiz ", val21:"
+str.3:
+	.asciiz ", val22:"
+str.4:
+	.asciiz ", val23:"
+str.5:
+	.asciiz ", val24:"
+str.6:
+	.asciiz "val30: "
+str.7:
+	.asciiz ", val32: "
+str.8:
+	.asciiz ", val34: "
+str.9:
+	.asciiz "val40: "
+str.10:
+	.asciiz ", val42:"
+str.11:
+	.asciiz ", val43:"
+str.12:
+	.asciiz ", val44:"
 
 
 .text
 main:
-main_b0:
-	addiu $sp, $sp, -4
+main_b148:
+	addiu $sp, $sp, -104
+	la vr0, str.0
+	move $a0, vr0
+	li $v0, 4
+	syscall
+	li vr2, 0
+	li vr1, 0
+	j main_b153
+main_b153:
+	blt vr2, 5, main_b154
+	move vr4, vr1
+	move vr5, vr2
+	j main_b240
+main_b154:
+	li vr6, 0
+	j main_b158
+main_b155:
+	li vr14, 0
+	j main_b177
+main_b158:
+	blt vr6, 5, main_b159
+	j main_b160
+main_b159:
 	li $v0, 5
 	syscall
-	move vr0, $v0
-	li vr1, -2147483647
-	mult vr1, vr0
-	mfhi vr1
-	addu vr1, vr1, vr0
-	slt $v0, vr0, $zero
-	addu vr1, vr1, $v0
-	subu vr1, $zero, vr1
-	mul vr1, vr1, -2
-	subu vr1, vr0, vr1
-	move $a0, vr1
+	move vr8, $v0
+	sll vr9, vr2, 4
+	sll $v0, vr2, 2
+	addu vr9, vr9, $v0
+	addu vr9, $sp, vr9
+	sll vr10, vr6, 2
+	addu vr10, vr9, vr10
+	sw vr8, 4(vr10)
+	addiu vr11, vr6, 1
+	move vr6, vr11
+	j main_b158
+main_b160:
+	addiu vr12, vr2, 1
+	beq vr12, 5, main_b171
+	j main_b173
+main_b171:
+	move vr4, vr6
+	move vr5, vr12
+	j main_b155
+main_b173:
+	move vr1, vr6
+	move vr2, vr12
+	j main_b153
+main_b177:
+	blt vr14, 2, main_b178
+	j main_b179
+main_b178:
+	li $v0, 5
+	syscall
+	move vr16, $v0
+	la vr17, strP
+	sll vr18, vr14, 2
+	addu vr18, vr17, vr18
+	sw vr16, 0(vr18)
+	addiu vr19, vr14, 1
+	move vr14, vr19
+	j main_b177
+main_b179:
+	li $v0, 5
+	syscall
+	move vr20, $v0
+	sw vr20, base
+	la vr21, strP
+	lw vr22, 0(vr21)
+	la vr23, strP
+	lw vr24, 4(vr23)
+	lw vr25, base
+	move $a0, vr22
+	move $a1, vr24
+	move $a2, vr25
+	addiu $a3, $sp, 4
+	jal dfs
+	la vr26, val
+	lw vr27, 40(vr26)
+	la vr28, val
+	lw vr29, 44(vr28)
+	la vr30, val
+	lw vr31, 48(vr30)
+	la vr32, val
+	lw vr33, 52(vr32)
+	la vr34, val
+	lw vr35, 56(vr34)
+	la vr36, str.1
+	move $a0, vr36
+	li $v0, 4
+	syscall
+	move $a0, vr27
+	li $v0, 1
+	syscall
+	la vr37, str.2
+	move $a0, vr37
+	li $v0, 4
+	syscall
+	move $a0, vr29
+	li $v0, 1
+	syscall
+	la vr38, str.3
+	move $a0, vr38
+	li $v0, 4
+	syscall
+	move $a0, vr31
+	li $v0, 1
+	syscall
+	la vr39, str.4
+	move $a0, vr39
+	li $v0, 4
+	syscall
+	move $a0, vr33
+	li $v0, 1
+	syscall
+	la vr40, str.5
+	move $a0, vr40
+	li $v0, 4
+	syscall
+	move $a0, vr35
 	li $v0, 1
 	syscall
 	li $a0, 10
 	li $v0, 11
 	syscall
-	li vr2, -2147483647
-	mult vr2, vr0
-	mfhi vr2
-	addu vr2, vr2, vr0
-	slt $v0, vr0, $zero
-	addu vr2, vr2, $v0
-	sll vr2, vr2, 1
-	subu vr2, vr0, vr2
-	move $a0, vr2
+	la vr41, val
+	lw vr42, 60(vr41)
+	la vr43, val
+	lw vr44, 68(vr43)
+	la vr45, val
+	lw vr46, 76(vr45)
+	la vr47, str.6
+	move $a0, vr47
+	li $v0, 4
+	syscall
+	move $a0, vr42
+	li $v0, 1
+	syscall
+	la vr48, str.7
+	move $a0, vr48
+	li $v0, 4
+	syscall
+	move $a0, vr44
+	li $v0, 1
+	syscall
+	la vr49, str.8
+	move $a0, vr49
+	li $v0, 4
+	syscall
+	move $a0, vr46
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	la vr50, val
+	lw vr51, 80(vr50)
+	la vr52, val
+	lw vr53, 88(vr52)
+	la vr54, val
+	lw vr55, 92(vr54)
+	la vr56, val
+	lw vr57, 96(vr56)
+	la vr58, str.9
+	move $a0, vr58
+	li $v0, 4
+	syscall
+	move $a0, vr51
+	li $v0, 1
+	syscall
+	la vr59, str.10
+	move $a0, vr59
+	li $v0, 4
+	syscall
+	move $a0, vr53
+	li $v0, 1
+	syscall
+	la vr60, str.11
+	move $a0, vr60
+	li $v0, 4
+	syscall
+	move $a0, vr55
+	li $v0, 1
+	syscall
+	la vr61, str.12
+	move $a0, vr61
+	li $v0, 4
+	syscall
+	move $a0, vr57
 	li $v0, 1
 	syscall
 	li $a0, 10
@@ -39,4 +268,270 @@ main_b0:
 	syscall
 	li $v0, 10
 	syscall
+main_b240:
+	j main_b155
+
+CalcMod:
+CalcMod_b0:
+	addiu $sp, $sp, -4
+	sw $ra, 0($sp)
+	move vr62, $a0
+	lw vr63, Mod
+	div vr64, vr62, vr63
+	lw vr65, Mod
+	mul vr66, vr64, vr65
+	subu vr67, vr62, vr66
+	move $v0, vr67
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+
+Check:
+Check_b10:
+	addiu $sp, $sp, -4
+	sw $ra, 0($sp)
+	move vr68, $a0
+	bge vr68, 0, Check_b17
+	j Check_b230
+Check_b13:
+	li $v0, 1
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+Check_b14:
+	li $v0, 0
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+Check_b17:
+	blt vr68, 5, Check_b13
+	j Check_b231
+Check_b230:
+	j Check_b14
+Check_b231:
+	j Check_b14
+
+check:
+check_b20:
+	addiu $sp, $sp, -4
+	sw $ra, 0($sp)
+	move vr71, $a0
+	move vr72, $a1
+	blt vr71, 0, check_b234
+	j check_b27
+check_b25:
+	li $v0, 0
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+check_b26:
+	la vr74, Map
+	sll vr75, vr71, 4
+	sll $v0, vr71, 2
+	addu vr75, vr75, $v0
+	addu vr75, vr74, vr75
+	sll vr76, vr72, 2
+	addu vr76, vr75, vr76
+	lw vr77, 0(vr76)
+	bne vr77, 0, check_b36
+	j check_b38
+check_b27:
+	bge vr71, 5, check_b232
+	j check_b30
+check_b30:
+	move $a0, vr72
+	jal Check
+	move vr80, $v0
+	beq vr80, 0, check_b233
+	j check_b26
+check_b36:
+	li $v0, 1
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+check_b38:
+	li $v0, 0
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+check_b232:
+	j check_b25
+check_b233:
+	j check_b25
+check_b234:
+	j check_b25
+
+dfs:
+dfs_b44:
+	addiu $sp, $sp, -4
+	sw $ra, 0($sp)
+	move vr82, $a0
+	move vr83, $a1
+	move vr84, $a2
+	move vr85, $a3
+	la vr86, val
+	sll vr87, vr82, 4
+	sll $v0, vr82, 2
+	addu vr87, vr87, $v0
+	addu vr87, vr86, vr87
+	sll vr88, vr83, 2
+	addu vr88, vr87, vr88
+	lw vr89, 0(vr88)
+	bne vr89, 0, dfs_b53
+	j dfs_b54
+dfs_b53:
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+dfs_b54:
+	sll vr91, vr82, 4
+	sll $v0, vr82, 2
+	addu vr91, vr91, $v0
+	addu vr91, vr85, vr91
+	sll vr92, vr83, 2
+	addu vr92, vr91, vr92
+	lw vr93, 0(vr92)
+	mul vr94, vr84, vr93
+	lw vr95, Mod
+	div vr94, vr95
+	mfhi vr96
+	lw vr97, Mod
+	addu vr98, vr96, vr97
+	move $a0, vr98
+	jal CalcMod
+	move vr99, $v0
+	la vr100, val
+	sll vr101, vr82, 4
+	sll $v0, vr82, 2
+	addu vr101, vr101, $v0
+	addu vr101, vr100, vr101
+	sll vr102, vr83, 2
+	addu vr102, vr101, vr102
+	sw vr99, 0(vr102)
+	la vr103, val
+	sll vr104, vr82, 4
+	sll $v0, vr82, 2
+	addu vr104, vr104, $v0
+	addu vr104, vr103, vr104
+	sll vr105, vr83, 2
+	addu vr105, vr104, vr105
+	lw vr106, 0(vr105)
+	beq vr106, 0, dfs_b75
+	j dfs_b235
+dfs_b75:
+	la vr108, val
+	sll vr109, vr82, 4
+	sll $v0, vr82, 2
+	addu vr109, vr109, $v0
+	addu vr109, vr108, vr109
+	sll vr110, vr83, 2
+	addu vr110, vr109, vr110
+	li vr111, 1
+	sw vr111, 0(vr110)
+	j dfs_b76
+dfs_b76:
+	la vr112, dx
+	lw vr113, 0(vr112)
+	addu vr114, vr82, vr113
+	la vr115, dy
+	lw vr116, 0(vr115)
+	addu vr117, vr83, vr116
+	move $a0, vr114
+	move $a1, vr117
+	jal check
+	move vr118, $v0
+	bne vr118, 0, dfs_b87
+	li vr130, 0
+	j dfs_b236
+dfs_b87:
+	la vr120, dx
+	lw vr121, 0(vr120)
+	addu vr122, vr82, vr121
+	la vr123, dy
+	lw vr124, 0(vr123)
+	addu vr125, vr83, vr124
+	la vr126, val
+	sll vr127, vr82, 4
+	sll $v0, vr82, 2
+	addu vr127, vr127, $v0
+	addu vr127, vr126, vr127
+	sll vr128, vr83, 2
+	addu vr128, vr127, vr128
+	lw vr129, 0(vr128)
+	move $a0, vr122
+	move $a1, vr125
+	move $a2, vr129
+	move $a3, vr85
+	jal dfs
+	li vr130, 1
+	j dfs_b88
+dfs_b88:
+	la vr131, dx
+	lw vr132, 4(vr131)
+	addu vr133, vr82, vr132
+	la vr134, dy
+	lw vr135, 4(vr134)
+	addu vr136, vr83, vr135
+	move $a0, vr133
+	move $a1, vr136
+	jal check
+	move vr137, $v0
+	bne vr137, 0, dfs_b112
+	li vr149, 0
+	j dfs_b237
+dfs_b112:
+	la vr139, dx
+	lw vr140, 4(vr139)
+	addu vr141, vr82, vr140
+	la vr142, dy
+	lw vr143, 4(vr142)
+	addu vr144, vr83, vr143
+	la vr145, val
+	sll vr146, vr82, 4
+	sll $v0, vr82, 2
+	addu vr146, vr146, $v0
+	addu vr146, vr145, vr146
+	sll vr147, vr83, 2
+	addu vr147, vr146, vr147
+	lw vr148, 0(vr147)
+	move $a0, vr141
+	move $a1, vr144
+	move $a2, vr148
+	move $a3, vr85
+	jal dfs
+	li vr149, 1
+	j dfs_b113
+dfs_b113:
+	bne vr130, 0, dfs_b239
+	j dfs_b139
+dfs_b137:
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+dfs_b138:
+	la vr151, val
+	sll vr152, vr82, 4
+	sll $v0, vr82, 2
+	addu vr152, vr152, $v0
+	addu vr152, vr151, vr152
+	sll vr153, vr83, 2
+	addu vr153, vr152, vr153
+	li vr154, -1
+	sw vr154, 0(vr153)
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+dfs_b139:
+	bne vr149, 0, dfs_b238
+	j dfs_b138
+dfs_b235:
+	j dfs_b76
+dfs_b236:
+	j dfs_b88
+dfs_b237:
+	j dfs_b113
+dfs_b238:
+	j dfs_b137
+dfs_b239:
+	j dfs_b137
 

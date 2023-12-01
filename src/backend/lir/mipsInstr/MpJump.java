@@ -22,7 +22,6 @@ public class MpJump extends MpInstr {
         this.K = K;
         this.argNum = argNum;
         replaceDst(BackEnd.mipsPhyRegs.get(2));
-
     }
     public MpJump(MipsInstrType type, MpBlock block, MpReg sourceReg) {
         super(type, block);
