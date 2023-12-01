@@ -1,235 +1,105 @@
 .data
-n:
-	.word 1
-a:
-	.word 1
-b:
-	.word 2
-c:
-	.word 3
-d:
-	.word 4
-e:
-	.word 5
+CONSTANT:
+	.word 100
 str.0:
-	.asciiz "19374223\n"
+	.asciiz "20373898\n"
 str.1:
-	.asciiz "fibo["
-str.2:
-	.asciiz "] = "
-str.3:
-	.asciiz "fibo["
-str.4:
-	.asciiz "] / 2 = "
-str.5:
-	.asciiz "/***************** END *****************/\n"
+	.asciiz " !()*+,-./0:;<?@[]~^`\n"
 
 
 .text
 main:
-main_b22:
-	addiu $sp, $sp, -4
-	li $v0, 5
-	syscall
-	move vr0, $v0
-	la vr1, str.0
-	move $a0, vr1
-	li $v0, 4
-	syscall
+main_b3:
+	addiu $sp, $sp, -2048
+	la vr0, str.0
 	move $a0, vr0
-	sw $v1, -4($sp)
-	sw $a0, -8($sp)
-	sw $a1, -12($sp)
-	sw $a2, -16($sp)
-	sw $a3, -20($sp)
-	sw $t0, -24($sp)
-	sw $t1, -28($sp)
-	sw $t2, -32($sp)
-	sw $t3, -36($sp)
-	sw $t4, -40($sp)
-	sw $t5, -44($sp)
-	sw $t6, -48($sp)
-	sw $t7, -52($sp)
-	addiu $sp, $sp, -56
-	jal fib
-	addiu $sp, $sp, 56
-	lw $v1, -4($sp)
-	lw $a0, -8($sp)
-	lw $a1, -12($sp)
-	lw $a2, -16($sp)
-	lw $a3, -20($sp)
-	lw $t0, -24($sp)
-	lw $t1, -28($sp)
-	lw $t2, -32($sp)
-	lw $t3, -36($sp)
-	lw $t4, -40($sp)
-	lw $t5, -44($sp)
-	lw $t6, -48($sp)
-	lw $t7, -52($sp)
-	move vr2, $v0
-	la vr3, str.1
-	move $a0, vr3
 	li $v0, 4
 	syscall
-	move $a0, vr0
-	li $v0, 1
-	syscall
-	la vr4, str.2
-	move $a0, vr4
-	li $v0, 4
-	syscall
-	move $a0, vr2
+	li $a0, 1
 	li $v0, 1
 	syscall
 	li $a0, 10
 	li $v0, 11
 	syscall
-	move $a0, vr0
-	sw $v1, -4($sp)
-	sw $a0, -8($sp)
-	sw $a1, -12($sp)
-	sw $a2, -16($sp)
-	sw $a3, -20($sp)
-	sw $t0, -24($sp)
-	sw $t1, -28($sp)
-	sw $t2, -32($sp)
-	sw $t3, -36($sp)
-	sw $t4, -40($sp)
-	sw $t5, -44($sp)
-	sw $t6, -48($sp)
-	sw $t7, -52($sp)
-	addiu $sp, $sp, -56
-	jal fib
-	addiu $sp, $sp, 56
-	lw $v1, -4($sp)
-	lw $a0, -8($sp)
-	lw $a1, -12($sp)
-	lw $a2, -16($sp)
-	lw $a3, -20($sp)
-	lw $t0, -24($sp)
-	lw $t1, -28($sp)
-	lw $t2, -32($sp)
-	lw $t3, -36($sp)
-	lw $t4, -40($sp)
-	lw $t5, -44($sp)
-	lw $t6, -48($sp)
-	lw $t7, -52($sp)
-	move vr5, $v0
-	srl vr6, vr5, 1
-	la vr7, str.3
-	move $a0, vr7
-	li $v0, 4
-	syscall
-	move $a0, vr0
+	li vr1, 1
+	sw vr1, 16($sp)
+	li vr2, 1
+	sw vr2, 36($sp)
+	li vr3, 2
+	sw vr3, 44($sp)
+	lw vr4, 16($sp)
+	move $a0, vr4
 	li $v0, 1
 	syscall
-	la vr8, str.4
-	move $a0, vr8
-	li $v0, 4
+	li $a0, 10
+	li $v0, 11
 	syscall
+	lw vr5, 36($sp)
+	move $a0, vr5
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	lw vr6, 16($sp)
+	lw vr7, 44($sp)
 	move $a0, vr6
 	li $v0, 1
 	syscall
 	li $a0, 10
 	li $v0, 11
 	syscall
-	la vr9, str.5
-	move $a0, vr9
+	move $a0, vr7
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	li vr8, 1
+	j main_b28
+main_b28:
+	bne vr8, 3, main_b29
+	j main_b30
+main_b29:
+	move $a0, vr8
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	addiu vr10, vr8, 1
+	move vr8, vr10
+	j main_b28
+main_b30:
+	addiu vr11, vr8, 0
+	addiu vr12, vr11, 1
+	addiu $a0, $sp, 48
+	jal fun
+	move vr13, $v0
+	addu vr14, vr12, vr13
+	move $a0, vr14
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	move $a0, vr14
+	li $v0, 1
+	syscall
+	la vr15, str.1
+	move $a0, vr15
 	li $v0, 4
 	syscall
 	li $v0, 10
 	syscall
 
-fib:
-fib_b0:
+fun:
+fun_b0:
 	addiu $sp, $sp, -4
 	sw $ra, 0($sp)
-	move vr10, $a0
-	beq vr10, 1, fib_b4
-	j fib_b6
-fib_b4:
-	li vr12, 1
-	j fib_b5
-fib_b5:
-	move $v0, vr12
+	move vr16, $a0
+	li $v0, 0
 	lw $ra, 0($sp)
 	addiu $sp, $sp, 4
 	jr $ra
-fib_b6:
-	beq vr10, 2, fib_b9
-	j fib_b11
-fib_b9:
-	li vr14, 1
-	j fib_b10
-fib_b10:
-	move vr12, vr14
-	j fib_b5
-fib_b11:
-	addiu vr15, vr10, -1
-	move $a0, vr15
-	sw $v1, -4($sp)
-	sw $a0, -8($sp)
-	sw $a1, -12($sp)
-	sw $a2, -16($sp)
-	sw $a3, -20($sp)
-	sw $t0, -24($sp)
-	sw $t1, -28($sp)
-	sw $t2, -32($sp)
-	sw $t3, -36($sp)
-	sw $t4, -40($sp)
-	sw $t5, -44($sp)
-	sw $t6, -48($sp)
-	sw $t7, -52($sp)
-	addiu $sp, $sp, -56
-	jal fib
-	addiu $sp, $sp, 56
-	lw $v1, -4($sp)
-	lw $a0, -8($sp)
-	lw $a1, -12($sp)
-	lw $a2, -16($sp)
-	lw $a3, -20($sp)
-	lw $t0, -24($sp)
-	lw $t1, -28($sp)
-	lw $t2, -32($sp)
-	lw $t3, -36($sp)
-	lw $t4, -40($sp)
-	lw $t5, -44($sp)
-	lw $t6, -48($sp)
-	lw $t7, -52($sp)
-	move vr16, $v0
-	addiu vr17, vr10, -2
-	move $a0, vr17
-	sw $v1, -4($sp)
-	sw $a0, -8($sp)
-	sw $a1, -12($sp)
-	sw $a2, -16($sp)
-	sw $a3, -20($sp)
-	sw $t0, -24($sp)
-	sw $t1, -28($sp)
-	sw $t2, -32($sp)
-	sw $t3, -36($sp)
-	sw $t4, -40($sp)
-	sw $t5, -44($sp)
-	sw $t6, -48($sp)
-	sw $t7, -52($sp)
-	addiu $sp, $sp, -56
-	jal fib
-	addiu $sp, $sp, 56
-	lw $v1, -4($sp)
-	lw $a0, -8($sp)
-	lw $a1, -12($sp)
-	lw $a2, -16($sp)
-	lw $a3, -20($sp)
-	lw $t0, -24($sp)
-	lw $t1, -28($sp)
-	lw $t2, -32($sp)
-	lw $t3, -36($sp)
-	lw $t4, -40($sp)
-	lw $t5, -44($sp)
-	lw $t6, -48($sp)
-	lw $t7, -52($sp)
-	move vr18, $v0
-	addu vr19, vr16, vr18
-	move vr14, vr19
-	j fib_b10
 

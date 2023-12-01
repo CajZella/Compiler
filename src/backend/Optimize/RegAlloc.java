@@ -14,6 +14,7 @@ import util.MyPair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Stack;
 
 /*
@@ -64,12 +65,14 @@ public class RegAlloc {
     private void regReset() {
         for (MpBlock block : curMF.getMpBlocks())
             for (MpInstr instr : block.getMpInstrs()) {
-                if (instr.hasDstReg() && !instr.getDstReg().isColored())
+                if (instr.hasDstReg() && !instr.getDstReg().isColored()) {
                     instr.replaceDst(color.get(instr.getDstReg()));
+                }
                 if (instr.hasSrc1Reg() && !instr.getSrc1Reg().isColored())
                     instr.replaceSrc1(color.get(instr.getSrc1Reg()));
                 if (instr.hasSrc2Reg() && !instr.getSrc2Reg().isColored())
-                    instr.replaceSrc2(color.get(instr.getSrc2Reg()));
+                    instr.replaceSrc2(color.get(instr.getSrc2Reg())
+                    );
             }
     }
     private void init() {
@@ -97,23 +100,25 @@ public class RegAlloc {
                 for (MpReg reg : instr.getUseRegs()) {
                     if (!reg.isColored()) {
                         initial.add(reg);
-                        adjList.put(reg, new HashSet<>());
-                        degree.put(reg, 0);
                     }
                 }
                 for (MpReg reg : instr.getDefRegs()) {
                     if (!reg.isColored()) {
                         initial.add(reg);
-                        adjList.put(reg, new HashSet<>());
-                        degree.put(reg, 0);
                     }
                 }
             }
 
-        if (curMF.getLabel().getName().equals("main"))
+        if (curMF.getLabel().getName().equals("main")) {
             K = 23;
-        else
+            for (int i = 0; i < 30; i++)
+                color.put(precolored.get(i), precolored.get(i));
+        }
+        else {
             K = 13;
+            for (int i = 0; i < 30; i++)
+                color.put(precolored.get(i), precolored.get(i));
+        }
         stackSize = curMF.getStackSize();
     }
     private void regAlloc() {
@@ -178,17 +183,21 @@ public class RegAlloc {
         adjSet.add(pair);
         adjSet.add(new MyPair<>(V, U));
         if (!precolored.contains(U)) {
-            adjList.get(U).add(V);
-            degree.put(U, degree.get(U) + 1);
+            HashSet<MpReg> regs = adjList.getOrDefault(U, new HashSet<>());
+            regs.add(V);
+            adjList.put(U, regs);
+            degree.put(U, degree.getOrDefault(U, 0) + 1);
         }
         if (!precolored.contains(V)) {
-            adjList.get(V).add(U);
-            degree.put(V, degree.get(V) + 1);
+            HashSet<MpReg> regs = adjList.getOrDefault(V, new HashSet<>());
+            regs.add(U);
+            adjList.put(V, regs);
+            degree.put(V, degree.getOrDefault(V, 0) + 1);
         }
     }
     private void makeWorklist() {
         for (MpReg reg : initial) {
-            if (degree.get(reg) >= K)
+            if (degree.getOrDefault(reg, 0) >= K)
                 spillWorklist.add(reg);
             else if (moveRelated(reg))
                 freezeWorklist.add(reg);
@@ -217,13 +226,14 @@ public class RegAlloc {
     }
     private HashSet<MpReg> adjacent(MpReg reg) {
         HashSet<MpReg> regs = new HashSet<>();
-        regs.addAll(adjList.get(reg));
+        regs.addAll(adjList.getOrDefault(reg, new HashSet<>()));
         regs.removeAll(selectStack);
         regs.removeAll(coalescedNodes);
         return regs;
     }
     private void decrementDegree(MpReg reg) {
-        int d = degree.get(reg);
+        if (reg.isColored()) return;
+        int d = degree.getOrDefault(reg, 0);
         degree.put(reg, d - 1);
         if (d == K) {
             HashSet<MpReg> regs = adjacent(reg);
@@ -295,18 +305,18 @@ public class RegAlloc {
         }
     }
     private void addWorkList(MpReg reg) { // 合并传送指令，两个节点可能不再是传送有关，用addWorkList将它们加入简化工作表
-        if (!precolored.contains(reg) && !moveRelated(reg) && degree.get(reg) < K) {
+        if (!precolored.contains(reg) && !moveRelated(reg) && degree.getOrDefault(reg, 0) < K) {
             freezeWorklist.remove(reg);
             simplifyWorklist.add(reg);
         }
     }
     private boolean OK(MpReg u, MpReg v) { // 合并一个预着色寄存器时所使用的启发式函数
-        return degree.get(u) < K || precolored.contains(u) || adjSet.add(new MyPair<>(u, v));
+        return precolored.contains(u) || degree.getOrDefault(u, 0) < K || adjSet.contains(new MyPair<>(u, v));
     }
     private boolean conservative(HashSet<MpReg> regs) { // 保守合并启发式的函数
         int k = 0;
         for (MpReg reg : regs)
-            if (degree.get(reg) >= K)
+            if (degree.getOrDefault(reg, 0) >= K)
                 k++;
         return k < K;
     }
@@ -331,7 +341,7 @@ public class RegAlloc {
             addEdge(reg, u);
             decrementDegree(reg);
         }
-        if (degree.containsKey(u) && degree.get(u) >= K && freezeWorklist.contains(u)) {
+        if (degree.containsKey(u) && degree.getOrDefault(u, 0) >= K && freezeWorklist.contains(u)) {
             freezeWorklist.remove(u);
             spillWorklist.add(u);
         }
@@ -353,7 +363,7 @@ public class RegAlloc {
                 v = getAlias(y);
             activeMoves.remove(move);
             frozenMoves.add(move);
-            if (nodeMoves(v).isEmpty() && degree.get(v) < K) {
+            if (nodeMoves(v).isEmpty() && degree.getOrDefault(v, 0) < K) {
                 freezeWorklist.remove(v);
                 simplifyWorklist.add(v);
             }
@@ -394,7 +404,7 @@ public class RegAlloc {
                 for (int i = 15; i >= 3; i--)
                     okColors.add(precolored.get(i));
 
-            for (MpReg w : adjList.get(reg))
+            for (MpReg w : adjList.getOrDefault(reg, new HashSet<>()))
                 if (coloredNodes.contains(getAlias(w)) || precolored.contains(getAlias(w)))
                     okColors.remove(color.get(getAlias(w)));
             if (okColors.isEmpty())
@@ -412,23 +422,23 @@ public class RegAlloc {
         for (MpReg v : spilledNodes) {
             MpImm offset = new MpImm(stackSize);
             stackSize += 4;
+            MpReg newTemp = new MpReg();
             for (MpBlock block : curMF.getMpBlocks()) {
                 for (MpInstr instr : block.getMpInstrs()) {
-                    for (MpReg defReg : instr.getDefRegs()) {
-                        if (defReg.equal(v)) {
-                            MpReg newTemp = new MpReg();
-                            newTemps.add(newTemp);
-                            instr.replaceDst(newTemp);
-                            instr.insertAfter(new MpStore(block, newTemp, precolored.get(29), offset));
-                        }
+                    if (instr.hasDstReg() && instr.getDstReg().equal(v)) {
+                        newTemps.add(newTemp);
+                        instr.replaceDst(newTemp);
+                        instr.insertAfter(new MpStore(block, newTemp, precolored.get(27), offset));
                     }
-                    for (MpReg useReg : instr.getUseRegs()) {
-                        if (useReg.equal(v)) {
-                            MpReg newTemp = new MpReg();
-                            newTemps.add(newTemp);
-                            instr.replaceSrc(newTemp);
-                            instr.insertBefore(new MpLoad(block, newTemp, precolored.get(29), offset));
-                        }
+                    if (instr.hasSrc1Reg() && instr.getSrc1Reg().equal(v)) {
+                        newTemps.add(newTemp);
+                        instr.replaceSrc1(newTemp);
+                        instr.insertBefore(new MpLoad(block, newTemp, precolored.get(27), offset));
+                    }
+                    if (instr.hasSrc2Reg() && instr.getSrc2Reg().equal(v)) {
+                        newTemps.add(newTemp);
+                        instr.replaceSrc2(newTemp);
+                        instr.insertBefore(new MpLoad(block, newTemp, precolored.get(27), offset));
                     }
                 }
             }

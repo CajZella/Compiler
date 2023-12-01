@@ -460,18 +460,8 @@ public class CodeGen {
                 }
             }
         }
-        for (int i = 3; i <= 15; i++) {
-            MpStore mipsStore = new MpStore(curMB, mipsPhyRegs.get(i), sp, new MpImm(-(i-2)*4));
-            curMB.addMpInstr(mipsStore);
-        }
-        curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, mipsPhyRegs.get(27), mipsPhyRegs.get(27), new MpImm(curStackSize)));
         MpFunction callee = f2mf.get(irFunc);
-        curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.jal, curMB, callee.getLabel()));
-        curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, mipsPhyRegs.get(27), mipsPhyRegs.get(27), new MpImm(-curStackSize)));
-        for (int i = 3; i <= 15; i++) {
-            MpLoad mipsLoad = new MpLoad(curMB, mipsPhyRegs.get(i), sp, new MpImm(-(i-2)*4));
-            curMB.addMpInstr(mipsLoad);
-        }
+        curMB.addMpInstr(new MpJump(curMB, callee.getLabel(), 13, instr.operandsSize() - 1));
         if (instr.getType().isIntegerTy()) {
             MpReg dst = new MpReg();
             val2opd.put(instr, dst);
@@ -760,7 +750,7 @@ public class CodeGen {
             else {
                 MpOpd idx =  genOperand(irIdx);
                 if (idx instanceof MpImm) {
-                    offset.addVal(((MpImm) idx).getVal() * dimSizes.get(i));
+                    offset.addVal(((MpImm) idx).getVal() * dimSizes.get(i-1));
                 } else {
                     preBase = base;
                     base = new MpReg();

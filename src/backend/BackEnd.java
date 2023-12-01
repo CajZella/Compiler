@@ -1,7 +1,11 @@
 package backend;
 
 import backend.Optimize.RegAlloc;
+import backend.lir.MpBlock;
+import backend.lir.MpFunction;
 import backend.lir.MpModule;
+import backend.lir.mipsInstr.MpInstr;
+import backend.lir.mipsInstr.MpJump;
 import backend.lir.mipsOperand.MpPhyReg;
 import backend.lir.mipsOperand.MpReg;
 import ir.Module;
@@ -25,6 +29,11 @@ public class BackEnd {
             MyIO.writeFile(Config.MIPSVRFile, mipsModule.toString());
         RegAlloc regAlloc = new RegAlloc(mipsModule, mipsPhyRegs);
         regAlloc.run();
+        for (MpFunction mipsFunction : mipsModule.getMpFunctions())
+            for (MpBlock mipsBlock : mipsFunction.getMpBlocks())
+                for (MpInstr mipsInstr : mipsBlock.getMpInstrs())
+                    if (mipsInstr.getInstrType() == MpInstr.MipsInstrType.jal)
+                        ((MpJump)mipsInstr).dealJal();
     }
     public static MpModule getMipsModule() { return mipsModule; }
 }

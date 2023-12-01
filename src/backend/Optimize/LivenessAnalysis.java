@@ -21,7 +21,7 @@ public class LivenessAnalysis {
     public LivenessAnalysis(MpFunction curMF) {
         this.curMF = curMF;
         analysisBlocksLive();
-        while(!analysisOnce());
+        while(analysisOnce());
     }
 
     public HashMap<MpBlock, HashSet<MpReg>> getIn() { return in; }
@@ -30,15 +30,19 @@ public class LivenessAnalysis {
 
     private void analysisBlocksLive() {
         for (MpBlock curMB : curMF.getMpBlocks()) {
-            HashSet curDef = new HashSet();
-            HashSet curUse = new HashSet();
+            HashSet curDef = new HashSet(); // 定义先于任何使用
+            HashSet curUse = new HashSet(); // 使用先于任何定义
             def.put(curMB, curDef);
             use.put(curMB, curUse);
             in.put(curMB, new HashSet<>());
             out.put(curMB, new HashSet<>());
-            for (MpInstr curMI : curMB.getMpInstrs()) {
-                curUse.addAll(curMI.getUseRegs());
-                curDef.addAll(curMI.getDefRegs());
+            for (MpInstr instr : curMB.getMpInstrs()) {
+                if (instr.hasDstReg() && !curUse.contains(instr.getDstReg()))
+                    curDef.add(instr.getDstReg());
+                if (instr.hasSrc1Reg() && !curDef.contains(instr.getSrc1Reg()))
+                    curUse.add(instr.getSrc1Reg());
+                if (instr.hasSrc2Reg() && !curDef.contains(instr.getSrc2Reg()))
+                    curUse.add(instr.getSrc2Reg());
             }
         }
     }
