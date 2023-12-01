@@ -12,13 +12,13 @@ import java.util.LinkedList;
 /*
  * 全局活跃变量分析
  */
-public class livenessAnalysis {
+public class LivenessAnalysis {
     private MpFunction curMF;
     private HashMap<MpBlock, HashSet<MpReg>> def = new HashMap<>();
     private HashMap<MpBlock, HashSet<MpReg>> use = new HashMap<>();
     private HashMap<MpBlock, HashSet<MpReg>> in = new HashMap<>();
     private HashMap<MpBlock, HashSet<MpReg>> out = new HashMap<>();
-    public livenessAnalysis(MpFunction curMF) {
+    public LivenessAnalysis(MpFunction curMF) {
         this.curMF = curMF;
         analysisBlocksLive();
         while(!analysisOnce());
@@ -34,14 +34,11 @@ public class livenessAnalysis {
             HashSet curUse = new HashSet();
             def.put(curMB, curDef);
             use.put(curMB, curUse);
+            in.put(curMB, new HashSet<>());
+            out.put(curMB, new HashSet<>());
             for (MpInstr curMI : curMB.getMpInstrs()) {
-                HashSet<MpReg> useRegs = curMI.getUseRegs();
-                for (MpReg curReg : useRegs)
-                    if (!curDef.contains(curReg))
-                        curUse.add(curReg);
-                HashSet<MpReg> defRegs = curMI.getDefRegs();
-                for (MpReg curReg : defRegs)
-                    curDef.add(curReg);
+                curUse.addAll(curMI.getUseRegs());
+                curDef.addAll(curMI.getDefRegs());
             }
         }
     }
@@ -61,20 +58,17 @@ public class livenessAnalysis {
             visitedMBs.put(curMB, true);
             HashSet<MpReg> curDef = def.get(curMB);
             HashSet<MpReg> curUse = use.get(curMB);
-            HashSet<MpReg> curIn = new HashSet<>();
-            HashSet<MpReg> curOut = new HashSet<>();
-            in.put(curMB, curIn);
-            out.put(curMB, curOut);
+            HashSet<MpReg> curIn = in.get(curMB);
+            HashSet<MpReg> curOut = out.get(curMB);
             for (MpBlock curSuccMB : curMB.getSuccMBs()) {
-                HashSet<MpReg> curSuccIn = in.get(curSuccMB);
-                if (!equal(curOut, curSuccIn)) {
-                    changed = true;
-                    curOut.addAll(curSuccIn);
-                }
+                curOut.addAll(in.get(curSuccMB));
             }
+            HashSet<MpReg> oldIn = new HashSet<>(curIn);
             curIn.addAll(curOut);
             curIn.removeAll(curDef);
             curIn.addAll(curUse);
+            if (!equal(oldIn, curIn))
+                changed = true;
             for (MpBlock curPrecMB : curMB.getPrecMBs())
                 if (!visitedMBs.get(curPrecMB))
                     MBs.add(curPrecMB);

@@ -48,6 +48,15 @@ MpReg getPhyReg() { // 获取一个物理寄存器
 }
 ```
 ## 图着色寄存器分配
+### 活跃变量分析
+
+沿控制流反方向
+$$
+in[s]=use[s]\cup(out[s]-def[s])\\
+out[s]=\cup_{s的后继基本块p}in[p]
+$$
+
+
 ### 冲突图数据结构
 查询冲突图数据结构操作：
 1. 获得与结点x相邻的所有结点 -> 邻接表
@@ -63,30 +72,4 @@ MpReg getPhyReg() { // 获取一个物理寄存器
 2. 有可能合并的传送指令 worklist moves
 3. 低度数的传送有关的结点 freeze worklist
 4. 高度数的结点 spill worklist
-
-## 除法优化
-
-### 无符号整数
-
-```java
-// q=u/d
-int N = 32;
-int clz(x); // x二进制表示从最高位开始（左起）的连续的0的个数
-int ctz(x); // x二进制表示从最低位开始（右起）的连续的0的个数
-Multiplier chooseMultiplier(d, p) {
-    assert d != 0;
-    assert p >= 1 && p <= N;
-    int l = N - clz(d-1);
-    Uint64 low = (Uint64(1) << (N+1)) / d;
-    Uint64 high = ((Uint64(1) << (N + l)) + (Uint64(1) << (N + l - p))) / d;
-	while ((low >> 1) < (high >> 1) && l > 0)
-        low >>= 1, high >>= 1, --l;
-    return {high, l};
-}
-void generateUnsignedDivision(Uint32 d) {
-    assert(d != 0);
-    int s = ctz(d);
-    Multiplier multiplier = chooseMultiplier(d, N)
-}
-```
 

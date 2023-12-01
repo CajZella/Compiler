@@ -25,19 +25,19 @@ public class MyLinkedList<T extends  MyLinkedNode> implements Iterable<T> {
         tail.setPrev(head);
         size = 0;
     }
-    public T contains(T node) {
-        if (size == 0) return null;
+    public boolean contains(T node) {
+        if (size == 0) return false;
         T cur = (T) head.getNext();
         while (cur != node && cur != tail) {
             cur = (T)head.getNext();
         }
-        if (cur == node) { return cur; }
-        else { return null; }
+        if (cur == node) { return true; }
+        else { return false; }
     }
     public void insertBefore(T node, T before) {
         if (head == before) { insertAtHead(node); }
         else {
-            assert null != contains(before);
+            assert contains(before);
             before.insertBefore(node);
             size++;
         }
@@ -45,7 +45,7 @@ public class MyLinkedList<T extends  MyLinkedNode> implements Iterable<T> {
     public void insertAfter(T node, T after) {
         if (tail == after) { insertAtTail(node); }
         else {
-            assert null != contains(after);
+            assert contains(after);
             after.insertAfter(node);
             size++;
         }

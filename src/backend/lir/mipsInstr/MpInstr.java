@@ -72,9 +72,17 @@ public abstract class MpInstr extends MyLinkedNode {
         addUseReg(src2Reg, reg);
         src2Reg = reg;
     }
-    public boolean hasDstReg() { return null != dstReg && !dstReg.isPrecolored(); }
-    public boolean hasSrc1Reg() { return null != src1Reg && !src1Reg.isPrecolored(); }
-    public boolean hasSrc2Reg() { return null != src2Reg && !src2Reg.isPrecolored(); }
+    public void replaceSrc(MpReg reg) {
+        for (MpReg src : useRegs) {
+            if (src.equal(src1Reg))
+                replaceSrc1(reg);
+            if (src.equal(src2Reg))
+                replaceSrc2(reg);
+        }
+    }
+    public boolean hasDstReg() { return null != dstReg; }
+    public boolean hasSrc1Reg() { return null != src1Reg; }
+    public boolean hasSrc2Reg() { return null != src2Reg; }
     public MpReg getDstReg() { return dstReg; }
     public MpReg getSrc1Reg() { return src1Reg; }
     public MpReg getSrc2Reg() { return src2Reg; }
@@ -89,15 +97,23 @@ public abstract class MpInstr extends MyLinkedNode {
     public void addUseReg(MpReg old, MpReg reg) {
         if (null != old)
             removeUseReg(old);
+        reg.incUseTime();
         useRegs.add(reg);
     }
     public void addDefReg(MpReg old, MpReg reg) {
         if (null != old)
             removeDefReg(old);
+        reg.incUseTime();
         defRegs.add(reg);
     }
-    public void removeUseReg(MpReg reg) { useRegs.remove(reg); }
-    public void removeDefReg(MpReg reg) { defRegs.remove(reg); }
+    public void removeUseReg(MpReg reg) {
+        reg.decUseTime();
+        useRegs.remove(reg);
+    }
+    public void removeDefReg(MpReg reg) {
+        reg.decUseTime();
+        defRegs.remove(reg);
+    }
     public HashSet<MpReg> getUseRegs() { return useRegs; }
     public HashSet<MpReg> getDefRegs() { return defRegs; }
     public MipsInstrType getInstrType() { return instrType; }

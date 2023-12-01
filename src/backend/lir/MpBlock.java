@@ -26,6 +26,7 @@ public class MpBlock extends MyLinkedNode {
     public HashSet<MpBlock> getPrecMBs() { return precMBs; }
     public HashSet<MpBlock> getSuccMBs() { return succMBs; }
     public MpLabel getLabel() { return this.label; }
+    public MpInstr getFirstMpInstr() { return mpInstrs.getHead(); }
     public MpInstr getLastMpInstr() { return mpInstrs.getTail(); }
     public void removeInstr(MpInstr instr) { mpInstrs.remove(instr); }
     public void addMpInstr(MpInstr mpInstr) { this.mpInstrs.insertAtTail(mpInstr); }

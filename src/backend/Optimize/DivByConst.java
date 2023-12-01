@@ -1,5 +1,6 @@
 package backend.Optimize;
 
+import backend.BackEnd;
 import backend.lir.MpBlock;
 import backend.lir.mipsInstr.MpAlu;
 import backend.lir.mipsInstr.MpCmp;
@@ -30,7 +31,7 @@ public class DivByConst {
         if (divisor == 1) {
             curMB.addMpInstr(new MpMove(curMB, dst, dividend));
         } else if (divisor == -1) {
-            curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, new MpReg(MpPhyReg.$zero), dividend));
+            curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, BackEnd.mipsPhyRegs.get(0), dividend));
         }
         /* step2. 若除数是2的幂次 */
         else if ((divisor & (divisor - 1)) == 0) {
@@ -83,10 +84,10 @@ public class DivByConst {
         }
         if (multiplier.post > 0)
             curMB.addMpInstr(new MpShift(MpInstr.MipsInstrType.sra, curMB, dst, dst, new MpImm(multiplier.post)));
-        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.slt, curMB, new MpReg(MpPhyReg.$v0), n, new MpReg(MpPhyReg.$zero)));
-        curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addu, curMB, dst, dst, new MpReg(MpPhyReg.$v0)));
+        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.slt, curMB, BackEnd.mipsPhyRegs.get(2), n, BackEnd.mipsPhyRegs.get(0)));
+        curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addu, curMB, dst, dst, BackEnd.mipsPhyRegs.get(2)));
         if (d < 0)
-            curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, new MpReg(MpPhyReg.$zero), dst));
+            curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, BackEnd.mipsPhyRegs.get(0), dst));
     }
     public class Multiplier {
         public BigInteger m;
