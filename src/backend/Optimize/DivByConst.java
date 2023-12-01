@@ -33,11 +33,6 @@ public class DivByConst {
         } else if (divisor == -1) {
             curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, BackEnd.mipsPhyRegs.get(0), dividend));
         }
-        /* step2. 若除数是2的幂次 */
-        else if ((divisor & (divisor - 1)) == 0) {
-            int shift = (Integer.numberOfTrailingZeros(divisor));
-            curMB.addMpInstr(new MpShift(MpInstr.MipsInstrType.srl, curMB, dst, dividend, new MpImm(shift)));
-        }
         /* step3. 转化为除以无符号常数的除法优化 */
         else {
             generateDivision(dividend, divisor, dst, curMB);

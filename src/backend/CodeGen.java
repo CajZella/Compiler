@@ -313,7 +313,7 @@ public class CodeGen {
                switch (mipsCmp.getInstrType()) {
                    case seq -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.beq, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
                    case sne -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.bne, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
-                   case slt -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.blt, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
+                   case slt, slti -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.blt, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
                    case sle -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.ble, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
                    case sgt -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.bgt, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
                    case sge -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.bge, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
@@ -504,6 +504,8 @@ public class CodeGen {
                 case slt -> {
                     if (lhs instanceof MpImm)
                         curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.sgt, curMB, dst, (MpReg) rhs, lhs));
+                    else if (rhs instanceof MpImm)
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.slti, curMB, dst, (MpReg) lhs, rhs));
                     else
                         curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.slt, curMB, dst, (MpReg) lhs, rhs));
                 }
@@ -515,7 +517,7 @@ public class CodeGen {
                 }
                 case sgt -> {
                     if (lhs instanceof MpImm)
-                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.slt, curMB, dst, (MpReg) rhs, lhs));
+                        curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.slti, curMB, dst, (MpReg) rhs, lhs));
                     else
                         curMB.addMpInstr(new MpCmp(MpInstr.MipsInstrType.sgt, curMB, dst, (MpReg) lhs, rhs));
                 }

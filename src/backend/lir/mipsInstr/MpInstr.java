@@ -16,18 +16,18 @@ public abstract class MpInstr extends MyLinkedNode {
         ori,
         subu,
         xor,
-        mul, //todo:窥孔优化 peephole
+        mul,
         mult,
         div,
         mfhi,
 
         sll,
-        sra,
-        srl,
+        sra, // 算术右移
 
         seq,
         sne,
         slt,
+        slti,
         sle,
         sgt,
         sge,
