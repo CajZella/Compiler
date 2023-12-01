@@ -558,6 +558,9 @@ public class CodeGen {
      * 同加法
      */
     private void genSubInstr(Alu instr) {
+        if (instr.getName().equals("%i484")) {
+            int x = 1;
+        }
         MpOpd lhs = genOperand(instr.getOperand(0));
         MpOpd rhs = genOperand(instr.getOperand(1));
         if (lhs instanceof MpImm && rhs instanceof MpImm) {
@@ -571,8 +574,8 @@ public class CodeGen {
                 curMB.addMpInstr(new MpLoadImm(curMB, dst, (MpImm)lhs));
                 curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, dst, (MpReg) rhs));
             } else if (rhs instanceof MpImm) {
-                ((MpImm)rhs).setVal(-((MpImm)rhs).getVal());
-                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) lhs, (MpImm) rhs));
+                MpImm imm = new MpImm(-((MpImm)rhs).getVal());
+                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) lhs, imm));
             } else {
                 curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, (MpReg) lhs, (MpReg) rhs));
             }
@@ -754,7 +757,7 @@ public class CodeGen {
                 } else {
                     preBase = base;
                     base = new MpReg();
-                    mulOptimize(base, (MpReg) idx, new MpImm(dimSizes.get(i)));
+                    mulOptimize(base, (MpReg) idx, new MpImm(dimSizes.get(i-1)));
                     curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addu, curMB, base, preBase, base));
                 }
             }
