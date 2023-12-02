@@ -2,316 +2,309 @@ declare i32 @getint()
 declare void @putint(i32)
 declare void @putstr(i8*)
 declare void @putch(i32)
-@normalConst1 = dso_local constant i32 10
-@normalConst2 = dso_local constant i32 12
-@normalConst3 = dso_local constant i32 13
-@array1DConst1 = dso_local constant [3 x i32] [i32 1, i32 2, i32 3]
-@array2DConst1 = dso_local constant [3 x [2 x i32]] [[2 x i32] [i32 1, i32 3], [2 x i32] [i32 3, i32 5], [2 x i32] [i32 5, i32 7]]
-@normalVar1 = dso_local global i32 21
-@normalVar2 = dso_local global i32 22
-@normalVar3 = dso_local global i32 23
-@array1DVar1 = dso_local global [4 x i32] [i32 1, i32 2, i32 3, i32 4]
-@array2DVar1 = dso_local global [2 x [3 x i32]] zeroinitializer
-@sum = dso_local global i32 0
-@str.0 = private unnamed_addr constant [11 x i8] c" is even!\0A\00"
-@str.1 = private unnamed_addr constant [10 x i8] c" is odd!\0A\00"
-@str.2 = private unnamed_addr constant [11 x i8] c"All even!\0A\00"
-@str.3 = private unnamed_addr constant [15 x i8] c"Contains odd! \00"
-@str.4 = private unnamed_addr constant [16 x i8] c"array contains \00"
-@str.5 = private unnamed_addr constant [15 x i8] c" even number!\0A\00"
-@str.6 = private unnamed_addr constant [10 x i8] c"19373341\0A\00"
-@str.7 = private unnamed_addr constant [5 x i8] c"m = \00"
-@str.8 = private unnamed_addr constant [7 x i8] c", n = \00"
-@str.9 = private unnamed_addr constant [8 x i8] c", mm = \00"
-@str.10 = private unnamed_addr constant [8 x i8] c", nn = \00"
-@str.11 = private unnamed_addr constant [19 x i8] c"max of mm and nn: \00"
-@str.12 = private unnamed_addr constant [21 x i8] c"; min of mm and nn: \00"
-@str.13 = private unnamed_addr constant [14 x i8] c"mainConst1 = \00"
-@str.14 = private unnamed_addr constant [21 x i8] c"Sum of normalConst: \00"
-@str.15 = private unnamed_addr constant [15 x i8] c"Sum of array: \00"
-@str.16 = private unnamed_addr constant [15 x i8] c"sum of array: \00"
-define dso_local void @outputInt(i32 %ar1) {
-outputInt_b0:
-  call void @putint(i32 %ar1)
-  call void @putch(i32 10)
+@str.0 = private unnamed_addr constant [3 x i8] c"19\00"
+@str.1 = private unnamed_addr constant [5 x i8] c"384\0A\00"
+@str.2 = private unnamed_addr constant [36 x i8] c"const and var // decl and def test\0A\00"
+@str.3 = private unnamed_addr constant [31 x i8] c"expected result: 579, output: \00"
+@str.4 = private unnamed_addr constant [30 x i8] c"function (def and )call test\0A\00"
+@str.5 = private unnamed_addr constant [52 x i8] c"expected result: {{589, 21}, {599, 31}}, output: {{\00"
+@str.6 = private unnamed_addr constant [3 x i8] c", \00"
+@str.7 = private unnamed_addr constant [5 x i8] c"}, {\00"
+@str.8 = private unnamed_addr constant [3 x i8] c", \00"
+@str.9 = private unnamed_addr constant [4 x i8] c"}}\0A\00"
+@str.10 = private unnamed_addr constant [61 x i8] c"LExp test, falling into infinite loop indicates an error -- \00"
+@str.11 = private unnamed_addr constant [6 x i8] c"pass\0A\00"
+@str.12 = private unnamed_addr constant [48 x i8] c"simple echo test, get a integer and read back: \00"
+@str.13 = private unnamed_addr constant [246 x i8] c"\0A\0A================================================================================\0A                                     PASSED                                     \0A================================================================================\0A\00"
+define dso_local void @_() {
+__b0:
+  %i3 = srem i32 120, 121
+  %i4 = add i32 267, %i3
+  %i5 = sub i32 %i4, 14
+  %i6 = getelementptr [3 x i8], [3 x i8]* @str.0, i32 0, i32 0
+  call void @putstr(i8* %i6)
+  call void @putint(i32 %i5)
+  %i7 = getelementptr [5 x i8], [5 x i8]* @str.1, i32 0, i32 0
+  call void @putstr(i8* %i7)
   ret void
 }
-define dso_local i32 @getArraySum(i32* %ar5, i32 %ar7) {
-getArraySum_b4:
-  br label %getArraySum_b11
-getArraySum_b11:
-  %p1 = phi i32 [ 0, %getArraySum_b4 ], [ %i22, %getArraySum_b12 ]
-  %p0 = phi i32 [ 0, %getArraySum_b4 ], [ %i24, %getArraySum_b12 ]
-  %i16 = icmp slt i32 %p0, %ar7
-  br i1 %i16, label %getArraySum_b12, label %getArraySum_b13
-getArraySum_b12:
-  %i20 = getelementptr i32, i32* %ar5, i32 %p0
-  %i21 = load i32, i32* %i20
-  %i22 = add i32 %p1, %i21
-  %i24 = add i32 %p0, 1
-  br label %getArraySum_b11
-getArraySum_b13:
+define dso_local i32 @DoNotCall() {
+DoNotCall_b8:
+  br label %DoNotCall_b9
+DoNotCall_b9:
+  %i12 = icmp ne i32 1, 0
+  br i1 %i12, label %DoNotCall_b10, label %DoNotCall_b11
+DoNotCall_b10:
+  br label %DoNotCall_b9
+DoNotCall_b11:
+  %i13 = sub i32 0, 1
+  ret i32 %i13
+}
+define dso_local i32 @addN(i32 %ar15, i32 %ar17) {
+addN_b14:
+  br label %addN_b20
+addN_b20:
+  %p2 = phi i32 [ 0, %addN_b14 ], [ %i39, %addN_b25 ], [ %i30, %addN_b24 ]
+  %p0 = phi i32 [ %ar15, %addN_b14 ], [ %i32, %addN_b25 ], [ %p0, %addN_b24 ]
+  %i23 = icmp ne i32 1, 0
+  br i1 %i23, label %addN_b21, label %addN_b22
+addN_b21:
+  %i28 = icmp eq i32 %p2, 0
+  br i1 %i28, label %addN_b24, label %addN_b26
+addN_b22:
+  %p1 = phi i32 [ %p0, %addN_b20 ], [ %i32, %addN_b33 ]
   ret i32 %p1
+addN_b24:
+  %i30 = add i32 %p2, 1
+  br label %addN_b20
+addN_b25:
+  br label %addN_b20
+addN_b26:
+  %i32 = add i32 %p0, 1
+  %i37 = icmp eq i32 %p2, %ar17
+  br i1 %i37, label %addN_b33, label %addN_b34
+addN_b33:
+  br label %addN_b22
+addN_b34:
+  %i39 = add i32 %p2, 1
+  br label %addN_b25
 }
-define dso_local void @judgeEvenOdd(i32 %ar27) {
-judgeEvenOdd_b26:
-  %i33 = srem i32 %ar27, 2
-  %i34 = icmp eq i32 %i33, 0
-  br i1 %i34, label %judgeEvenOdd_b29, label %judgeEvenOdd_b31
-judgeEvenOdd_b29:
-  call void @putint(i32 %ar27)
-  %i36 = getelementptr [11 x i8], [11 x i8]* @str.0, i32 0, i32 0
-  call void @putstr(i8* %i36)
-  br label %judgeEvenOdd_b30
-judgeEvenOdd_b30:
+define dso_local i32 @add2(i32 %ar42) {
+add2_b41:
+  %i45 = call i32 @addN(i32 %ar42, i32 2)
+  ret i32 %i45
+}
+define dso_local void @aAddN(i32* %ar47, i32 %ar49, i32 %ar51) {
+aAddN_b46:
+  br label %aAddN_b54
+aAddN_b54:
+  %p3 = phi i32 [ 0, %aAddN_b46 ], [ %i70, %aAddN_b55 ]
+  %i59 = icmp slt i32 %p3, %ar49
+  br i1 %i59, label %aAddN_b55, label %aAddN_b56
+aAddN_b55:
+  %i62 = getelementptr i32, i32* %ar47, i32 %p3
+  %i63 = load i32, i32* %i62
+  %i65 = call i32 @addN(i32 %i63, i32 %ar51)
+  %i68 = getelementptr i32, i32* %ar47, i32 %p3
+  store i32 %i65, i32* %i68
+  %i70 = add i32 %p3, 1
+  br label %aAddN_b54
+aAddN_b56:
   ret void
-judgeEvenOdd_b31:
-  call void @putint(i32 %ar27)
-  %i38 = getelementptr [10 x i8], [10 x i8]* @str.1, i32 0, i32 0
-  call void @putstr(i8* %i38)
-  br label %judgeEvenOdd_b30
 }
-define dso_local void @judgeArrayAllEven([3 x i32]* %ar40, i32 %ar42) {
-judgeArrayAllEven_b39:
-  %i49 = getelementptr [3 x i32], [3 x i32]* %ar40, i32 0, i32 1
-  %i50 = load i32, i32* %i49
-  br label %judgeArrayAllEven_b51
-judgeArrayAllEven_b51:
-  %p8 = phi i32 [ 0, %judgeArrayAllEven_b39 ], [ %p6, %judgeArrayAllEven_b75 ]
-  %p5 = phi i32 [ 0, %judgeArrayAllEven_b39 ], [ %p4, %judgeArrayAllEven_b75 ]
-  %p2 = phi i32 [ 0, %judgeArrayAllEven_b39 ], [ %i79, %judgeArrayAllEven_b75 ]
-  %i56 = icmp slt i32 %p2, %ar42
-  br i1 %i56, label %judgeArrayAllEven_b52, label %judgeArrayAllEven_b53
-judgeArrayAllEven_b52:
-  br label %judgeArrayAllEven_b57
-judgeArrayAllEven_b53:
-  %p7 = phi i32 [ %p8, %judgeArrayAllEven_b51 ], [ %p6, %judgeArrayAllEven_b74 ]
-  %p3 = phi i32 [ %p5, %judgeArrayAllEven_b51 ], [ %p4, %judgeArrayAllEven_b74 ]
-  %i84 = icmp eq i32 %p7, 0
-  br i1 %i84, label %judgeArrayAllEven_b80, label %judgeArrayAllEven_b82
-judgeArrayAllEven_b57:
-  %p4 = phi i32 [ 0, %judgeArrayAllEven_b52 ], [ %i73, %judgeArrayAllEven_b62 ]
-  %i61 = icmp slt i32 %p4, 3
-  br i1 %i61, label %judgeArrayAllEven_b58, label %judgeArrayAllEven_b59
-judgeArrayAllEven_b58:
-  %i68 = getelementptr [3 x i32], [3 x i32]* %ar40, i32 %p2, i32 %p4
-  %i69 = load i32, i32* %i68
-  %i70 = srem i32 %i69, 2
-  %i71 = icmp eq i32 %i70, 0
-  br i1 %i71, label %judgeArrayAllEven_b62, label %judgeArrayAllEven_b64
-judgeArrayAllEven_b59:
-  %p6 = phi i32 [ %p8, %judgeArrayAllEven_b57 ], [ 1, %judgeArrayAllEven_b64 ]
-  %i77 = icmp eq i32 %p6, 1
-  br i1 %i77, label %judgeArrayAllEven_b74, label %judgeArrayAllEven_b75
-judgeArrayAllEven_b62:
-  %i73 = add i32 %p4, 1
-  br label %judgeArrayAllEven_b57
-judgeArrayAllEven_b64:
-  br label %judgeArrayAllEven_b59
-judgeArrayAllEven_b74:
-  br label %judgeArrayAllEven_b53
-judgeArrayAllEven_b75:
-  %i79 = add i32 %p2, 1
-  br label %judgeArrayAllEven_b51
-judgeArrayAllEven_b80:
-  %i85 = getelementptr [11 x i8], [11 x i8]* @str.2, i32 0, i32 0
-  call void @putstr(i8* %i85)
-  br label %judgeArrayAllEven_b81
-judgeArrayAllEven_b81:
+define dso_local void @addBoardcast([2 x i32]* %ar72, i32* %ar74, i32 %ar76) {
+addBoardcast_b71:
+  br label %addBoardcast_b79
+addBoardcast_b79:
+  %p6 = phi i32 [ %p5, %addBoardcast_b88 ], [ 0, %addBoardcast_b71 ]
+  %p4 = phi i32 [ 0, %addBoardcast_b71 ], [ %i108, %addBoardcast_b88 ]
+  %i84 = icmp slt i32 %p4, %ar76
+  br i1 %i84, label %addBoardcast_b80, label %addBoardcast_b81
+addBoardcast_b80:
+  br label %addBoardcast_b86
+addBoardcast_b81:
   ret void
-judgeArrayAllEven_b82:
-  %i87 = getelementptr [15 x i8], [15 x i8]* @str.3, i32 0, i32 0
-  call void @putstr(i8* %i87)
-  call void @putint(i32 %i50)
-  call void @putch(i32 10)
-  br label %judgeArrayAllEven_b81
-}
-define dso_local i32 @cntEvenNum(i32* %ar89, i32 %ar91) {
-cntEvenNum_b88:
-  br label %cntEvenNum_b95
-cntEvenNum_b95:
-  %p10 = phi i32 [ 0, %cntEvenNum_b88 ], [ %p10, %cntEvenNum_b102 ], [ %i113, %cntEvenNum_b103 ]
-  %p9 = phi i32 [ 0, %cntEvenNum_b88 ], [ %i111, %cntEvenNum_b102 ], [ %i115, %cntEvenNum_b103 ]
-  %i100 = sub i32 %ar91, 1
-  %i101 = icmp sle i32 %p9, %i100
-  br i1 %i101, label %cntEvenNum_b96, label %cntEvenNum_b97
-cntEvenNum_b96:
-  %i106 = getelementptr i32, i32* %ar89, i32 %p9
-  %i107 = load i32, i32* %i106
-  %i108 = srem i32 %i107, 2
-  %i109 = icmp ne i32 %i108, 0
-  br i1 %i109, label %cntEvenNum_b102, label %cntEvenNum_b103
-cntEvenNum_b97:
-  %i117 = getelementptr [16 x i8], [16 x i8]* @str.4, i32 0, i32 0
-  call void @putstr(i8* %i117)
-  call void @putint(i32 %p10)
-  %i118 = getelementptr [15 x i8], [15 x i8]* @str.5, i32 0, i32 0
-  call void @putstr(i8* %i118)
-  ret i32 %p10
-cntEvenNum_b102:
-  %i111 = add i32 %p9, 1
-  br label %cntEvenNum_b95
-cntEvenNum_b103:
-  %i113 = add i32 %p10, 1
-  %i115 = add i32 %p9, 1
-  br label %cntEvenNum_b95
-}
-define dso_local i32 @get2Max(i32 %ar121, i32 %ar123) {
-get2Max_b120:
-  %i132 = icmp sgt i32 %ar121, %ar123
-  br i1 %i132, label %get2Max_b127, label %get2Max_b129
-get2Max_b127:
-  br label %get2Max_b128
-get2Max_b128:
-  %p11 = phi i32 [ %ar123, %get2Max_b129 ], [ %ar121, %get2Max_b127 ]
-  ret i32 %p11
-get2Max_b129:
-  br label %get2Max_b128
-}
-define dso_local i32 @get2Min(i32 %ar137, i32 %ar139) {
-get2Min_b136:
-  %i148 = icmp sge i32 %ar137, %ar139
-  br i1 %i148, label %get2Min_b143, label %get2Min_b145
-get2Min_b143:
-  br label %get2Min_b144
-get2Min_b144:
-  %p12 = phi i32 [ %ar139, %get2Min_b143 ], [ %ar137, %get2Min_b145 ]
-  ret i32 %p12
-get2Min_b145:
-  br label %get2Min_b144
+addBoardcast_b86:
+  %p5 = phi i32 [ 0, %addBoardcast_b80 ], [ %i106, %addBoardcast_b87 ]
+  %i90 = icmp slt i32 %p5, 2
+  br i1 %i90, label %addBoardcast_b87, label %addBoardcast_b88
+addBoardcast_b87:
+  %i94 = getelementptr [2 x i32], [2 x i32]* %ar72, i32 %p4, i32 %p5
+  %i95 = load i32, i32* %i94
+  %i98 = getelementptr i32, i32* %ar74, i32 %p5
+  %i99 = load i32, i32* %i98
+  %i100 = add i32 %i95, %i99
+  %i104 = getelementptr [2 x i32], [2 x i32]* %ar72, i32 %p4, i32 %p5
+  store i32 %i100, i32* %i104
+  %i106 = add i32 %p5, 1
+  br label %addBoardcast_b86
+addBoardcast_b88:
+  %i108 = add i32 %p4, 1
+  br label %addBoardcast_b79
 }
 define dso_local i32 @main() {
-main_b152:
-  %i153 = getelementptr [10 x i8], [10 x i8]* @str.6, i32 0, i32 0
-  call void @putstr(i8* %i153)
-  %i157 = call i32 @getint()
-  %i159 = call i32 @getint()
-  %i161 = call i32 @getint()
-  %i165 = call i32 @get2Max(i32 %i159, i32 %i161)
-  %i169 = call i32 @get2Min(i32 %i159, i32 %i161)
-  br label %main_b170
-main_b170:
-  %p15 = phi i32 [ 0, %main_b152 ], [ %i182, %main_b171 ]
-  %i174 = icmp slt i32 %p15, 4
-  br i1 %i174, label %main_b171, label %main_b172
-main_b171:
-  %i177 = mul i32 %p15, %p15
-  %i178 = sdiv i32 %i177, 2
-  %i180 = getelementptr [4 x i32], [4 x i32]* @array1DVar1, i32 0, i32 %p15
-  store i32 %i178, i32* %i180
-  %i182 = add i32 %p15, 1
-  br label %main_b170
-main_b172:
-  %i184 = getelementptr [4 x i32], [4 x i32]* @array1DVar1, i32 0, i32 0
-  %i185 = call i32 @getArraySum(i32* %i184, i32 4)
-  %i190 = getelementptr [5 x i8], [5 x i8]* @str.7, i32 0, i32 0
-  call void @putstr(i8* %i190)
-  call void @putint(i32 %i185)
-  %i191 = getelementptr [7 x i8], [7 x i8]* @str.8, i32 0, i32 0
-  call void @putstr(i8* %i191)
-  call void @putint(i32 %i157)
-  %i192 = getelementptr [8 x i8], [8 x i8]* @str.9, i32 0, i32 0
-  call void @putstr(i8* %i192)
-  call void @putint(i32 %i159)
-  %i193 = getelementptr [8 x i8], [8 x i8]* @str.10, i32 0, i32 0
-  call void @putstr(i8* %i193)
-  call void @putint(i32 %i161)
+main_b109:
+  call void @_()
+  %i110 = getelementptr [36 x i8], [36 x i8]* @str.2, i32 0, i32 0
+  call void @putstr(i8* %i110)
+  %i112 = alloca [2 x i32]
+  %i113 = alloca [2 x [2 x i32]]
+  %i115 = alloca [2 x i32]
+  %i116 = getelementptr [2 x i32], [2 x i32]* %i115, i32 0, i32 0
+  store i32 5, i32* %i116
+  %i117 = getelementptr [2 x i32], [2 x i32]* %i115, i32 0, i32 1
+  store i32 6, i32* %i117
+  %i118 = alloca [2 x [2 x i32]]
+  %i119 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i118, i32 0, i32 0, i32 0
+  store i32 7, i32* %i119
+  %i120 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i118, i32 0, i32 0, i32 1
+  store i32 10, i32* %i120
+  %i121 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i118, i32 0, i32 1, i32 0
+  store i32 27, i32* %i121
+  %i122 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i118, i32 0, i32 1, i32 1
+  store i32 96, i32* %i122
+  %i123 = alloca [2 x i32]
+  %i124 = getelementptr [2 x i32], [2 x i32]* %i123, i32 0, i32 0
+  store i32 1, i32* %i124
+  %i125 = getelementptr [2 x i32], [2 x i32]* %i123, i32 0, i32 1
+  store i32 3, i32* %i125
+  %i126 = alloca [2 x i32]
+  %i127 = getelementptr [2 x i32], [2 x i32]* %i126, i32 0, i32 0
+  store i32 2, i32* %i127
+  %i128 = getelementptr [2 x i32], [2 x i32]* %i126, i32 0, i32 1
+  store i32 4, i32* %i128
+  %i129 = alloca [2 x [2 x i32]]
+  %i130 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i129, i32 0, i32 0, i32 0
+  store i32 2, i32* %i130
+  %i131 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i129, i32 0, i32 0, i32 1
+  store i32 3, i32* %i131
+  %i132 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i129, i32 0, i32 1, i32 0
+  store i32 1, i32* %i132
+  %i133 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i129, i32 0, i32 1, i32 1
+  store i32 4, i32* %i133
+  %i134 = getelementptr [2 x i32], [2 x i32]* %i115, i32 0, i32 1
+  %i135 = load i32, i32* %i134
+  %i136 = getelementptr [2 x i32], [2 x i32]* %i112, i32 0, i32 0
+  store i32 %i135, i32* %i136
+  %i137 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i129, i32 0, i32 0, i32 1
+  %i138 = load i32, i32* %i137
+  %i139 = getelementptr [2 x i32], [2 x i32]* %i112, i32 0, i32 0
+  %i140 = load i32, i32* %i139
+  %i141 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i118, i32 0, i32 1, i32 1
+  %i142 = load i32, i32* %i141
+  %i143 = mul i32 %i140, %i142
+  %i144 = add i32 %i138, %i143
+  %i146 = getelementptr [31 x i8], [31 x i8]* @str.3, i32 0, i32 0
+  call void @putstr(i8* %i146)
+  call void @putint(i32 %i144)
   call void @putch(i32 10)
-  %i196 = getelementptr [19 x i8], [19 x i8]* @str.11, i32 0, i32 0
-  call void @putstr(i8* %i196)
-  call void @putint(i32 %i165)
-  %i197 = getelementptr [21 x i8], [21 x i8]* @str.12, i32 0, i32 0
-  call void @putstr(i8* %i197)
+  %i150 = icmp ne i32 579, %i144
+  br i1 %i150, label %main_b147, label %main_b148
+main_b147:
+  ret i32 1
+main_b148:
+  %i151 = getelementptr [30 x i8], [30 x i8]* @str.4, i32 0, i32 0
+  call void @putstr(i8* %i151)
+  %i153 = call i32 @add2(i32 %i144)
+  %i154 = getelementptr [2 x i32], [2 x i32]* %i112, i32 0, i32 0
+  store i32 %i153, i32* %i154
+  %i155 = getelementptr [2 x i32], [2 x i32]* %i123, i32 0, i32 1
+  %i156 = load i32, i32* %i155
+  %i157 = call i32 @addN(i32 %i156, i32 5)
+  %i158 = getelementptr [2 x i32], [2 x i32]* %i112, i32 0, i32 1
+  store i32 %i157, i32* %i158
+  %i159 = getelementptr [2 x i32], [2 x i32]* %i112, i32 0, i32 0
+  call void @aAddN(i32* %i159, i32 2, i32 3)
+  %i160 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 0, i32 0
+  store i32 5, i32* %i160
+  %i161 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 0, i32 1
+  store i32 10, i32* %i161
+  %i162 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 1, i32 0
+  store i32 15, i32* %i162
+  %i163 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 1, i32 1
+  store i32 20, i32* %i163
+  %i164 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 0
+  %i165 = getelementptr [2 x i32], [2 x i32]* %i112, i32 0, i32 0
+  call void @addBoardcast([2 x i32]* %i164, i32* %i165, i32 2)
+  %i166 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 0, i32 0
+  %i167 = load i32, i32* %i166
+  %i168 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 0, i32 1
+  %i169 = load i32, i32* %i168
+  %i170 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 1, i32 0
+  %i171 = load i32, i32* %i170
+  %i172 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 1, i32 1
+  %i173 = load i32, i32* %i172
+  %i174 = getelementptr [52 x i8], [52 x i8]* @str.5, i32 0, i32 0
+  call void @putstr(i8* %i174)
+  call void @putint(i32 %i167)
+  %i175 = getelementptr [3 x i8], [3 x i8]* @str.6, i32 0, i32 0
+  call void @putstr(i8* %i175)
   call void @putint(i32 %i169)
-  call void @putch(i32 10)
-  %i200 = getelementptr [14 x i8], [14 x i8]* @str.13, i32 0, i32 0
-  call void @putstr(i8* %i200)
-  call void @putint(i32 10)
-  call void @putch(i32 10)
-  %i201 = load i32, i32* @normalConst1
-  %i202 = load i32, i32* @normalConst2
-  %i203 = add i32 %i201, %i202
-  %i204 = load i32, i32* @normalConst3
-  %i205 = add i32 %i203, %i204
-  %i206 = getelementptr [21 x i8], [21 x i8]* @str.14, i32 0, i32 0
-  call void @putstr(i8* %i206)
-  call void @putint(i32 %i205)
-  call void @putch(i32 10)
-  call void @judgeEvenOdd(i32 %i157)
-  %i209 = getelementptr [15 x i8], [15 x i8]* @str.15, i32 0, i32 0
-  call void @putstr(i8* %i209)
-  call void @putint(i32 %i185)
-  call void @putch(i32 10)
-  br label %main_b210
+  %i176 = getelementptr [5 x i8], [5 x i8]* @str.7, i32 0, i32 0
+  call void @putstr(i8* %i176)
+  call void @putint(i32 %i171)
+  %i177 = getelementptr [3 x i8], [3 x i8]* @str.8, i32 0, i32 0
+  call void @putstr(i8* %i177)
+  call void @putint(i32 %i173)
+  %i178 = getelementptr [4 x i8], [4 x i8]* @str.9, i32 0, i32 0
+  call void @putstr(i8* %i178)
+  %i181 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 0, i32 0
+  %i182 = load i32, i32* %i181
+  %i183 = icmp ne i32 %i182, 589
+  br i1 %i183, label %main_b179, label %main_b180
+main_b179:
+  ret i32 2
+main_b180:
+  %i186 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 0, i32 1
+  %i187 = load i32, i32* %i186
+  %i188 = icmp ne i32 %i187, 21
+  br i1 %i188, label %main_b184, label %main_b185
+main_b184:
+  ret i32 2
+main_b185:
+  %i191 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 1, i32 0
+  %i192 = load i32, i32* %i191
+  %i193 = icmp ne i32 %i192, 599
+  br i1 %i193, label %main_b189, label %main_b190
+main_b189:
+  ret i32 2
+main_b190:
+  %i196 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i113, i32 0, i32 1, i32 1
+  %i197 = load i32, i32* %i196
+  %i198 = icmp ne i32 %i197, 31
+  br i1 %i198, label %main_b194, label %main_b195
+main_b194:
+  ret i32 2
+main_b195:
+  %i199 = getelementptr [61 x i8], [61 x i8]* @str.10, i32 0, i32 0
+  call void @putstr(i8* %i199)
+  %i203 = icmp ne i32 0, 0
+  br i1 %i203, label %main_b200, label %main_b202
+main_b200:
+  br label %main_b201
+main_b201:
+  %i220 = icmp eq i32 0, 0
+  br i1 %i220, label %main_b221, label %main_b219
+main_b202:
+  %i205 = icmp slt i32 2, 1
+  br i1 %i205, label %main_b200, label %main_b204
+main_b204:
+  %i207 = icmp sgt i32 1, 1
+  br i1 %i207, label %main_b200, label %main_b206
+main_b206:
+  %i209 = icmp sge i32 3, 5
+  br i1 %i209, label %main_b200, label %main_b208
+main_b208:
+  %i211 = icmp sle i32 7, 6
+  br i1 %i211, label %main_b200, label %main_b210
 main_b210:
-  %p18 = phi i32 [ 0, %main_b172 ], [ %p19, %main_b217 ]
-  %p14 = phi i32 [ 0, %main_b172 ], [ %i236, %main_b217 ]
-  %i214 = icmp slt i32 %p14, 2
-  br i1 %i214, label %main_b211, label %main_b212
-main_b211:
-  br label %main_b215
+  %i213 = icmp eq i32 9, 10
+  br i1 %i213, label %main_b200, label %main_b212
 main_b212:
-  %i237 = load i32, i32* @sum
-  %i238 = getelementptr [15 x i8], [15 x i8]* @str.16, i32 0, i32 0
-  call void @putstr(i8* %i238)
-  call void @putint(i32 %i237)
+  %i215 = icmp ne i32 1, 0
+  br i1 %i215, label %main_b200, label %main_b214
+main_b214:
+  %i216 = call i32 @DoNotCall()
+  %i217 = icmp ne i32 %i216, 0
+  br i1 %i217, label %main_b200, label %main_b201
+main_b218:
+  br label %main_b219
+main_b219:
+  %i226 = getelementptr [6 x i8], [6 x i8]* @str.11, i32 0, i32 0
+  call void @putstr(i8* %i226)
+  %i227 = getelementptr [48 x i8], [48 x i8]* @str.12, i32 0, i32 0
+  call void @putstr(i8* %i227)
+  %i229 = call i32 @getint()
+  call void @putint(i32 %i229)
   call void @putch(i32 10)
-  br label %main_b239
-main_b215:
-  %p19 = phi i32 [ 0, %main_b211 ], [ %i234, %main_b216 ]
-  %i219 = icmp slt i32 %p19, 3
-  br i1 %i219, label %main_b216, label %main_b217
-main_b216:
-  %i221 = mul i32 10, %p14
-  %i223 = sub i32 %i221, %p19
-  %i226 = getelementptr [2 x [3 x i32]], [2 x [3 x i32]]* @array2DVar1, i32 0, i32 %p14, i32 %p19
-  store i32 %i223, i32* %i226
-  %i227 = load i32, i32* @sum
-  %i230 = getelementptr [2 x [3 x i32]], [2 x [3 x i32]]* @array2DVar1, i32 0, i32 %p14, i32 %p19
-  %i231 = load i32, i32* %i230
-  %i232 = add i32 %i227, %i231
-  store i32 %i232, i32* @sum
-  %i234 = add i32 %p19, 1
-  br label %main_b215
-main_b217:
-  %i236 = add i32 %p14, 1
-  br label %main_b210
-main_b239:
-  %p16 = phi i32 [ %p18, %main_b212 ], [ %p17, %main_b246 ]
-  %p13 = phi i32 [ 0, %main_b212 ], [ %i262, %main_b246 ]
-  %i243 = icmp slt i32 %p13, 2
-  br i1 %i243, label %main_b240, label %main_b241
-main_b240:
-  br label %main_b244
-main_b241:
-  %i263 = getelementptr [4 x i32], [4 x i32]* @array1DVar1, i32 0, i32 0
-  %i264 = call i32 @cntEvenNum(i32* %i263, i32 4)
-  %i265 = getelementptr [2 x [3 x i32]], [2 x [3 x i32]]* @array2DVar1, i32 0, i32 0
-  call void @judgeArrayAllEven([3 x i32]* %i265, i32 2)
-  %i268 = icmp ne i32 0, 0
-  br i1 %i268, label %main_b266, label %main_b267
-main_b244:
-  %p17 = phi i32 [ 0, %main_b240 ], [ %i260, %main_b245 ]
-  %i248 = icmp slt i32 %p17, 3
-  br i1 %i248, label %main_b245, label %main_b246
-main_b245:
-  %i250 = mul i32 4, %p13
-  %i252 = mul i32 %i250, %p17
-  %i253 = sdiv i32 %i252, 2
-  %i254 = add i32 %i253, 4
-  %i255 = sub i32 %i254, 2
-  %i258 = getelementptr [2 x [3 x i32]], [2 x [3 x i32]]* @array2DVar1, i32 0, i32 %p13, i32 %p17
-  store i32 %i255, i32* %i258
-  %i260 = add i32 %p17, 1
-  br label %main_b244
-main_b246:
-  %i262 = add i32 %p13, 1
-  br label %main_b239
-main_b266:
-  %i269 = getelementptr [2 x [3 x i32]], [2 x [3 x i32]]* @array2DVar1, i32 0, i32 0, i32 0
-  %i270 = load i32, i32* %i269
-  call void @judgeEvenOdd(i32 %i270)
-  br label %main_b267
-main_b267:
+  %i231 = getelementptr [246 x i8], [246 x i8]* @str.13, i32 0, i32 0
+  call void @putstr(i8* %i231)
   ret i32 0
+main_b221:
+  %i222 = icmp eq i32 2, 0
+  br i1 %i222, label %main_b223, label %main_b219
+main_b223:
+  %i224 = call i32 @DoNotCall()
+  %i225 = icmp ne i32 %i224, 0
+  br i1 %i225, label %main_b218, label %main_b219
 }

@@ -19,6 +19,8 @@ public class MpBranch extends MpInstr {
         else this.src2Imm = (MpImm) src2;
         this.label = label;
     }
+    public void replaceLabel(MpLabel label) { this.label = label; }
+    public MpLabel getLabel() { return label; }
     public String toString() {
         return String.format("%s %s, %s, %s", instrType, src1Reg, null == src2Reg ? src2Imm : src2Reg, label);
     }

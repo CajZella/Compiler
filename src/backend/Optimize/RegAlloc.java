@@ -394,7 +394,7 @@ public class RegAlloc {
         while (!selectStack.isEmpty()) {
             MpReg reg = selectStack.pop();
             ArrayList<MpReg> okColors = new ArrayList<>();
-            if (K == 24)
+            if (K == 23)
                 for (int i = 25; i >= 3; i--)
                     okColors.add(precolored.get(i));
             else

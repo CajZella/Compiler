@@ -30,13 +30,13 @@ public class BackEnd {
             MyIO.writeFile(Config.MIPSVRFile, mipsModule.toString());
         RegAlloc regAlloc = new RegAlloc(mipsModule, mipsPhyRegs);
         regAlloc.run();
+        Peephole peephole = new Peephole(mipsModule, mipsPhyRegs);
+        peephole.run();
         for (MpFunction mipsFunction : mipsModule.getMpFunctions())
             for (MpBlock mipsBlock : mipsFunction.getMpBlocks())
                 for (MpInstr mipsInstr : mipsBlock.getMpInstrs())
                     if (mipsInstr.getInstrType() == MpInstr.MipsInstrType.jal)
                         ((MpJump)mipsInstr).dealJal();
-        Peephole peephole = new Peephole(mipsModule, mipsPhyRegs);
-        peephole.run();
     }
     public static MpModule getMipsModule() { return mipsModule; }
 }

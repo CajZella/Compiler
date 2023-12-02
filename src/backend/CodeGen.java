@@ -112,7 +112,7 @@ public class CodeGen {
         /* 先建函数和基本块，再生成代码 */
         for (Function function : functions) {
             if (function.isBuiltin()) continue;
-            MpFunction mipsFunction = new MpFunction(function.getMipsName());
+            MpFunction mipsFunction = new MpFunction(function.getMipsName(), function.getArguments().size());
             mipsModule.addMpFunction(mipsFunction);
             f2mf.put(function, mipsFunction);
             MyLinkedList<BasicBlock> basicBlocks = function.getBlocks();
@@ -295,7 +295,7 @@ public class CodeGen {
         if (!instr.isCondBr()) {
             BasicBlock bb = (BasicBlock) instr.getOperand(0);
             MpBlock mb = bb2mb.get(bb);
-            curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.j, curMB, mb.getLabel()));
+            curMB.addMpInstr(new MpJump(curMB, mb.getLabel()));
         } else { // irCond = icmp
            Icmp irCond = (Icmp) instr.getOperand(0);
            MpOpd mipsCond = genOperand(irCond);
@@ -303,9 +303,9 @@ public class CodeGen {
            MpBlock falseBB = bb2mb.get(instr.getOperand(2));
            if (mipsCond instanceof MpImm) {
                if (((MpImm)mipsCond).getVal() > 0)
-                   curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.j, curMB, trueBB.getLabel()));
+                   curMB.addMpInstr(new MpJump(curMB, trueBB.getLabel()));
                else
-                   curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.j, curMB, falseBB.getLabel()));
+                   curMB.addMpInstr(new MpJump(curMB, falseBB.getLabel()));
            } else {
                MpCmp mipsCmp = (MpCmp) curMB.getLastMpInstr();
                curMB.removeInstr(mipsCmp);
@@ -318,7 +318,7 @@ public class CodeGen {
                    case sge -> curMB.addMpInstr(new MpBranch(MpInstr.MipsInstrType.bge, curMB, mipsCmp.getSrc1Reg(), mipsCmp.getSrc2(), trueBB.getLabel()));
                    default -> {}
                }
-               curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.j, curMB, falseBB.getLabel()));
+               curMB.addMpInstr(new MpJump(curMB, falseBB.getLabel()));
            }
         }
     }
@@ -344,7 +344,7 @@ public class CodeGen {
         MpAlu mpAlu = new MpAlu(MpInstr.MipsInstrType.addiu, curMB, mipsPhyRegs.get(27), mipsPhyRegs.get(27), new MpImm(curMF.getStackSize()));
         mpAlu.setSPreference();
         curMB.addMpInstr(mpAlu);
-        curMB.addMpInstr(new MpJump(MpInstr.MipsInstrType.jr, curMB, mipsPhyRegs.get(29)));
+        curMB.addMpInstr(new MpJump(curMB, mipsPhyRegs.get(29)));
     }
     /*
      * 生成操作数：考虑寄存器和立即数两种类型
@@ -408,7 +408,6 @@ public class CodeGen {
             return;
         }
         // step1.腾出寄存器
-        MpReg sp = mipsPhyRegs.get(27);
         int curStackSize = - (instr.operandsSize() - 1) * 4 -52;
         for (int i = 1; i < instr.operandsSize(); i++) {
             Value irArg = instr.getOperand(i);
@@ -459,7 +458,7 @@ public class CodeGen {
             }
         }
         MpFunction callee = f2mf.get(irFunc);
-        curMB.addMpInstr(new MpJump(curMB, callee.getLabel(), 13, instr.operandsSize() - 1));
+        curMB.addMpInstr(new MpJump(curMB, callee.getLabel(), instr.operandsSize() - 1));
         if (instr.getType().isIntegerTy()) {
             MpReg dst = (MpReg) genOperand(instr);
             curMB.addMpInstr(new MpMove(curMB, dst, mipsPhyRegs.get(2)));
