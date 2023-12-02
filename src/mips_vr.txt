@@ -69,7 +69,7 @@ str.16:
 
 .text
 main:
-main_b154:
+main_b152:
 	addiu $sp, $sp, -4
 	la vr0, str.6
 	move $a0, vr0
@@ -93,11 +93,11 @@ main_b154:
 	jal get2Min
 	move vr5, $v0
 	li vr6, 0
+	j main_b170
+main_b170:
+	blt vr6, 4, main_b171
 	j main_b172
-main_b172:
-	blt vr6, 4, main_b173
-	j main_b174
-main_b173:
+main_b171:
 	mul vr8, vr6, vr6
 	li vr9, -2147483647
 	mult vr9, vr8
@@ -111,8 +111,8 @@ main_b173:
 	sw vr9, 0(vr11)
 	addiu vr12, vr6, 1
 	move vr6, vr12
-	j main_b172
-main_b174:
+	j main_b170
+main_b172:
 	la vr13, array1DVar1
 	move $a0, vr13
 	li $a1, 4
@@ -205,14 +205,14 @@ main_b174:
 	syscall
 	li vr30, 0
 	li vr29, 0
+	j main_b210
+main_b210:
+	blt vr30, 2, main_b211
 	j main_b212
-main_b212:
-	blt vr30, 2, main_b213
-	j main_b214
-main_b213:
+main_b211:
 	li vr34, 0
-	j main_b217
-main_b214:
+	j main_b215
+main_b212:
 	lw vr32, sum
 	la vr33, str.16
 	move $a0, vr33
@@ -226,11 +226,11 @@ main_b214:
 	syscall
 	move vr49, vr29
 	li vr50, 0
-	j main_b241
-main_b217:
-	blt vr34, 3, main_b218
-	j main_b219
-main_b218:
+	j main_b239
+main_b215:
+	blt vr34, 3, main_b216
+	j main_b217
+main_b216:
 	sll vr36, vr30, 3
 	sll $v0, vr30, 1
 	addu vr36, vr36, $v0
@@ -256,19 +256,19 @@ main_b218:
 	sw vr46, sum
 	addiu vr47, vr34, 1
 	move vr34, vr47
-	j main_b217
-main_b219:
+	j main_b215
+main_b217:
 	addiu vr48, vr30, 1
-	move vr29, vr34
 	move vr30, vr48
-	j main_b212
-main_b241:
-	blt vr50, 2, main_b242
-	j main_b243
-main_b242:
+	move vr29, vr34
+	j main_b210
+main_b239:
+	blt vr50, 2, main_b240
+	j main_b241
+main_b240:
 	li vr55, 0
-	j main_b246
-main_b243:
+	j main_b244
+main_b241:
 	la vr52, array1DVar1
 	move $a0, vr52
 	li $a1, 4
@@ -278,11 +278,11 @@ main_b243:
 	move $a0, vr54
 	li $a1, 2
 	jal judgeArrayAllEven
-	j main_b275
-main_b246:
-	blt vr55, 3, main_b247
-	j main_b248
-main_b247:
+	j main_b273
+main_b244:
+	blt vr55, 3, main_b245
+	j main_b246
+main_b245:
 	sll vr57, vr50, 2
 	mul vr58, vr57, vr55
 	li vr59, -2147483647
@@ -303,23 +303,23 @@ main_b247:
 	sw vr61, 0(vr64)
 	addiu vr65, vr55, 1
 	move vr55, vr65
-	j main_b246
-main_b248:
+	j main_b244
+main_b246:
 	addiu vr66, vr50, 1
 	move vr50, vr66
 	move vr49, vr55
-	j main_b241
-main_b268:
+	j main_b239
+main_b266:
 	la vr67, array2DVar1
 	lw vr68, 0(vr67)
 	move $a0, vr68
 	jal judgeEvenOdd
-	j main_b269
-main_b269:
+	j main_b267
+main_b267:
 	li $v0, 10
 	syscall
-main_b275:
-	j main_b269
+main_b273:
+	j main_b267
 
 outputInt:
 outputInt_b0:
@@ -407,195 +407,183 @@ judgeArrayAllEven_b39:
 	sw $ra, 0($sp)
 	move vr84, $a0
 	move vr85, $a1
+	lw vr86, 4(vr84)
 	li vr87, 0
-	li vr86, 0
-	li vr88, 0
 	li vr89, 0
-	j judgeArrayAllEven_b48
-judgeArrayAllEven_b48:
-	blt vr89, vr85, judgeArrayAllEven_b49
-	move vr91, vr86
-	move vr92, vr87
-	move vr93, vr88
-	j judgeArrayAllEven_b273
-judgeArrayAllEven_b49:
-	li vr95, 0
-	j judgeArrayAllEven_b54
-judgeArrayAllEven_b50:
-	beq vr92, 0, judgeArrayAllEven_b82
-	j judgeArrayAllEven_b84
-judgeArrayAllEven_b54:
-	blt vr95, 3, judgeArrayAllEven_b55
-	move vr102, vr86
-	move vr103, vr87
-	j judgeArrayAllEven_b274
-judgeArrayAllEven_b55:
-	sll vr97, vr89, 3
+	li vr88, 0
+	j judgeArrayAllEven_b51
+judgeArrayAllEven_b51:
+	blt vr89, vr85, judgeArrayAllEven_b52
+	move vr91, vr87
+	move vr92, vr88
+	j judgeArrayAllEven_b271
+judgeArrayAllEven_b52:
+	li vr94, 0
+	j judgeArrayAllEven_b57
+judgeArrayAllEven_b53:
+	beq vr91, 0, judgeArrayAllEven_b80
+	j judgeArrayAllEven_b82
+judgeArrayAllEven_b57:
+	blt vr94, 3, judgeArrayAllEven_b58
+	move vr101, vr87
+	j judgeArrayAllEven_b272
+judgeArrayAllEven_b58:
+	sll vr96, vr89, 3
 	sll $v0, vr89, 2
-	addu vr97, vr97, $v0
-	addu vr97, vr84, vr97
-	sll vr98, vr95, 2
-	addu vr98, vr97, vr98
-	lw vr99, 0(vr98)
-	li vr100, -2147483647
-	mult vr100, vr99
-	mfhi vr100
-	addu vr100, vr100, vr99
-	slt $v0, vr99, $zero
-	addu vr100, vr100, $v0
-	sll vr100, vr100, 1
-	subu vr100, vr99, vr100
-	beq vr100, 0, judgeArrayAllEven_b59
-	j judgeArrayAllEven_b61
-judgeArrayAllEven_b56:
-	beq vr103, 1, judgeArrayAllEven_b76
-	j judgeArrayAllEven_b77
+	addu vr96, vr96, $v0
+	addu vr96, vr84, vr96
+	sll vr97, vr94, 2
+	addu vr97, vr96, vr97
+	lw vr98, 0(vr97)
+	li vr99, -2147483647
+	mult vr99, vr98
+	mfhi vr99
+	addu vr99, vr99, vr98
+	slt $v0, vr98, $zero
+	addu vr99, vr99, $v0
+	sll vr99, vr99, 1
+	subu vr99, vr98, vr99
+	beq vr99, 0, judgeArrayAllEven_b62
+	j judgeArrayAllEven_b64
 judgeArrayAllEven_b59:
-	addiu vr105, vr95, 1
-	move vr95, vr105
-	j judgeArrayAllEven_b54
-judgeArrayAllEven_b61:
-	sll vr106, vr89, 3
-	sll $v0, vr89, 2
-	addu vr106, vr106, $v0
-	addu vr106, vr84, vr106
-	sll vr107, vr95, 2
-	addu vr107, vr106, vr107
-	lw vr108, 0(vr107)
-	move vr102, vr108
-	li vr103, 1
-	j judgeArrayAllEven_b56
-judgeArrayAllEven_b76:
-	move vr91, vr102
-	move vr93, vr95
-	move vr92, vr103
-	j judgeArrayAllEven_b50
-judgeArrayAllEven_b77:
-	addiu vr109, vr89, 1
-	move vr89, vr109
-	move vr86, vr102
-	move vr88, vr95
-	move vr87, vr103
-	j judgeArrayAllEven_b48
-judgeArrayAllEven_b82:
-	la vr110, str.2
-	move $a0, vr110
+	beq vr101, 1, judgeArrayAllEven_b74
+	j judgeArrayAllEven_b75
+judgeArrayAllEven_b62:
+	addiu vr103, vr94, 1
+	move vr94, vr103
+	j judgeArrayAllEven_b57
+judgeArrayAllEven_b64:
+	li vr101, 1
+	j judgeArrayAllEven_b59
+judgeArrayAllEven_b74:
+	move vr91, vr101
+	move vr92, vr94
+	j judgeArrayAllEven_b53
+judgeArrayAllEven_b75:
+	addiu vr104, vr89, 1
+	move vr89, vr104
+	move vr87, vr101
+	move vr88, vr94
+	j judgeArrayAllEven_b51
+judgeArrayAllEven_b80:
+	la vr105, str.2
+	move $a0, vr105
 	li $v0, 4
 	syscall
-	j judgeArrayAllEven_b83
-judgeArrayAllEven_b83:
+	j judgeArrayAllEven_b81
+judgeArrayAllEven_b81:
 	lw $ra, 0($sp)
 	addiu $sp, $sp, 4
 	jr $ra
-judgeArrayAllEven_b84:
-	la vr111, str.3
-	move $a0, vr111
+judgeArrayAllEven_b82:
+	la vr106, str.3
+	move $a0, vr106
 	li $v0, 4
 	syscall
-	move $a0, vr91
+	move $a0, vr86
 	li $v0, 1
 	syscall
 	li $a0, 10
 	li $v0, 11
 	syscall
-	j judgeArrayAllEven_b83
-judgeArrayAllEven_b273:
-	j judgeArrayAllEven_b50
-judgeArrayAllEven_b274:
-	j judgeArrayAllEven_b56
+	j judgeArrayAllEven_b81
+judgeArrayAllEven_b271:
+	j judgeArrayAllEven_b53
+judgeArrayAllEven_b272:
+	j judgeArrayAllEven_b59
 
 cntEvenNum:
-cntEvenNum_b90:
+cntEvenNum_b88:
 	addiu $sp, $sp, -4
 	sw $ra, 0($sp)
-	move vr112, $a0
-	move vr113, $a1
-	li vr114, 0
-	li vr115, 0
+	move vr107, $a0
+	move vr108, $a1
+	li vr110, 0
+	li vr109, 0
+	j cntEvenNum_b95
+cntEvenNum_b95:
+	addiu vr111, vr108, -1
+	ble vr110, vr111, cntEvenNum_b96
 	j cntEvenNum_b97
+cntEvenNum_b96:
+	sll vr113, vr110, 2
+	addu vr113, vr107, vr113
+	lw vr114, 0(vr113)
+	li vr115, -2147483647
+	mult vr115, vr114
+	mfhi vr115
+	addu vr115, vr115, vr114
+	slt $v0, vr114, $zero
+	addu vr115, vr115, $v0
+	sll vr115, vr115, 1
+	subu vr115, vr114, vr115
+	bne vr115, 0, cntEvenNum_b102
+	j cntEvenNum_b103
 cntEvenNum_b97:
-	addiu vr116, vr113, -1
-	ble vr115, vr116, cntEvenNum_b98
-	j cntEvenNum_b99
-cntEvenNum_b98:
-	sll vr118, vr115, 2
-	addu vr118, vr112, vr118
-	lw vr119, 0(vr118)
-	li vr120, -2147483647
-	mult vr120, vr119
-	mfhi vr120
-	addu vr120, vr120, vr119
-	slt $v0, vr119, $zero
-	addu vr120, vr120, $v0
-	sll vr120, vr120, 1
-	subu vr120, vr119, vr120
-	bne vr120, 0, cntEvenNum_b104
-	j cntEvenNum_b105
-cntEvenNum_b99:
-	la vr122, str.4
-	move $a0, vr122
+	la vr117, str.4
+	move $a0, vr117
 	li $v0, 4
 	syscall
-	move $a0, vr114
+	move $a0, vr109
 	li $v0, 1
 	syscall
-	la vr123, str.5
-	move $a0, vr123
+	la vr118, str.5
+	move $a0, vr118
 	li $v0, 4
 	syscall
-	move $v0, vr114
+	move $v0, vr109
 	lw $ra, 0($sp)
 	addiu $sp, $sp, 4
 	jr $ra
-cntEvenNum_b104:
-	addiu vr124, vr115, 1
-	move vr114, vr114
-	move vr115, vr124
-	j cntEvenNum_b97
-cntEvenNum_b105:
-	addiu vr125, vr114, 1
-	addiu vr126, vr115, 1
-	move vr115, vr126
-	move vr114, vr125
-	j cntEvenNum_b97
+cntEvenNum_b102:
+	addiu vr119, vr110, 1
+	move vr109, vr109
+	move vr110, vr119
+	j cntEvenNum_b95
+cntEvenNum_b103:
+	addiu vr120, vr109, 1
+	addiu vr121, vr110, 1
+	move vr110, vr121
+	move vr109, vr120
+	j cntEvenNum_b95
 
 get2Max:
-get2Max_b122:
+get2Max_b120:
 	addiu $sp, $sp, -4
 	sw $ra, 0($sp)
-	move vr127, $a0
-	move vr128, $a1
-	bgt vr127, vr128, get2Max_b129
-	j get2Max_b131
-get2Max_b129:
-	move vr130, vr127
-	j get2Max_b130
-get2Max_b130:
-	move $v0, vr130
+	move vr122, $a0
+	move vr123, $a1
+	bgt vr122, vr123, get2Max_b127
+	j get2Max_b129
+get2Max_b127:
+	move vr125, vr122
+	j get2Max_b128
+get2Max_b128:
+	move $v0, vr125
 	lw $ra, 0($sp)
 	addiu $sp, $sp, 4
 	jr $ra
-get2Max_b131:
-	move vr130, vr128
-	j get2Max_b130
+get2Max_b129:
+	move vr125, vr123
+	j get2Max_b128
 
 get2Min:
-get2Min_b138:
+get2Min_b136:
 	addiu $sp, $sp, -4
 	sw $ra, 0($sp)
-	move vr131, $a0
-	move vr132, $a1
-	bge vr131, vr132, get2Min_b145
-	j get2Min_b147
-get2Min_b145:
-	move vr134, vr132
-	j get2Min_b146
-get2Min_b146:
-	move $v0, vr134
+	move vr126, $a0
+	move vr127, $a1
+	bge vr126, vr127, get2Min_b143
+	j get2Min_b145
+get2Min_b143:
+	move vr129, vr127
+	j get2Min_b144
+get2Min_b144:
+	move $v0, vr129
 	lw $ra, 0($sp)
 	addiu $sp, $sp, 4
 	jr $ra
-get2Min_b147:
-	move vr134, vr131
-	j get2Min_b146
+get2Min_b145:
+	move vr129, vr126
+	j get2Min_b144
 

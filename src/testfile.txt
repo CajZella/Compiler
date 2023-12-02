@@ -35,7 +35,7 @@ void judgeEvenOdd(int n) {
 }
 
 void judgeArrayAllEven(int para3[][3], int row) {
-	int i = 0, j = 0, flag = 0, temp = para[0][1];
+	int i = 0, j = 0, flag = 0, temp = para3[0][1];
 	while (i < row) {
 		j = 0;
 		while (j < 3) {

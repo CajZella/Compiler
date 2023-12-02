@@ -1,5 +1,6 @@
 package backend;
 
+import backend.Optimize.Peephole;
 import backend.Optimize.RegAlloc;
 import backend.lir.MpBlock;
 import backend.lir.MpFunction;
@@ -34,6 +35,8 @@ public class BackEnd {
                 for (MpInstr mipsInstr : mipsBlock.getMpInstrs())
                     if (mipsInstr.getInstrType() == MpInstr.MipsInstrType.jal)
                         ((MpJump)mipsInstr).dealJal();
+        Peephole peephole = new Peephole(mipsModule, mipsPhyRegs);
+        peephole.run();
     }
     public static MpModule getMipsModule() { return mipsModule; }
 }
