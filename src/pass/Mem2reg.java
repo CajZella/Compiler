@@ -93,17 +93,6 @@ public class Mem2reg {
             }
             alloca.dropAllReferences();
             alloca.remove();
-        } else if (defInstrs.size() == 1) {
-            Store defInstr = (Store) defInstrs.iterator().next();
-            for (Instr useInstr : useInstrs) {
-                useInstr.replaceAllUsesWith(defInstr.getValue());
-                useInstr.dropAllReferences();
-                useInstr.remove();
-            }
-            defInstr.dropAllReferences();
-            defInstr.remove();
-            alloca.dropAllReferences();
-            alloca.remove();
         } else {
             /* step1. 找到需要加phi的基本块 */
             HashSet<BasicBlock> F = new HashSet<>(); // 需要加phi的基本块

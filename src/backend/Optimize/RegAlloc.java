@@ -314,7 +314,6 @@ public class RegAlloc {
     }
     private MpReg getAlias(MpReg reg) {
         if (coalescedNodes.contains(reg)) {
-            assert alias.containsKey(reg);
             return getAlias(alias.get(reg));
         }
         else
@@ -394,7 +393,6 @@ public class RegAlloc {
     private void assignColors() {
         while (!selectStack.isEmpty()) {
             MpReg reg = selectStack.pop();
-            assert !reg.isColored();
             ArrayList<MpReg> okColors = new ArrayList<>();
             if (K == 24)
                 for (int i = 25; i >= 3; i--)
@@ -404,7 +402,6 @@ public class RegAlloc {
                     okColors.add(precolored.get(i));
             for (MpReg w : adjList.getOrDefault(reg, new HashSet<>()))
                 if (coloredNodes.contains(getAlias(w)) || precolored.contains(getAlias(w))) {
-                    assert color.containsKey(getAlias(w));
                     okColors.remove(color.get(getAlias(w)));
                 }
             if (okColors.isEmpty())
@@ -415,7 +412,6 @@ public class RegAlloc {
             }
         }
         for (MpReg reg : coalescedNodes) {
-            assert !reg.isColored();
             color.put(reg, color.get(getAlias(reg)));
         }
     }

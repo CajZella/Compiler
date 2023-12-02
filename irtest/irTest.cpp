@@ -3,7 +3,7 @@
 #include <fstream>
 #include <cstring>
 int main() {
-    const char* path = "../2022test/full";
+    const char* path = "../2021test";
     const char* test_file = "testfile.txt";
     const char* error_file = "error.txt";
     const char* llvm_file = "llvm.txt";
@@ -11,12 +11,13 @@ int main() {
     const char* ans_file = "ans.txt";
     char ch = 'C';
     char command[200];
+    int a[3] = {29, 27, 26};
     sprintf(command, "echo -n > %s", log_file);
     system(command);
     for (int i = 0; i < 3; i++) {
         char path1[100];
         sprintf(path1, "%s/%c", path, ch);
-        for (int j = 1; j <= 30; j++) {
+        for (int j = 1; j <= a[i]; j++) {
             sprintf(command, "cp %s/testfile%d.txt %s", path1, j, test_file);
             system(command);
             sprintf(command, "echo %s/testfile%d.txt >> %s", path1, j, log_file);
