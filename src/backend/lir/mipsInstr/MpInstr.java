@@ -72,14 +72,6 @@ public abstract class MpInstr extends MyLinkedNode {
         addUseReg(src2Reg, reg);
         src2Reg = reg;
     }
-    public void replaceSrc(MpReg reg) {
-        for (MpReg src : useRegs) {
-            if (src.equal(src1Reg))
-                replaceSrc1(reg);
-            if (src.equal(src2Reg))
-                replaceSrc2(reg);
-        }
-    }
     public boolean hasDstReg() { return null != dstReg; }
     public boolean hasSrc1Reg() { return null != src1Reg; }
     public boolean hasSrc2Reg() { return null != src2Reg; }

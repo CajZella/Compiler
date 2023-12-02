@@ -1,5 +1,6 @@
 package backend.lir.mipsInstr;
 
+import backend.BackEnd;
 import backend.lir.MpBlock;
 import backend.lir.mipsOperand.MpImm;
 import backend.lir.mipsOperand.MpReg;
@@ -29,8 +30,19 @@ public class MpAlu extends MpInstr {
         replaceSrc2(rt);
         this.isRI = false;
     }
-
-    public MpImm getImm() { return imm; }
+    public void replaceZeroWithReg() {
+        if (null == imm || imm.getVal() != 0)
+            return;
+        imm = null;
+        isRI = false;
+        if (instrType == MipsInstrType.addiu)
+            instrType = MipsInstrType.addu;
+        else if (instrType == MipsInstrType.andi)
+            instrType = MipsInstrType.and;
+        else if (instrType == MipsInstrType.ori)
+            instrType = MipsInstrType.or;
+        replaceSrc2(BackEnd.mipsPhyRegs.get(0));
+    }
     public String toString() {
         if (isSPreference) {
             return imm.getVal() > 0 ?

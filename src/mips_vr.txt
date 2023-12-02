@@ -203,7 +203,7 @@ main_b208:
 main_b210:
 	j main_b212
 main_b212:
-	j main_b238
+	j main_b240
 main_b214:
 	jal DoNotCall
 	move vr49, $v0
@@ -236,12 +236,12 @@ main_b219:
 	li $v0, 10
 	syscall
 main_b221:
-	j main_b242
+	j main_b243
 main_b223:
 	jal DoNotCall
 	move vr55, $v0
 	bne vr55, 0, main_b218
-	j main_b243
+	j main_b244
 main_b233:
 	j main_b200
 main_b234:
@@ -307,8 +307,8 @@ addN_b14:
 	sw $ra, 0($sp)
 	move vr59, $a0
 	move vr60, $a1
-	li vr61, 0
 	move vr62, vr59
+	li vr61, 0
 	j addN_b20
 addN_b20:
 	move vr64, vr62
@@ -327,8 +327,8 @@ addN_b24:
 	move vr61, vr65
 	j addN_b20
 addN_b25:
-	move vr62, vr66
 	move vr61, vr68
+	move vr62, vr66
 	j addN_b20
 addN_b26:
 	addiu vr66, vr62, 1

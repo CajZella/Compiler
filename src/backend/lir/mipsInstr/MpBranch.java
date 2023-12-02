@@ -1,5 +1,6 @@
 package backend.lir.mipsInstr;
 
+import backend.BackEnd;
 import backend.lir.MpBlock;
 import backend.lir.mipsOperand.MpImm;
 import backend.lir.mipsOperand.MpLabel;
@@ -21,6 +22,12 @@ public class MpBranch extends MpInstr {
     }
     public void replaceLabel(MpLabel label) { this.label = label; }
     public MpLabel getLabel() { return label; }
+    public void replaceZeroWithReg() {
+        if (null == src2Imm || src2Imm.getVal() != 0)
+            return;
+        src2Imm = null;
+        replaceSrc2(BackEnd.mipsPhyRegs.get(0));
+    }
     public String toString() {
         return String.format("%s %s, %s, %s", instrType, src1Reg, null == src2Reg ? src2Imm : src2Reg, label);
     }

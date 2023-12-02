@@ -3,6 +3,9 @@ package backend.Optimize;
 import backend.lir.MpBlock;
 import backend.lir.MpFunction;
 import backend.lir.MpModule;
+import backend.lir.mipsInstr.MpAlu;
+import backend.lir.mipsInstr.MpBranch;
+import backend.lir.mipsInstr.MpCmp;
 import backend.lir.mipsInstr.MpInstr;
 import backend.lir.mipsInstr.MpJump;
 import backend.lir.mipsOperand.MpReg;
@@ -25,6 +28,7 @@ public class Peephole {
             finished &= redundantPreserveWhenCall();
             finished &= removeRedundantMove();
             finished &= removeUselessBlock();
+            replaceZeroWithZeroReg();
         }
     }
 
@@ -120,5 +124,23 @@ public class Peephole {
             }
         }
         return finished;
+    }
+
+    /*
+     * 在一定位置中将立即数0换成寄存器$zero
+     */
+    private void replaceZeroWithZeroReg() {
+        for (MpFunction function : module.getMpFunctions()) {
+            for (MpBlock block : function.getMpBlocks()) {
+                for (MpInstr instr : block.getMpInstrs()) {
+                    if (instr instanceof MpAlu)
+                        ((MpAlu) instr).replaceZeroWithReg();
+                    else if (instr instanceof MpBranch)
+                        ((MpBranch) instr).replaceZeroWithReg();
+                    else if (instr instanceof MpCmp)
+                        ((MpCmp) instr).replaceZeroWithReg();
+                }
+            }
+        }
     }
 }
