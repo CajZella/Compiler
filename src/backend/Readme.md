@@ -83,10 +83,14 @@ $$
 4. move 目标寄存器和源寄存器相同 ok
 5. 0 换成 $zero ok
    1. testfile5: ![img3.png](..\image\img3.png)
-6. 已经在block内获取过的全局变量，不必再次获取   有好有坏，暂时保留
+6. 已经在block内获取过的全局变量，不必再次获取   ==有好有坏，暂时保留==
    1. ![image-20231202223023899](https://s2.loli.net/2023/12/02/HZPQdjcLGUN9EwY.png)
-7. 去掉不必要的$ra的保存和恢复
+7. 去掉不必要的$ra的保存和恢复 ok
+   1. ![image-20231202230327428](https://s2.loli.net/2023/12/02/B76DSeiYkyMJLVt.png)
+
 8. 函数参数等到用到的时候再获取 
+   1. 在当前架构上想不到好方法
+
 9. 去掉相邻的store和load
 
 

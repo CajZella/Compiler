@@ -22,6 +22,8 @@ public class MpStore extends MpInstr {
         replaceSrc1(targetReg);
         this.base = base;
     }
+    public MpImm getOffset() { return offset; }
+    public MpData getBase() { return base; }
     public String toString() {
         return null == offset ?
                 String.format("%s %s, %s", instrType.toString(), src1Reg, base) :

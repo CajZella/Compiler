@@ -1,5 +1,6 @@
 package backend.Optimize;
 
+import backend.BackEnd;
 import backend.lir.MpBlock;
 import backend.lir.MpFunction;
 import backend.lir.MpModule;
@@ -8,9 +9,13 @@ import backend.lir.mipsInstr.MpBranch;
 import backend.lir.mipsInstr.MpCmp;
 import backend.lir.mipsInstr.MpInstr;
 import backend.lir.mipsInstr.MpJump;
+import backend.lir.mipsInstr.MpLoad;
+import backend.lir.mipsInstr.MpMove;
+import backend.lir.mipsInstr.MpStore;
 import backend.lir.mipsOperand.MpReg;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -28,8 +33,9 @@ public class Peephole {
             finished &= redundantPreserveWhenCall();
             finished &= removeRedundantMove();
             finished &= removeUselessBlock();
-            replaceZeroWithZeroReg();
         }
+        replaceZeroWithZeroReg();
+        removeRedundantPreserveRA();
     }
 
     /*
@@ -144,17 +150,74 @@ public class Peephole {
         }
     }
     private void removeRedundantPreserveRA() {
+        HashSet<MpFunction> hasJal = new HashSet<>();
         for (MpFunction function : module.getMpFunctions()) {
-            for (MpBlock block : function.getMpBlocks()) {
-                for (MpInstr instr : block.getMpInstrs()) {
-                    if (instr.getInstrType() == MpInstr.MipsInstrType.sw) {
-                        MpReg src = instr.getSrc1Reg();
-                        if (src == phyRegs.get(31)) {
-                            instr.remove();
+            for (MpBlock block : function.getMpBlocks())
+                for (MpInstr instr : block.getMpInstrs())
+                    if (instr.getInstrType() == MpInstr.MipsInstrType.jal)
+                        hasJal.add(function);
+        }
+        for (MpFunction function : module.getMpFunctions()) {
+            if (function.isMain()) continue;
+            if (!hasJal.contains(function)) {
+                for (MpBlock block : function.getMpBlocks()) {
+                    Iterator<MpInstr> iterator = block.getMpInstrs().iterator();
+                    while (iterator.hasNext()) {
+                        MpInstr instr = iterator.next();
+                        if (instr instanceof MpStore && instr.getSrc1Reg() == BackEnd.mipsPhyRegs.get(29)) {
+                            MpAlu prevInst = (MpAlu) instr.getPrev();
+                            if (prevInst.getImm().getVal() == -4) {
+                                function.setStackSize(0);
+                                prevInst.remove();
+                            }
+                            iterator.remove();
+                        }
+                        else if (instr instanceof MpLoad && instr.getDstReg() == BackEnd.mipsPhyRegs.get(29)) {
+                            MpAlu nextInst = (MpAlu) instr.getNext();
+                            if (nextInst.getImm().getVal() == 4)
+                                nextInst.remove();
+                            iterator.remove();
                         }
                     }
                 }
             }
         }
+    }
+    /*
+     * 相邻的store和load 目前有bug
+     */
+    private boolean removeRedundantLS() {
+        boolean finished = true;
+        for (MpFunction function : module.getMpFunctions())
+            for (MpBlock block : function.getMpBlocks()) {
+                Iterator<MpInstr> iterator = block.getMpInstrs().iterator();
+                while (iterator.hasNext()) {
+                    MpInstr instr = iterator.next();
+                    if (instr instanceof MpStore) {
+                        MpStore store = (MpStore) instr;
+                        if (instr.hasNext()) {
+                            MpInstr nextInst = (MpInstr) instr.getNext();
+                            if (nextInst instanceof MpLoad) {
+                                MpLoad load = (MpLoad) nextInst;
+                                if (null != load.getBase() && null != store.getBase() && load.getBase() == store.getBase()) {
+                                    instr.insertBefore(new MpMove(block, load.getDstReg(), store.getSrc1Reg()));
+                                    iterator.remove();
+                                    load.remove();
+                                    finished = false;
+                                }
+                                if (null != load.getOffset() && null != store.getOffset()
+                                        && load.getOffset().getVal() == store.getOffset().getVal()
+                                        && load.getSrc1Reg() == store.getSrc2Reg()) {
+                                    instr.insertBefore(new MpMove(block, load.getDstReg(), store.getSrc1Reg()));
+                                    iterator.remove();
+                                    load.remove();
+                                    finished = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        return finished;
     }
 }

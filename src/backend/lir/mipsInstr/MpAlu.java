@@ -30,6 +30,7 @@ public class MpAlu extends MpInstr {
         replaceSrc2(rt);
         this.isRI = false;
     }
+    public MpImm getImm() { return imm; }
     public void replaceZeroWithReg() {
         if (null == imm || imm.getVal() != 0)
             return;

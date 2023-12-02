@@ -18,6 +18,8 @@ public class MpLoad extends MpInstr {
         replaceSrc1(base);
         this.offset = offset;
     }
+    public MpImm getOffset() { return offset; }
+    public MpData getBase() { return base; }
     public MpLoad(MpBlock block, MpReg targetReg, MpData base) {
         super(MipsInstrType.lw, block);
         replaceDst(targetReg);

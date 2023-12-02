@@ -174,7 +174,7 @@ public class CodeGen {
         MpAlu mpAlu = new MpAlu(MpInstr.MipsInstrType.addiu, tempMB, mipsPhyRegs.get(27), mipsPhyRegs.get(27), new MpImm(-offset));
         mpAlu.setSPreference();
         tempMB.addMpInstr(mpAlu);
-        /* step3.在函数开始时先将$ra保存在栈中 todo: 待优化，若函数内没有jal指令，即没有调用其他函数，可以不用保存$ra */
+        /* step3.在函数开始时先将$ra保存在栈中 优化，若函数内没有jal指令，即没有调用其他函数，可以不用保存$ra */
         if (!curIF.isMain()) {
             MpStore mpStore = new MpStore(tempMB, mipsPhyRegs.get(29), mipsPhyRegs.get(27), new MpImm(0));
             tempMB.addMpInstr(mpStore);
