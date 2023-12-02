@@ -143,4 +143,18 @@ public class Peephole {
             }
         }
     }
+    private void removeRedundantPreserveRA() {
+        for (MpFunction function : module.getMpFunctions()) {
+            for (MpBlock block : function.getMpBlocks()) {
+                for (MpInstr instr : block.getMpInstrs()) {
+                    if (instr.getInstrType() == MpInstr.MipsInstrType.sw) {
+                        MpReg src = instr.getSrc1Reg();
+                        if (src == phyRegs.get(31)) {
+                            instr.remove();
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

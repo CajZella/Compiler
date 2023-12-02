@@ -20,7 +20,6 @@ import backend.lir.MpFunction;
 import backend.lir.MpModule;
 import backend.lir.mipsOperand.MpImm;
 import backend.lir.mipsOperand.MpOpd;
-import backend.lir.mipsOperand.MpPhyReg;
 import backend.lir.mipsOperand.MpReg;
 import backend.lir.mipsOperand.MpStackOffset;
 import ir.BasicBlock;
@@ -203,12 +202,24 @@ public class CodeGen {
         for (BasicBlock basicBlock : basicBlocks) {
             curIB = basicBlock;
             curMB = bb2mb.get(curIB);
+            gv2cnt = new HashMap<>();
+            gv2mr = new HashMap<>();
+            for (Instr instr : curIB.getInstrs())
+                if (instr instanceof GetElementPtr) {
+                    GetElementPtr gep = (GetElementPtr) instr;
+                    if (gep.getOperand(0) instanceof GlobalVariable) {
+                        GlobalVariable gv = (GlobalVariable) gep.getOperand(0);
+                        gv2cnt.put(gv, gv2cnt.getOrDefault(gv, 0) + 1);
+                    }
+                }
             genBlock();
         }
         /* step7. 处理 parallel copies */
         if(Config.isLLVMopt)
             handleParallelCopies();
     }
+    private HashMap<GlobalVariable, Integer> gv2cnt;
+    private HashMap<GlobalVariable, MpReg> gv2mr;
     private void handleParallelCopies() {
         MyLinkedList<BasicBlock> basicBlocks = curIF.getBlocks();
         for (BasicBlock basicBlock : basicBlocks) {
@@ -713,7 +724,17 @@ public class CodeGen {
         if (irPtr instanceof GlobalVariable) {
             base = new MpReg();
             offset = new MpImm(0);
-            curMB.addMpInstr(new MpLoadAddr(curMB, base, gv2md.get(irPtr)));
+            GlobalVariable gv = (GlobalVariable) irPtr;
+            if (gv2cnt.get(gv) == 1)
+                curMB.addMpInstr(new MpLoadAddr(curMB, base, gv2md.get(gv)));
+            else if (gv2mr.containsKey(gv))
+                curMB.addMpInstr(new MpMove(curMB, base, gv2mr.get(gv)));
+            else {
+                MpReg reg = new MpReg();
+                curMB.addMpInstr(new MpLoadAddr(curMB, reg, gv2md.get(gv)));
+                gv2mr.put(gv, reg);
+                curMB.addMpInstr(new MpMove(curMB, base, reg));
+            }
         } else {
             MpOpd ptr = val2opd.get(irPtr);
             if (ptr instanceof MpStackOffset) {
