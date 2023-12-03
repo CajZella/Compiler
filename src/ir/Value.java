@@ -1,7 +1,5 @@
 package ir;
 
-import ir.instrs.Instr;
-import ir.instrs.Phi;
 import ir.types.Type;
 import util.MyLinkedList;
 import util.MyLinkedNode;
@@ -39,7 +37,7 @@ public abstract class Value extends MyLinkedNode {
     protected ValueType valueTy;
     protected String name = null; // 可能为空字符串
     protected static int num = 0; // 用于生成唯一的名字
-    private MyLinkedList<Use> useList = new MyLinkedList<>(); // def-use，使用某个Value的User列表
+    protected MyLinkedList<Use> useList = new MyLinkedList<>(); // def-use，使用某个Value的User列表
     protected Type type; // LLVM value是有类型的
     public Value(ValueType valueTy, String name, Type type) {
         this.valueTy = valueTy;

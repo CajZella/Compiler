@@ -1,398 +1,135 @@
 .data
-cnum1:
-	.word 1
-cnum2:
-	.word 2
-cnum3:
-	.word 3
-carray1:
-	.word 1
-	.word 2
-carray2:
-	.word 3
-	.word 4
-carray3:
-	.word 5
-	.word 6
-carrays1:
-	.word 1
-	.word 2
-	.word 3
-	.word 4
-carrays2:
-	.word 1
-	.word 2
-	.word 5
-	.word 6
-carrays3:
-	.word 1
-	.word 2
-	.word 7
-	.word 8
+max_number:
+	.word 100
+min_number:
+	.word 0
+a:
+	.word 0
 str.0:
-	.asciiz "19373749\n"
+	.asciiz "19231204"
 str.1:
-	.asciiz "yes\n"
+	.asciiz "The score is "
 str.2:
-	.asciiz "no\n"
+	.asciiz ".\n"
+str.3:
+	.asciiz "Yes!\n"
+str.4:
+	.asciiz "No!\n"
+str.5:
+	.asciiz "No!"
+str.6:
+	.asciiz "Yes!"
 
 
 .text
 main:
-main_b76:
-	addiu $sp, $sp, -76
+main_b0:
+	addiu $sp, $sp, -4
 	la vr0, str.0
 	move $a0, vr0
 	li $v0, 4
 	syscall
-	li vr1, 1
-	sw vr1, 4($sp)
-	li vr2, 2
-	sw vr2, 8($sp)
-	li vr3, 3
-	sw vr3, 12($sp)
-	li vr4, 4
-	sw vr4, 16($sp)
-	li vr5, 5
-	sw vr5, 20($sp)
-	li vr6, 6
-	sw vr6, 24($sp)
-	li vr7, 1
-	sw vr7, 28($sp)
-	li vr8, 2
-	sw vr8, 32($sp)
-	li vr9, 3
-	sw vr9, 36($sp)
-	li vr10, 4
-	sw vr10, 40($sp)
-	li vr11, 1
-	sw vr11, 44($sp)
-	li vr12, 2
-	sw vr12, 48($sp)
-	li vr13, 5
-	sw vr13, 52($sp)
-	li vr14, 6
-	sw vr14, 56($sp)
-	li vr15, 1
-	sw vr15, 60($sp)
-	li vr16, 2
-	sw vr16, 64($sp)
-	li vr17, 7
-	sw vr17, 68($sp)
-	li vr18, 8
-	sw vr18, 72($sp)
-	li vr19, 3
-	sw vr19, 8($sp)
-	lw vr20, 8($sp)
-	lw vr21, 4($sp)
-	addu vr22, vr20, vr21
-	move $a0, vr22
-	li $v0, 1
-	syscall
 	li $a0, 10
 	li $v0, 11
 	syscall
-	li vr23, 1
-	j main_b117
-main_b117:
-	li vr23, 1
-	j main_b118
-main_b118:
-	move vr24, vr23
-	j main_b213
-main_b121:
-	li vr24, 1
-	j main_b122
-main_b122:
-	move vr25, vr24
-	j main_b214
-main_b124:
-	li vr25, 1
-	j main_b125
-main_b125:
-	move vr26, vr25
-	j main_b215
-main_b127:
-	li vr26, 1
-	j main_b128
-main_b128:
-	bge vr26, 0, main_b130
-	j main_b132
-main_b130:
-	addu vr28, vr26, vr26
-	move vr29, vr28
-	j main_b131
-main_b131:
-	move $a0, vr29
-	li $v0, 1
+	li $v0, 5
 	syscall
-	li $a0, 10
-	li $v0, 11
-	syscall
-	beq vr29, 0, main_b143
-	j main_b216
-main_b132:
-	addiu vr31, vr26, 0
-	move vr29, vr31
-	j main_b131
-main_b143:
-	la vr32, str.1
-	move $a0, vr32
+	move vr1, $v0
+	lw vr2, min_number
+	bge vr1, vr2, main_b5
+	j main_b48
+main_b5:
+	la vr4, str.1
+	move $a0, vr4
 	li $v0, 4
 	syscall
-	j main_b144
-main_b144:
-	bne vr29, 0, main_b149
-	j main_b217
-main_b149:
-	la vr34, str.2
-	move $a0, vr34
+	move $a0, vr1
+	li $v0, 1
+	syscall
+	la vr5, str.2
+	move $a0, vr5
 	li $v0, 4
 	syscall
-	j main_b150
-main_b150:
-	li vr35, 2
-	j main_b156
-main_b156:
-	j main_b157
-main_b157:
-	bne vr35, 0, main_b160
-	j main_b161
-main_b158:
-	jal ifun1
-	move vr37, $v0
-	li $a0, 0
-	jal ifun2
-	move vr38, $v0
-	sw vr38, 8($sp)
-	lw vr39, 8($sp)
-	move $a0, vr39
-	li $v0, 1
+	j main_b6
+main_b6:
+	li vr6, 2
+	sw vr6, a
+	lw vr7, a
+	beq vr7, 2, main_b14
+	j main_b49
+main_b14:
+	la vr9, str.3
+	move $a0, vr9
+	li $v0, 4
 	syscall
-	li $a0, 10
-	li $v0, 11
+	j main_b15
+main_b15:
+	li vr10, 8
+	sw vr10, a
+	lw vr11, a
+	bne vr11, 8, main_b20
+	j main_b22
+main_b20:
+	la vr13, str.4
+	move $a0, vr13
+	li $v0, 4
 	syscall
-	move $a0, vr37
-	li $a1, 0
-	jal ifun3
-	move vr40, $v0
-	sw vr40, 28($sp)
-	lw vr41, 28($sp)
-	move $a0, vr41
-	li $v0, 1
+	j main_b21
+main_b21:
+	li vr14, 100
+	sw vr14, a
+	lw vr15, a
+	lw vr16, max_number
+	ble vr15, vr16, main_b28
+	j main_b50
+main_b22:
+	la vr18, str.3
+	move $a0, vr18
+	li $v0, 4
 	syscall
-	li $a0, 10
-	li $v0, 11
+	j main_b21
+main_b28:
+	la vr19, str.3
+	move $a0, vr19
+	li $v0, 4
 	syscall
-	lw vr42, 40($sp)
-	mul vr43, vr37, vr42
-	lw vr44, 52($sp)
-	div vr45, vr43, vr44
-	lw vr46, 64($sp)
-	div vr45, vr46
-	mfhi vr47
-	move $a0, vr47
-	li $v0, 1
+	j main_b29
+main_b29:
+	lw vr20, a
+	lw vr21, max_number
+	blt vr20, vr21, main_b34
+	j main_b51
+main_b34:
+	la vr23, str.3
+	move $a0, vr23
+	li $v0, 4
 	syscall
-	li $a0, 10
-	li $v0, 11
+	j main_b35
+main_b35:
+	lw vr24, a
+	bgt vr24, 30, main_b40
+	j main_b42
+main_b40:
+	la vr26, str.5
+	move $a0, vr26
+	li $v0, 4
 	syscall
-	addiu $a0, $sp, 60
-	jal ifun4
-	move vr48, $v0
-	move $a0, vr48
-	li $v0, 1
-	syscall
-	li $a0, 10
-	li $v0, 11
-	syscall
-	addiu $a0, $sp, 28
-	addiu $a1, $sp, 44
-	jal ifun7
-	move vr49, $v0
-	move $a0, vr49
-	li $v0, 1
-	syscall
-	li $a0, 10
-	li $v0, 11
-	syscall
-	lw vr50, 4($sp)
-	addu vr51, vr49, vr50
-	lw vr52, 12($sp)
-	subu vr53, vr51, vr52
-	move $a0, vr53
-	li $v0, 1
-	syscall
-	li $a0, 10
-	li $v0, 11
-	syscall
+	j main_b41
+main_b41:
 	li $v0, 10
 	syscall
-main_b160:
-	addiu vr54, vr35, -1
-	move vr35, vr54
-	j main_b156
-main_b161:
-	j main_b158
-main_b212:
-	j main_b118
-main_b213:
-	j main_b122
-main_b214:
-	j main_b125
-main_b215:
-	j main_b128
-main_b216:
-	j main_b144
-main_b217:
-	j main_b150
-main_b218:
-	j main_b158
-
-vfun1:
-vfun1_b0:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-vfun2:
-vfun2_b1:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	move vr55, $a0
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-vfun3:
-vfun3_b4:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	move vr56, $a0
-	move vr57, $a1
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-vfun4:
-vfun4_b9:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	move vr58, $a0
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-vfun5:
-vfun5_b12:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	move vr59, $a0
-	move vr60, $a1
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-vfun6:
-vfun6_b17:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	move vr61, $a0
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-vfun7:
-vfun7_b20:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	move vr62, $a0
-	move vr63, $a1
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-ifun1:
-ifun1_b25:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	li $v0, 0
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-ifun2:
-ifun2_b26:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	move vr64, $a0
-	addu vr65, vr64, vr64
-	move $v0, vr65
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-ifun3:
-ifun3_b32:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	move vr66, $a0
-	move vr67, $a1
-	addu vr68, vr66, vr67
-	move $v0, vr68
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-ifun4:
-ifun4_b40:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	move vr69, $a0
-	lw vr70, 0(vr69)
-	move $v0, vr70
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-ifun5:
-ifun5_b46:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	move vr71, $a0
-	move vr72, $a1
-	lw vr73, 0(vr71)
-	lw vr74, 0(vr72)
-	addu vr75, vr73, vr74
-	move $v0, vr75
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-ifun6:
-ifun6_b58:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	move vr76, $a0
-	lw vr77, 0(vr76)
-	move $v0, vr77
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
-
-ifun7:
-ifun7_b64:
-	addiu $sp, $sp, -4
-	sw $ra, 0($sp)
-	move vr78, $a0
-	move vr79, $a1
-	lw vr80, 0(vr78)
-	lw vr81, 0(vr79)
-	addu vr82, vr80, vr81
-	move $v0, vr82
-	lw $ra, 0($sp)
-	addiu $sp, $sp, 4
-	jr $ra
+main_b42:
+	la vr27, str.6
+	move $a0, vr27
+	li $v0, 4
+	syscall
+	j main_b41
+main_b48:
+	j main_b6
+main_b49:
+	j main_b15
+main_b50:
+	j main_b29
+main_b51:
+	j main_b35
 

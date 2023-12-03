@@ -10,6 +10,7 @@ public class PassManager {
         MakeDom.run(module);
         if (Config.isLLVMopt) {
             new Mem2reg(module).run();
+            new DeadCodeElimination(module).run();
 
             MyIO.writeFile(Config.LLVMOptFile, ManageFrontend.getModule().toString());
             new RemovePhi(module).run();

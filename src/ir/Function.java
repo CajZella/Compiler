@@ -1,11 +1,11 @@
 package ir;
 
-import ir.constants.Constant;
 import ir.types.DataType;
 import ir.types.FunctionType;
 import ir.valueSymtab.ValueSymtab;
 import util.MyLinkedList;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 // keep track of a list of BasicBlocks, formal Arguments and a SymbolTable
@@ -28,7 +28,6 @@ public class Function extends Value {
     public boolean isEmpty() { return this.blocks.isEmpty(); }
     public int size() { return this.blocks.size(); }
     public BasicBlock getEntryBlock() { return this.blocks.getHead(); }
-
     public boolean isMain() { return this.name.equals("@main"); }
     public void setSymtab(ValueSymtab symtab) { this.symtab = symtab; }
     public void addArgument(Argument argument) {
@@ -39,6 +38,7 @@ public class Function extends Value {
     public ArrayList<Argument> getArguments() { return this.arguments; }
     public ValueSymtab getSymtab() { return this.symtab; }
     public boolean isBuiltin() { return this.isBuiltin; }
+    public boolean isVoid() { return ((FunctionType)type).getReturnType().isVoidTy(); }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

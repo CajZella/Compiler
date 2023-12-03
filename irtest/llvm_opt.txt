@@ -113,7 +113,6 @@ sumMatrix_b87:
   br label %sumMatrix_b93
 sumMatrix_b93:
   %p5 = phi i32 [ 0, %sumMatrix_b87 ], [ %p4, %sumMatrix_b100 ]
-  %p3 = phi i32 [ 0, %sumMatrix_b87 ], [ %p2, %sumMatrix_b100 ]
   %p1 = phi i32 [ 0, %sumMatrix_b87 ], [ %i113, %sumMatrix_b100 ]
   %i97 = icmp slt i32 %p1, 10
   br i1 %i97, label %sumMatrix_b94, label %sumMatrix_b95
@@ -141,8 +140,6 @@ matrixMulti_b115:
   %i122 = alloca [10 x [10 x i32]]
   br label %matrixMulti_b126
 matrixMulti_b126:
-  %p11 = phi i32 [ 0, %matrixMulti_b115 ], [ %p9, %matrixMulti_b133 ]
-  %p8 = phi i32 [ 0, %matrixMulti_b115 ], [ %p7, %matrixMulti_b133 ]
   %p6 = phi i32 [ 0, %matrixMulti_b115 ], [ %i168, %matrixMulti_b133 ]
   %i130 = icmp slt i32 %p6, 10
   br i1 %i130, label %matrixMulti_b127, label %matrixMulti_b128
@@ -153,7 +150,6 @@ matrixMulti_b128:
   %i170 = call i32 @sumMatrix([10 x i32]* %i169)
   ret i32 %i170
 matrixMulti_b131:
-  %p9 = phi i32 [ %p11, %matrixMulti_b127 ], [ %p10, %matrixMulti_b141 ]
   %p7 = phi i32 [ 0, %matrixMulti_b127 ], [ %i166, %matrixMulti_b141 ]
   %i135 = icmp slt i32 %p7, 10
   br i1 %i135, label %matrixMulti_b132, label %matrixMulti_b133
@@ -289,7 +285,6 @@ main_b237:
   call void @putch(i32 10)
   br label %main_b245
 main_b245:
-  %p17 = phi i32 [ 0, %main_b237 ], [ %p16, %main_b252 ]
   %p13 = phi i32 [ 0, %main_b237 ], [ %i268, %main_b252 ]
   %i249 = icmp slt i32 %p13, 10
   br i1 %i249, label %main_b246, label %main_b247
