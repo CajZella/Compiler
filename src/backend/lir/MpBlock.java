@@ -38,8 +38,13 @@ public class MpBlock extends MyLinkedNode {
         for (MpInstr instr : mpInstrs) {
             if (instr instanceof MpBranch && ((MpBranch) instr).getLabel() == oldLabel) {
                 ((MpBranch) instr).replaceLabel(newLabel);
-            } else if (instr.getInstrType() == MpInstr.MipsInstrType.j && ((MpJump) instr).getLabel() == oldLabel) {
-                ((MpJump) instr).replaceLabel(newLabel);
+            } else {
+                if (instr.getInstrType() == MpInstr.MipsInstrType.j) {
+                    assert instr instanceof MpJump;
+                    if (((MpJump) instr).getLabel() == oldLabel) {
+                        ((MpJump) instr).replaceLabel(newLabel);
+                    }
+                }
             }
         }
     }

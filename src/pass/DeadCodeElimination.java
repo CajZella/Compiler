@@ -12,6 +12,7 @@ import ir.instrs.GetElementPtr;
 import ir.instrs.Instr;
 import ir.instrs.Ret;
 import ir.instrs.Store;
+import ir.types.FunctionType;
 
 
 import java.util.ArrayList;
@@ -25,11 +26,13 @@ public class DeadCodeElimination {
     public DeadCodeElimination(Module module) {
         this.module = module;
     }
-    public boolean run() {
-        boolean finished = true;
-        finished &= functionElimination();
-        finished &= codeElimination();
-        return finished;
+    public void run() {
+        boolean finished = false;
+        while (!finished) {
+            finished = true;
+            finished &= functionElimination();
+            finished &= codeElimination();
+        }
     }
 
     /*
@@ -37,13 +40,17 @@ public class DeadCodeElimination {
      */
     private HashMap<Function, HashSet<Function>> calleeMap = new HashMap<>();
     private HashMap<Function, HashSet<Function>> callerMap = new HashMap<>();
+    private HashSet<Function> sideEffectFunctions = new HashSet<>();
     private boolean functionElimination() {
         boolean finished = true;
+        sideEffectFunctions.clear();
         Function mainFunction = null;
         HashSet<Function> visited = new HashSet<>();
         for (Function function : module.getFunctions()) {
             calleeMap.put(function, new HashSet<>());
             callerMap.put(function, new HashSet<>());
+            if (function.isBuiltin())
+                sideEffectFunctions.add(function);
             if (function.isMain())
                 mainFunction = function;
         }
@@ -62,16 +69,31 @@ public class DeadCodeElimination {
     // dfs遍历函数调用图
     private void dfsFunction(Function function, HashSet<Function> visited) {
         visited.add(function);
+        if (!((FunctionType)function.getType()).getReturnType().isVoidTy())
+            sideEffectFunctions.add(function);
         for (BasicBlock basicBlock : function.getBlocks()) {
             for (Instr instr : basicBlock.getInstrs()) {
                 if (instr instanceof Call) { // 函数调用
                     Call callInstr = (Call) instr;
                     Function callee = callInstr.getFunction();
-                    if (!callee.isBuiltin()) {
+                    if (callee.isBuiltin())
+                        sideEffectFunctions.add(function);
+                    else {
                         calleeMap.get(function).add(callee);
                         callerMap.get(callee).add(function);
                         if (!visited.contains(callee))
                             dfsFunction(callee, visited);
+                        if (sideEffectFunctions.contains(callee))
+                            sideEffectFunctions.add(function);
+                    }
+                } else if (instr instanceof Store) {
+                    Store storeInstr = (Store) instr;
+                    if (storeInstr.getPointer() instanceof GlobalVariable)
+                        sideEffectFunctions.add(function);
+                    else {
+                        GetElementPtr pointer = (GetElementPtr) storeInstr.getPointer();
+                        if (pointer.getOperand(0) instanceof GlobalVariable || function.getArguments().contains(pointer.getOperand(0)))
+                            sideEffectFunctions.add(function);
                     }
                 }
             }
@@ -89,10 +111,9 @@ public class DeadCodeElimination {
             if (function.isBuiltin()) continue;
             for (BasicBlock block : function.getBlocks()) {
                 for (Instr instr : block.getInstrs()) {
-                    if (instr instanceof Call || instr instanceof Ret || instr instanceof Br)
+                    if (instr instanceof Call && sideEffectFunctions.contains(instr.getOperand(0)) || instr instanceof Ret || instr instanceof Br)
                         worklist.add(instr);
-                    else if (instr instanceof Store) {
-                        Store storeInstr = (Store) instr;
+                    else if (instr instanceof Store storeInstr) {
                         if (storeInstr.getPointer() instanceof GlobalVariable)
                             worklist.add(instr);
                         else {

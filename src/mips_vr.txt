@@ -1,135 +1,254 @@
 .data
-max_number:
-	.word 100
-min_number:
-	.word 0
 a:
-	.word 0
+	.word 9
+b:
+	.word 9
+d:
+	.word 9
 str.0:
-	.asciiz "19231204"
+	.asciiz "appear\n"
 str.1:
-	.asciiz "The score is "
+	.asciiz "not\n"
 str.2:
-	.asciiz ".\n"
+	.asciiz "print123\n"
 str.3:
-	.asciiz "Yes!\n"
+	.asciiz "/****/"
 str.4:
-	.asciiz "No!\n"
+	.asciiz "/**/"
 str.5:
-	.asciiz "No!"
+	.asciiz "print return value :\n"
 str.6:
-	.asciiz "Yes!"
+	.asciiz "in : 5 ,out = "
 
 
 .text
 main:
-main_b0:
+main_b42:
 	addiu $sp, $sp, -4
-	la vr0, str.0
-	move $a0, vr0
-	li $v0, 4
+	li $a0, 19231177
+	li $v0, 1
 	syscall
 	li $a0, 10
 	li $v0, 11
 	syscall
-	li $v0, 5
-	syscall
-	move vr1, $v0
-	lw vr2, min_number
-	bge vr1, vr2, main_b5
-	j main_b48
-main_b5:
-	la vr4, str.1
-	move $a0, vr4
-	li $v0, 4
-	syscall
-	move $a0, vr1
+	jal testGetInt
+	li vr0, 1
+	j main_b58
+main_b58:
+	blt vr0, 10, main_b59
+	j main_b60
+main_b59:
+	move $a0, vr0
+	jal mycheck
+	move vr2, $v0
+	move $a0, vr2
 	li $v0, 1
 	syscall
-	la vr5, str.2
+	li $a0, 10
+	li $v0, 11
+	syscall
+	move $a0, vr0
+	jal mycheck
+	move vr3, $v0
+	move $a0, vr0
+	jal mycheck
+	move vr4, $v0
+	li vr5, 1717986919
+	mult vr5, vr4
+	mfhi vr5
+	sra vr5, vr5, 3
+	slt $v0, vr4, $zero
+	addu vr5, vr5, $v0
 	move $a0, vr5
+	jal mycheck
+	move vr6, $v0
+	blt vr3, vr6, main_b65
+	j main_b67
+main_b60:
+	la vr8, str.2
+	move $a0, vr8
 	li $v0, 4
 	syscall
-	j main_b6
-main_b6:
-	li vr6, 2
-	sw vr6, a
-	lw vr7, a
-	beq vr7, 2, main_b14
-	j main_b49
-main_b14:
+	li $a0, 1
+	li $v0, 1
+	syscall
+	li $a0, 2
+	li $v0, 1
+	syscall
+	li $a0, 3
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
 	la vr9, str.3
 	move $a0, vr9
 	li $v0, 4
 	syscall
-	j main_b15
-main_b15:
-	li vr10, 8
-	sw vr10, a
-	lw vr11, a
-	bne vr11, 8, main_b20
-	j main_b22
-main_b20:
-	la vr13, str.4
+	li $a0, 1
+	li $v0, 1
+	syscall
+	li $a0, 2
+	li $v0, 1
+	syscall
+	li $a0, 3
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	la vr10, str.4
+	move $a0, vr10
+	li $v0, 4
+	syscall
+	li $a0, 1
+	li $v0, 1
+	syscall
+	li $a0, 2
+	li $v0, 1
+	syscall
+	li $a0, 3
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	la vr11, str.5
+	move $a0, vr11
+	li $v0, 4
+	syscall
+	li $a0, 5
+	jal mycheck
+	move vr12, $v0
+	la vr14, str.6
+	move vr13, vr14
 	move $a0, vr13
 	li $v0, 4
 	syscall
-	j main_b21
-main_b21:
-	li vr14, 100
-	sw vr14, a
-	lw vr15, a
-	lw vr16, max_number
-	ble vr15, vr16, main_b28
-	j main_b50
-main_b22:
-	la vr18, str.3
-	move $a0, vr18
+	move $a0, vr12
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	li $a0, 5
+	jal mycheck
+	move vr15, $v0
+	move vr16, vr14
+	move $a0, vr16
 	li $v0, 4
 	syscall
-	j main_b21
-main_b28:
-	la vr19, str.3
+	move $a0, vr15
+	li $v0, 1
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	li $v0, 10
+	syscall
+main_b65:
+	la vr17, str.0
+	move $a0, vr17
+	li $v0, 4
+	syscall
+	j main_b66
+main_b66:
+	addiu vr18, vr0, 1
+	move vr0, vr18
+	j main_b58
+main_b67:
+	la vr19, str.1
 	move $a0, vr19
 	li $v0, 4
 	syscall
-	j main_b29
-main_b29:
-	lw vr20, a
-	lw vr21, max_number
-	blt vr20, vr21, main_b34
-	j main_b51
-main_b34:
-	la vr23, str.3
-	move $a0, vr23
-	li $v0, 4
-	syscall
-	j main_b35
-main_b35:
-	lw vr24, a
-	bgt vr24, 30, main_b40
-	j main_b42
-main_b40:
-	la vr26, str.5
-	move $a0, vr26
-	li $v0, 4
-	syscall
-	j main_b41
-main_b41:
+	j main_b66
+
+mycheck:
+mycheck_b0:
+	addiu $sp, $sp, -4
+	sw $ra, 0($sp)
+	move vr20, $a0
+	beq vr20, 1, mycheck_b3
+	j mycheck_b4
+mycheck_b3:
 	li $v0, 10
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+mycheck_b4:
+	beq vr20, 2, mycheck_b7
+	j mycheck_b8
+mycheck_b7:
+	li $v0, 20
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+mycheck_b8:
+	beq vr20, 4, mycheck_b11
+	j mycheck_b13
+mycheck_b11:
+	li $v0, 40
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+mycheck_b12:
+	beq vr20, 3, mycheck_b25
+	j mycheck_b27
+mycheck_b13:
+	beq vr20, 5, mycheck_b16
+	j mycheck_b18
+mycheck_b16:
+	li $v0, 50
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+mycheck_b17:
+	j mycheck_b12
+mycheck_b18:
+	beq vr20, 6, mycheck_b21
+	j mycheck_b22
+mycheck_b21:
+	li $v0, 60
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+mycheck_b22:
+	j mycheck_b17
+mycheck_b25:
+	li $v0, 30
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+mycheck_b27:
+	li $v0, 99
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
+
+testGetInt:
+testGetInt_b30:
+	addiu $sp, $sp, -4
+	sw $ra, 0($sp)
+	li vr27, 0
+	j testGetInt_b32
+testGetInt_b32:
+	blt vr27, 9, testGetInt_b33
+	j testGetInt_b34
+testGetInt_b33:
+	li $v0, 5
 	syscall
-main_b42:
-	la vr27, str.6
-	move $a0, vr27
-	li $v0, 4
+	move vr29, $v0
+	move $a0, vr29
+	li $v0, 1
 	syscall
-	j main_b41
-main_b48:
-	j main_b6
-main_b49:
-	j main_b15
-main_b50:
-	j main_b29
-main_b51:
-	j main_b35
+	li $a0, 10
+	li $v0, 11
+	syscall
+	addiu vr30, vr27, 1
+	move vr27, vr30
+	j testGetInt_b32
+testGetInt_b34:
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+	jr $ra
 
