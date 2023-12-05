@@ -9,13 +9,11 @@ import backend.lir.mipsInstr.MpMove;
 import backend.lir.mipsInstr.MpStore;
 import backend.lir.mipsOperand.MpImm;
 import backend.lir.mipsOperand.MpReg;
-import util.MyLinkedList;
 import util.MyPair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Stack;
 
 /*
@@ -419,24 +417,21 @@ public class RegAlloc {
             stackSize += 4;
             MpReg newTemp = new MpReg();
             for (MpBlock block : curMF.getMpBlocks()) {
-                MyLinkedList<MpInstr> instrs = block.getMpInstrs();
-                Iterator<MpInstr> iterator = instrs.iterator();
-                while (iterator.hasNext()) {
-                    MpInstr instr = iterator.next();
+                for (MpInstr instr : block.getMpInstrs()) {
                     if (instr.hasDstReg() && instr.getDstReg().equal(v)) {
                         newTemps.add(newTemp);
                         instr.replaceDst(newTemp);
-                        instrs.insertAfter(new MpStore(block, newTemp, precolored.get(27), offset), instr);
+                        instr.insertAfter(new MpStore(block, newTemp, precolored.get(27), offset));
                     }
                     if (instr.hasSrc1Reg() && instr.getSrc1Reg().equal(v)) {
                         newTemps.add(newTemp);
                         instr.replaceSrc1(newTemp);
-                        instrs.insertBefore(new MpLoad(block, newTemp, precolored.get(27), offset), instr);
+                        instr.insertBefore(new MpLoad(block, newTemp, precolored.get(27), offset));
                     }
                     if (instr.hasSrc2Reg() && instr.getSrc2Reg().equal(v)) {
                         newTemps.add(newTemp);
                         instr.replaceSrc2(newTemp);
-                        instrs.insertBefore(new MpLoad(block, newTemp, precolored.get(27), offset), instr);
+                        instr.insertBefore(new MpLoad(block, newTemp, precolored.get(27), offset));
                     }
                 }
             }

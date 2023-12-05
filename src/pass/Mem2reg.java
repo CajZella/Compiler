@@ -145,7 +145,6 @@ public class Mem2reg {
                     useInstr.remove();
                 }
             }
-            alloca.dropAllReferences();
             alloca.remove();
         }
     }

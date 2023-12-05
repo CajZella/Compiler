@@ -230,17 +230,16 @@ public class CodeGen {
             PCs pcs = basicBlock.getPcs();
             if (pcs == null) continue;
             curMB = bb2mb.get(basicBlock);
-            MyLinkedList<MpInstr> mipsInstrs = curMB.getMpInstrs();
-            MpInstr mipsTerminator = mipsInstrs.getTail();
+            MpInstr mipsTerminator = curMB.getLastMpInstr();
             ArrayList<PCs.ParallelCopy> parallelCopies = pcs.getParallelCopies();
             for (int i = parallelCopies.size() - 1; i >= 0; i--) {
                 PCs.ParallelCopy parallelCopy = parallelCopies.get(i);
                 MpOpd src = genOperand(parallelCopy.src);
                 MpOpd dst = genOperand(parallelCopy.dst);
                 if (src instanceof MpImm)
-                    mipsInstrs.insertBefore(new MpLoadImm(curMB, (MpReg) dst, (MpImm) src), mipsTerminator);
+                    mipsTerminator.insertBefore(new MpLoadImm(curMB, (MpReg) dst, (MpImm) src));
                 else
-                    mipsInstrs.insertBefore(new MpMove(curMB, (MpReg) dst, (MpReg) src), mipsTerminator);
+                    mipsTerminator.insertBefore(new MpMove(curMB, (MpReg) dst, (MpReg) src));
             }
         }
     }

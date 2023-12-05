@@ -69,7 +69,7 @@ public class Function extends Value {
             builder.append(String.format("declare %s %s(", ((FunctionType) type).getReturnType(), name));
             ArrayList<DataType> argumentTypes = ((FunctionType)type).getArgumentTypes();
             for (int i = 0; i < argumentTypes.size(); i++) {
-                DataType dataType = argumentTypes.get(i);
+               DataType dataType = argumentTypes.get(i);
                 builder.append(String.format("%s", dataType));
             }
             builder.append(")\n");

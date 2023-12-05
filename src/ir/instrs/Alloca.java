@@ -14,19 +14,6 @@ public class Alloca extends Instr {
         super(ValueType.alloca, type, pBB);
     }
     public boolean isArrayAlloc() { return ((PointerType)type).getReferencedType().isArrayTy(); }
-    public ArrayList<Store> getStores() {
-        ArrayList<Store> stores = new ArrayList<>();
-        for(Use use : useList) {
-            if (use.getUser() instanceof Store)
-                stores.add((Store) use.getUser());
-            else if (use.getUser() instanceof GetElementPtr) {
-                GetElementPtr getElementPtr = (GetElementPtr) use.getUser();
-                if (getElementPtr.getNext() instanceof Store)
-                    stores.add((Store) getElementPtr.getNext());
-            }
-        }
-        return stores;
-    }
     @Override
     public String toString() {
         return String.format("%s = alloca %s", name, ((PointerType)type).getReferencedType());
