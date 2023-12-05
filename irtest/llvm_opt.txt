@@ -83,13 +83,11 @@ isPrime_b60:
 isPrime_b61:
   %i67 = srem i32 %ar57, 2
   %i68 = icmp eq i32 %i67, 0
-  br i1 %i68, label %isPrime_b64, label %isPrime_b65
+  br i1 %i68, label %isPrime_b64, label %isPrime_b69
 isPrime_b64:
   ret i32 0
-isPrime_b65:
-  br label %isPrime_b69
 isPrime_b69:
-  %p0 = phi i32 [ 3, %isPrime_b65 ], [ %i83, %isPrime_b77 ]
+  %p0 = phi i32 [ 3, %isPrime_b61 ], [ %i83, %isPrime_b77 ]
   %i74 = sdiv i32 %ar57, 2
   %i75 = icmp slt i32 %p0, %i74
   br i1 %i75, label %isPrime_b70, label %isPrime_b71
@@ -249,7 +247,7 @@ main_b205:
   %i209 = icmp eq i32 %p12, 1
   br i1 %i209, label %main_b202, label %main_b204
 main_b216:
-  %p14 = phi i32 [ 5, %main_b199 ], [ %i229, %main_b232 ]
+  %p14 = phi i32 [ 5, %main_b199 ], [ %i229, %main_b217 ]
   %i221 = load i32, i32* @int_c
   %i222 = icmp slt i32 %p14, %i221
   br i1 %i222, label %main_b217, label %main_b219
@@ -260,9 +258,9 @@ main_b217:
   %i229 = add i32 %p14, 1
   %i234 = load i32, i32* @int_c
   %i235 = icmp eq i32 %i229, %i234
-  br i1 %i235, label %main_b230, label %main_b232
+  br i1 %i235, label %main_b218, label %main_b216
 main_b218:
-  %p15 = phi i32 [ %i229, %main_b230 ], [ %p14, %main_b219 ]
+  %p15 = phi i32 [ %i229, %main_b217 ], [ %p14, %main_b219 ]
   %i239 = load i32, i32* @int_c
   %i240 = icmp eq i32 %p15, %i239
   br i1 %i240, label %main_b236, label %main_b237
@@ -270,10 +268,6 @@ main_b219:
   %i224 = load i32, i32* @int_c
   %i225 = icmp sgt i32 %p14, %i224
   br i1 %i225, label %main_b217, label %main_b218
-main_b230:
-  br label %main_b218
-main_b232:
-  br label %main_b216
 main_b236:
   %i241 = call i32 @return_one()
   call void @putint(i32 %i241)

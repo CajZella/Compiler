@@ -17,6 +17,9 @@ public abstract class User extends Value {
         }
     }
     public User(String name) { super(name); }
+    public void removeOperand(int index) {
+        this.operands.remove(index);
+    }
     public void use(Value value) {
         Use use = new Use(this, value);
         this.operands.add(use);
@@ -31,10 +34,6 @@ public abstract class User extends Value {
     }
     public boolean isOperandsEmpty() { return this.operands.isEmpty(); }
     public Value getOperand(int index) { return this.operands.get(index).getVal(); }
-    public void setOperand(int index, Value value) {
-        Use use = this.operands.get(index);
-        use.setVal(value);
-    }
     public int operandsSize() { return this.operands.size(); }
     public void dropAllReferences() {
         for (Use use : this.operands) {
@@ -47,6 +46,20 @@ public abstract class User extends Value {
             if (use.getVal() == from) {
                 use.setVal(to);
             }
+        }
+    }
+    public void replaceAllUses(Value... operands) {
+        this.dropAllReferences();
+        this.operands.clear();
+        for (Value operand : operands) {
+            use(operand);
+        }
+    }
+    public void replaceAllUses(ArrayList<Value> operands) {
+        this.dropAllReferences();
+        this.operands.clear();
+        for (Value operand : operands) {
+            use(operand);
         }
     }
     public void replaceUsesOfWith(int idx, Value to) {

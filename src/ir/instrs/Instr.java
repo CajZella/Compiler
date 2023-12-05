@@ -22,6 +22,7 @@ public class Instr extends User {
     }
     public Instr() { super("%i" + num++); }
     public BasicBlock getParent() { return this.pBB; }
+    public void setParent(BasicBlock pBB) { this.pBB = pBB; }
     public boolean mayWriteToMemory() { return this.valueTy == ValueType.call || this.valueTy == ValueType.store; }
     public boolean mayReadFromMemory() { return this.valueTy == ValueType.load; }
     public boolean isTerminator() { return this.valueTy == ValueType.br || this.valueTy == ValueType.ret; }

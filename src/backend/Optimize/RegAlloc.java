@@ -47,6 +47,7 @@ public class RegAlloc {
     private final HashMap<MpReg, HashSet<MpMove>> moveList = new HashMap<>(); // 从一个节点到与该结点相关的传送指令表的映射
     private final HashMap<MpReg, MpReg> alias = new HashMap<>(); // 传送指令(u,v)合并后，alias[v] = u
     private final HashMap<MpReg, MpReg> color = new HashMap<>(); // 算法为节点选择的颜色
+    HashSet<MpReg> tempRegs = new HashSet<>();
     private int K;
     public RegAlloc(MpModule mipsModule, ArrayList<MpReg> precolored) {
         this.mipsModule = mipsModule;
@@ -368,13 +369,7 @@ public class RegAlloc {
     }
     private void selectSpill() {
         //todo: 使用次数和是否在循环中结合考虑
-        int maxCost = 0;
-        MpReg reg = null;
-        for (MpReg reg1 : spillWorklist)
-            if (calcSpillCost(reg1) > maxCost) {
-                maxCost = calcSpillCost(reg1);
-                reg = reg1;
-            }
+        MpReg reg = spillWorklist.iterator().next();
         spillWorklist.remove(reg);
         simplifyWorklist.add(reg);
         freezeMoves(reg);
@@ -445,6 +440,7 @@ public class RegAlloc {
         initial.addAll(coloredNodes);
         initial.addAll(coalescedNodes);
         initial.addAll(newTemps);
+        tempRegs.addAll(newTemps);
         coloredNodes.clear();
         coalescedNodes.clear();
     }

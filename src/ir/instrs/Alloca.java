@@ -1,7 +1,10 @@
 package ir.instrs;
 
 import ir.BasicBlock;
+import ir.Use;
 import ir.types.PointerType;
+
+import java.util.ArrayList;
 
 /*
     <result> = alloca <type>

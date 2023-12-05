@@ -12,10 +12,10 @@ import backend.lir.mipsInstr.MpJump;
 import backend.lir.mipsInstr.MpLoad;
 import backend.lir.mipsInstr.MpMove;
 import backend.lir.mipsInstr.MpStore;
+import backend.lir.mipsOperand.MpImm;
 import backend.lir.mipsOperand.MpReg;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -28,14 +28,14 @@ public class Peephole {
     }
     public void run() {
         boolean finished = false;
+        replaceZeroWithZeroReg();
+        handleStackSize();
         while (!finished) {
             finished = true;
             finished &= redundantPreserveWhenCall();
             finished &= removeRedundantMove();
             finished &= removeUselessBlock();
         }
-        replaceZeroWithZeroReg();
-        removeRedundantPreserveRA();
     }
 
     /*
@@ -114,7 +114,7 @@ public class Peephole {
             while (iterator.hasNext()) {
                 MpBlock block = iterator.next();
                 if (block.getFirstMpInstr().getInstrType() == MpInstr.MipsInstrType.j
-                        && block.getMpInstrs().size() == 1 && block.getPrecMBs().size() == 1) { // todo: 具体判断还是需要等到中间优化完成后
+                        && block.getPrecMBs().size() == 1) { // todo: 具体判断还是需要等到中间优化完成后
                     finished = false;
                     MpJump jump = (MpJump) block.getFirstMpInstr();
                     for (MpBlock precBlock : block.getPrecMBs()) {
@@ -149,37 +149,16 @@ public class Peephole {
             }
         }
     }
-    private void removeRedundantPreserveRA() {
-        HashSet<MpFunction> hasJal = new HashSet<>();
+    private void handleStackSize() {
         for (MpFunction function : module.getMpFunctions()) {
-            for (MpBlock block : function.getMpBlocks())
-                for (MpInstr instr : block.getMpInstrs())
-                    if (instr.getInstrType() == MpInstr.MipsInstrType.jal)
-                        hasJal.add(function);
-        }
-        for (MpFunction function : module.getMpFunctions()) {
-            if (function.isMain()) continue;
-            if (!hasJal.contains(function)) {
-                for (MpBlock block : function.getMpBlocks()) {
-                    Iterator<MpInstr> iterator = block.getMpInstrs().iterator();
-                    while (iterator.hasNext()) {
-                        MpInstr instr = iterator.next();
-                        if (instr instanceof MpStore && instr.getSrc1Reg() == BackEnd.mipsPhyRegs.get(29)) {
-                            MpAlu prevInst = (MpAlu) instr.getPrev();
-                            if (prevInst.getImm().getVal() == -4) {
-                                function.setStackSize(0);
-                                prevInst.remove();
-                            }
-                            iterator.remove();
-                        }
-                        else if (instr instanceof MpLoad && instr.getDstReg() == BackEnd.mipsPhyRegs.get(29)) {
-                            MpAlu nextInst = (MpAlu) instr.getNext();
-                            if (nextInst.getImm().getVal() == 4)
-                                nextInst.remove();
-                            iterator.remove();
-                        }
-                    }
-                }
+            int stackSize = function.getStackSize();
+            if (stackSize != 0) {
+                MpBlock block = function.getMpBlocks().getHead();
+                block.getMpInstrs().insertAtHead(new MpAlu(MpInstr.MipsInstrType.addiu, block, BackEnd.mipsPhyRegs.get(27), BackEnd.mipsPhyRegs.get(27), new MpImm(-stackSize)));
+                for (MpBlock block1 : function.getMpBlocks())
+                    for (MpInstr instr : block1.getMpInstrs())
+                        if (instr.getInstrType() == MpInstr.MipsInstrType.jr)
+                            instr.insertBefore(new MpAlu(MpInstr.MipsInstrType.addiu, block1, BackEnd.mipsPhyRegs.get(27), BackEnd.mipsPhyRegs.get(27), new MpImm(stackSize)));
             }
         }
     }

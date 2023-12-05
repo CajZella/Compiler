@@ -1,6 +1,7 @@
 package ir.instrs;
 
 import ir.BasicBlock;
+import ir.Function;
 import ir.Value;
 import ir.types.DataType;
 import ir.types.IntegerType;
@@ -15,6 +16,7 @@ public class Call extends Instr {
     public Call(DataType type, BasicBlock pBB, Value...operands) {
         super(ValueType.call, type, pBB, operands);
     }
+    public Function getFunction() { return (Function) getOperand(0); }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

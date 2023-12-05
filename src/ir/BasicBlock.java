@@ -1,11 +1,15 @@
 package ir;
 
+import ir.instrs.Br;
+import ir.instrs.Phi;
 import pass.PCs;
 import ir.instrs.Instr;
 import ir.types.LabelType;
 import util.MyLinkedList;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 
 // a single entry single exit section of the code
 public class BasicBlock extends Value {

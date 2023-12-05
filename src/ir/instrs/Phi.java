@@ -31,6 +31,7 @@ public class Phi extends Instr {
         return phiBBs.contains(block);
     }
     public BasicBlock getBlock(int i) { return phiBBs.get(i); }
+    public ArrayList<BasicBlock> getPhiBBs() { return phiBBs; }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

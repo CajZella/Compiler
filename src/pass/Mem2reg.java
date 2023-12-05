@@ -21,16 +21,14 @@ import java.util.LinkedList;
 import java.util.Stack;
 
 public class Mem2reg {
-    private final LinkedList<Function> functions;
+    private Module module;
     private HashSet<Instr> defInstrs = new HashSet<>();
     private HashSet<Instr> useInstrs = new HashSet<>();
     private HashSet<BasicBlock> useBBs = new HashSet<>();
     private HashSet<BasicBlock> defBBs = new HashSet<>();
     private Function curFunc;
-    private MyLinkedList<BasicBlock> curBBs;
-    private Alloca curVal;
     public Mem2reg(Module module) {
-        this.functions = module.getFunctions();
+        this.module = module;
     }
     public void run() {
 //        for (Function function : functions)
@@ -60,10 +58,9 @@ public class Mem2reg {
         insertPhi();
     }
     private void insertPhi() {
-        for (Function function : functions)
+        for (Function function : module.getFunctions())
             if (!function.isBuiltin()) {
                 curFunc = function;
-                curBBs = curFunc.getBlocks();
                 for (BasicBlock bb : function.getBlocks())
                     for (Instr instr : bb.getInstrs())
                         if (instr instanceof Alloca && !((Alloca) instr).isArrayAlloc())
@@ -71,7 +68,6 @@ public class Mem2reg {
             }
     }
     private void insertVarPhi(Alloca alloca) {
-        curVal = alloca;
         defInstrs = new HashSet<>();
         useInstrs = new HashSet<>();
         useBBs = new HashSet<>();

@@ -157,9 +157,11 @@ public class CodeGen {
         mipsModule.addMpData(mipsData);
         gv2md.put(globalVariable, mipsData);
     }
+    private boolean hasCallees;
     private void genFunction() {
         MyLinkedList<BasicBlock> basicBlocks = curIF.getBlocks();
-        int offset = 4; // $ra
+        hasCallees = !curIF.getCallees().isEmpty();
+        int offset = hasCallees ? 4 : 0; // $ra
         /* step1. 计算函数所需栈空间 */
         for (BasicBlock basicBlock : basicBlocks) {
             MyLinkedList<Instr> instrs = basicBlock.getInstrs();
@@ -171,11 +173,8 @@ public class CodeGen {
         curMF.setStackSize(offset);
         /* step2. 函数开栈空间 */
         MpBlock tempMB =bb2mb.get(basicBlocks.getHead());
-        MpAlu mpAlu = new MpAlu(MpInstr.MipsInstrType.addiu, tempMB, mipsPhyRegs.get(27), mipsPhyRegs.get(27), new MpImm(-offset));
-        mpAlu.setSPreference();
-        tempMB.addMpInstr(mpAlu);
         /* step3.在函数开始时先将$ra保存在栈中 优化，若函数内没有jal指令，即没有调用其他函数，可以不用保存$ra */
-        if (!curIF.isMain()) {
+        if (!curIF.isMain() && hasCallees) {
             MpStore mpStore = new MpStore(tempMB, mipsPhyRegs.get(29), mipsPhyRegs.get(27), new MpImm(0));
             tempMB.addMpInstr(mpStore);
         }
@@ -351,10 +350,8 @@ public class CodeGen {
             else
                 curMB.addMpInstr(new MpMove(curMB, mipsPhyRegs.get(2), (MpReg) ret));
         }
-        curMB.addMpInstr(new MpLoad(curMB, mipsPhyRegs.get(29), mipsPhyRegs.get(27), new MpImm(0)));
-        MpAlu mpAlu = new MpAlu(MpInstr.MipsInstrType.addiu, curMB, mipsPhyRegs.get(27), mipsPhyRegs.get(27), new MpImm(curMF.getStackSize()));
-        mpAlu.setSPreference();
-        curMB.addMpInstr(mpAlu);
+        if (hasCallees)
+            curMB.addMpInstr(new MpLoad(curMB, mipsPhyRegs.get(29), mipsPhyRegs.get(27), new MpImm(0)));
         curMB.addMpInstr(new MpJump(curMB, mipsPhyRegs.get(29)));
     }
     /*

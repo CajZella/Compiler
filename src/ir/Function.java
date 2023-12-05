@@ -6,6 +6,8 @@ import ir.types.FunctionType;
 import ir.valueSymtab.ValueSymtab;
 import util.MyLinkedList;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
 // keep track of a list of BasicBlocks, formal Arguments and a SymbolTable
@@ -14,6 +16,8 @@ public class Function extends Value {
     private ArrayList<Argument> arguments;
     private ValueSymtab symtab;
     private boolean isBuiltin;
+    private HashSet<Function> callees = new HashSet<>();
+    private HashSet<Function> callers = new HashSet<>();
     public Function(String name, FunctionType functionType, boolean isBuiltin) {
         super(ValueType.Function, String.format("@%s", name), functionType);
         this.arguments = new ArrayList<>();
@@ -39,6 +43,10 @@ public class Function extends Value {
     public ArrayList<Argument> getArguments() { return this.arguments; }
     public ValueSymtab getSymtab() { return this.symtab; }
     public boolean isBuiltin() { return this.isBuiltin; }
+    public void setCallees(HashSet<Function> callees) { this.callees = callees; }
+    public HashSet<Function> getCallees() { return this.callees; }
+    public void setCallers(HashSet<Function> callers) { this.callers = callers; }
+    public HashSet<Function> getCallers() { return this.callers; }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
