@@ -62,6 +62,7 @@ public abstract class User extends Value {
             use(operand);
         }
     }
+    public ArrayList<Use> getUserUses() { return this.operands; }
     public void replaceUsesOfWith(int idx, Value to) {
         operands.get(idx).setVal(to);
     }

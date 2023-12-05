@@ -32,6 +32,9 @@ public class Phi extends Instr {
     }
     public BasicBlock getBlock(int i) { return phiBBs.get(i); }
     public ArrayList<BasicBlock> getPhiBBs() { return phiBBs; }
+    public void replacePhiBB(int idx, BasicBlock newBB) {
+        phiBBs.set(idx, newBB);
+    }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

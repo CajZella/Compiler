@@ -3,7 +3,7 @@
 #include <fstream>
 #include <cstring>
 int main() {
-    const char* path = "../2021test";
+    const char* path = "../2022test/full";
     const char* test_file = "testfile.txt";
     const char* error_file = "error.txt";
     const char* llvm_file = "llvm.txt";

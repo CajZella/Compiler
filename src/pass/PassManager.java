@@ -14,7 +14,9 @@ public class PassManager {
             new Mem2reg(module).run();
             DeadCodeElimination deadCodeElimination = new DeadCodeElimination(module);
             deadCodeElimination.run();
-            boolean finished = false;
+            new FunctionInline(module).run();
+            deadCodeElimination.run();
+//            boolean finished = false;
 //            while (!finished) {
 //                finished = true;
 //                finished &= deadCodeElimination.run();

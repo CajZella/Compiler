@@ -166,8 +166,10 @@ public class CodeGen {
         for (BasicBlock basicBlock : basicBlocks) {
             MyLinkedList<Instr> instrs = basicBlock.getInstrs();
             for (Instr instr : instrs) {
-                if (instr instanceof Alloca)
+                if (instr instanceof Alloca) {
                     offset += instr.getType().size();
+                    genAllocaInstr((Alloca) instr);
+                }
             }
         }
         curMF.setStackSize(offset);
@@ -222,6 +224,9 @@ public class CodeGen {
     private void handleParallelCopies() {
         MyLinkedList<BasicBlock> basicBlocks = curIF.getBlocks();
         for (BasicBlock basicBlock : basicBlocks) {
+            if (basicBlock.getMipsName().equals("main_b16")) {
+                int x = 1;
+            }
             PCs pcs = basicBlock.getPcs();
             if (pcs == null) continue;
             curMB = bb2mb.get(basicBlock);
@@ -246,7 +251,6 @@ public class CodeGen {
     }
     private void genInstr(Instr instr) {
         switch (instr.getValueTy()) {
-            case alloca -> genAllocaInstr((Alloca) instr);
             case load -> genLoadInstr((Load) instr);
             case store -> genStoreInstr((Store) instr);
             case br -> genBrInstr((Br) instr);
@@ -381,6 +385,10 @@ public class CodeGen {
                 curMB.addMpInstr(new MpLoadImm(curMB, dst, new MpImm(((ConstantInt) irArg).getVal())));
             else {
                 MpOpd arg = val2opd.get(irArg);
+                if (arg == null) {
+                    arg = new MpReg();
+                    val2opd.put(irArg, arg);
+                }
                 if (arg instanceof MpStackOffset) {
                     MpReg base = ((MpStackOffset) arg).getBase();
                     MpImm soOffset = ((MpStackOffset) arg).getOffset();
@@ -773,11 +781,11 @@ public class CodeGen {
         val2opd.put(instr, mipsSO);
     }
     private void genZextInstr(Zext instr) {
-        MpOpd src = val2opd.get(instr.getOperand(0));
+        MpOpd src = genOperand(instr.getOperand(0));
         val2opd.put(instr, src);
     }
     private void genTruncInstr(Trunc instr) {
-        MpOpd src = val2opd.get(instr.getOperand(0));
+        MpOpd src = genOperand(instr.getOperand(0));
         val2opd.put(instr, src);
     }
     /*

@@ -11,11 +11,13 @@ import util.MyLinkedList;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 
 public class RemovePhi {
     private Module module;
     private Function curFunc;
+    private HashMap<BasicBlock, HashMap<BasicBlock, BasicBlock>> map = new HashMap<>();
     public RemovePhi(ir.Module module) {
         this.module = module;
     }
@@ -26,7 +28,10 @@ public class RemovePhi {
         }
     }
     private void removeFuncPhi() {
+        map.clear();
         MyLinkedList<BasicBlock> basicBlocks = curFunc.getBlocks();
+        for (BasicBlock block : basicBlocks)
+            map.put(block, new HashMap<>());
         // step1：插入PCs
         BasicBlock firstAdd = null;
         for (BasicBlock basicBlock : basicBlocks) {
@@ -48,10 +53,11 @@ public class RemovePhi {
                     pcBlock.getSuccBBs().add(basicBlock);
                     precBBs.add(pcBlock);
                     pcBlock.setPcs(pcs);
-                    precBlock.setPcBlock(pcBlock);
+                    map.get(precBlock).put(basicBlock, pcBlock);
                 } else {
                     precBBs.add(precBlock);
                     precBlock.setPcs(pcs);
+                    map.get(precBlock).put(basicBlock, precBlock);
                 }
             }
             basicBlock.setPrecBBs(precBBs);
@@ -65,13 +71,21 @@ public class RemovePhi {
                 for (int i = 0; i < phi.operandsSize(); i++) {
                     Value operand = phi.getOperand(i);
                     BasicBlock phiBB = phi.getBlock(i);
-                    PCs pcs = phiBB.getPcs();
-                    if (null == pcs)
-                        pcs = phiBB.getPcBlock().getPcs();
+                    BasicBlock selectBB = map.get(phiBB).get(basicBlock);
+                    PCs pcs = selectBB.getPcs();
                     pcs.add(operand, phi);
                 }
                 // phi.remove();
             }
         }
+//        for (BasicBlock block : curFunc.getBlocks()) {
+//            PCs pcs = block.getPcs();
+//            if (pcs != null) {
+//                System.out.println(block.getMipsName());
+//                for (PCs.ParallelCopy pc : pcs.getOriginPCs()) {
+//                    System.out.println(pc.getDst() + " = " + pc.getSrc());
+//                }
+//            }
+//        }
     }
 }

@@ -23,6 +23,7 @@ public class PCs {
     }
     private ArrayList<ParallelCopy> parallelCopies = new ArrayList<>();
     public void add(Value src, Value dst) { parallelCopies.add(new ParallelCopy(src, dst)); }
+    public ArrayList<ParallelCopy> getOriginPCs() { return parallelCopies; }
     public ArrayList<ParallelCopy> getParallelCopies() {
         // topological sorting
         ArrayList<ParallelCopy> sortedParallelCopies = new ArrayList<>();

@@ -2,316 +2,302 @@ declare i32 @getint()
 declare void @putint(i32)
 declare void @putstr(i8*)
 declare void @putch(i32)
-@const_a = dso_local constant i32 1
-@const_b = dso_local constant i32 2
-@const_c = dso_local constant i32 2
-@const_d = dso_local constant i32 3
-@int_c = dso_local global i32 3
-@int_d = dso_local global i32 0
-@int_e = dso_local global i32 2
-@const_array = dso_local constant [1 x i32] [i32 0]
-@const_double = dso_local constant [1 x [1 x i32]] [[1 x i32] [i32 0]]
-@array = dso_local global [100 x i32] zeroinitializer
-@matrix_A = dso_local global [10 x [10 x i32]] zeroinitializer
-@matrix_B = dso_local global [10 x [10 x i32]] zeroinitializer
-@str.0 = private unnamed_addr constant [10 x i8] c"19373630\0A\00"
-define dso_local void @output_id() {
-output_id_b0:
-  %i4 = icmp eq i32 0, 0
-  br i1 %i4, label %output_id_b5, label %output_id_b3
-output_id_b1:
-  %i8 = getelementptr [10 x i8], [10 x i8]* @str.0, i32 0, i32 0
-  call void @putstr(i8* %i8)
-  br label %output_id_b2
-output_id_b2:
-  ret void
-output_id_b3:
-  %i7 = icmp ne i32 1, 0
-  br i1 %i7, label %output_id_b1, label %output_id_b2
-output_id_b5:
-  %i6 = icmp ne i32 0, 0
-  br i1 %i6, label %output_id_b1, label %output_id_b3
-}
-define dso_local void @output_a_plus_b(i32 %ar10, i32 %ar12) {
-output_a_plus_b_b9:
-  %i16 = add i32 %ar10, %ar12
-  call void @putint(i32 %i16)
-  call void @putch(i32 10)
-  ret void
-}
-define dso_local i32 @A_plus_B(i32 %ar18, i32 %ar20) {
-A_plus_B_b17:
-  %i24 = add i32 %ar18, %ar20
-  ret i32 %i24
-}
-define dso_local i32 @return_one() {
-return_one_b25:
-  ret i32 1
-}
-define dso_local i32 @factorial(i32 %ar27) {
-factorial_b26:
-  %i33 = getelementptr [100 x i32], [100 x i32]* @array, i32 0, i32 %ar27
-  %i34 = load i32, i32* %i33
-  %i35 = icmp ne i32 %i34, 0
-  br i1 %i35, label %factorial_b29, label %factorial_b31
-factorial_b29:
-  %i37 = getelementptr [100 x i32], [100 x i32]* @array, i32 0, i32 %ar27
-  %i38 = load i32, i32* %i37
-  ret i32 %i38
-factorial_b31:
-  %i40 = sub i32 %ar27, 1
-  %i41 = call i32 @factorial(i32 %i40)
-  %i43 = sub i32 %ar27, 1
-  %i44 = getelementptr [100 x i32], [100 x i32]* @array, i32 0, i32 %i43
-  store i32 %i41, i32* %i44
-  %i46 = sub i32 %ar27, 1
-  %i47 = getelementptr [100 x i32], [100 x i32]* @array, i32 0, i32 %i46
-  %i48 = load i32, i32* %i47
-  %i50 = mul i32 %i48, %ar27
-  %i52 = getelementptr [100 x i32], [100 x i32]* @array, i32 0, i32 %ar27
-  store i32 %i50, i32* %i52
-  %i54 = getelementptr [100 x i32], [100 x i32]* @array, i32 0, i32 %ar27
-  %i55 = load i32, i32* %i54
-  ret i32 %i55
-}
-define dso_local i32 @isPrime(i32 %ar57) {
-isPrime_b56:
-  %i63 = icmp sle i32 %ar57, 0
-  br i1 %i63, label %isPrime_b60, label %isPrime_b61
-isPrime_b60:
-  ret i32 0
-isPrime_b61:
-  %i67 = srem i32 %ar57, 2
-  %i68 = icmp eq i32 %i67, 0
-  br i1 %i68, label %isPrime_b64, label %isPrime_b69
-isPrime_b64:
-  ret i32 0
-isPrime_b69:
-  %p0 = phi i32 [ 3, %isPrime_b61 ], [ %i83, %isPrime_b77 ]
-  %i74 = sdiv i32 %ar57, 2
-  %i75 = icmp slt i32 %p0, %i74
-  br i1 %i75, label %isPrime_b70, label %isPrime_b71
-isPrime_b70:
-  %i80 = srem i32 %ar57, %p0
-  %i81 = icmp eq i32 %i80, 0
-  br i1 %i81, label %isPrime_b76, label %isPrime_b77
-isPrime_b71:
-  %i84 = add i32 1, 1
-  %i85 = sdiv i32 1, 1
-  %i86 = sub i32 %i84, %i85
-  ret i32 %i86
-isPrime_b76:
-  ret i32 0
-isPrime_b77:
-  %i83 = add i32 %p0, 2
-  br label %isPrime_b69
-}
-define dso_local i32 @sumMatrix([10 x i32]* %ar88) {
-sumMatrix_b87:
-  br label %sumMatrix_b93
-sumMatrix_b93:
-  %p5 = phi i32 [ 0, %sumMatrix_b87 ], [ %p4, %sumMatrix_b100 ]
-  %p3 = phi i32 [ 0, %sumMatrix_b87 ], [ %p2, %sumMatrix_b100 ]
-  %p1 = phi i32 [ 0, %sumMatrix_b87 ], [ %i113, %sumMatrix_b100 ]
-  %i97 = icmp slt i32 %p1, 10
-  br i1 %i97, label %sumMatrix_b94, label %sumMatrix_b95
-sumMatrix_b94:
-  br label %sumMatrix_b98
-sumMatrix_b95:
-  ret i32 %p5
-sumMatrix_b98:
-  %p4 = phi i32 [ %p5, %sumMatrix_b94 ], [ %i109, %sumMatrix_b99 ]
-  %p2 = phi i32 [ 0, %sumMatrix_b94 ], [ %i111, %sumMatrix_b99 ]
-  %i102 = icmp slt i32 %p2, 10
-  br i1 %i102, label %sumMatrix_b99, label %sumMatrix_b100
-sumMatrix_b99:
-  %i107 = getelementptr [10 x i32], [10 x i32]* %ar88, i32 %p1, i32 %p2
-  %i108 = load i32, i32* %i107
-  %i109 = add i32 %p4, %i108
-  %i111 = add i32 %p2, 1
-  br label %sumMatrix_b98
-sumMatrix_b100:
-  %i113 = add i32 %p1, 1
-  br label %sumMatrix_b93
-}
-define dso_local i32 @matrixMulti([10 x i32]* %ar116, [10 x i32]* %ar118, i32 %ar120) {
-matrixMulti_b115:
-  %i122 = alloca [10 x [10 x i32]]
-  br label %matrixMulti_b126
-matrixMulti_b126:
-  %p11 = phi i32 [ 0, %matrixMulti_b115 ], [ %p9, %matrixMulti_b133 ]
-  %p8 = phi i32 [ 0, %matrixMulti_b115 ], [ %p7, %matrixMulti_b133 ]
-  %p6 = phi i32 [ 0, %matrixMulti_b115 ], [ %i168, %matrixMulti_b133 ]
-  %i130 = icmp slt i32 %p6, 10
-  br i1 %i130, label %matrixMulti_b127, label %matrixMulti_b128
-matrixMulti_b127:
-  br label %matrixMulti_b131
-matrixMulti_b128:
-  %i169 = getelementptr [10 x [10 x i32]], [10 x [10 x i32]]* %i122, i32 0, i32 0
-  %i170 = call i32 @sumMatrix([10 x i32]* %i169)
-  ret i32 %i170
-matrixMulti_b131:
-  %p9 = phi i32 [ %p11, %matrixMulti_b127 ], [ %p10, %matrixMulti_b141 ]
-  %p7 = phi i32 [ 0, %matrixMulti_b127 ], [ %i166, %matrixMulti_b141 ]
-  %i135 = icmp slt i32 %p7, 10
-  br i1 %i135, label %matrixMulti_b132, label %matrixMulti_b133
-matrixMulti_b132:
-  %i138 = getelementptr [10 x [10 x i32]], [10 x [10 x i32]]* %i122, i32 0, i32 %p6, i32 %p7
-  store i32 0, i32* %i138
-  br label %matrixMulti_b139
-matrixMulti_b133:
-  %i168 = add i32 %p6, 1
-  br label %matrixMulti_b126
-matrixMulti_b139:
-  %p10 = phi i32 [ 0, %matrixMulti_b132 ], [ %i164, %matrixMulti_b140 ]
-  %i143 = icmp slt i32 %p10, 10
-  br i1 %i143, label %matrixMulti_b140, label %matrixMulti_b141
-matrixMulti_b140:
-  %i146 = getelementptr [10 x [10 x i32]], [10 x [10 x i32]]* %i122, i32 0, i32 %p6, i32 %p7
-  %i147 = load i32, i32* %i146
-  %i151 = getelementptr [10 x i32], [10 x i32]* %ar116, i32 %p6, i32 %p10
-  %i152 = load i32, i32* %i151
-  %i156 = getelementptr [10 x i32], [10 x i32]* %ar118, i32 %p10, i32 %p7
-  %i157 = load i32, i32* %i156
-  %i158 = mul i32 %i152, %i157
-  %i159 = add i32 %i147, %i158
-  %i162 = getelementptr [10 x [10 x i32]], [10 x [10 x i32]]* %i122, i32 0, i32 %p6, i32 %p7
-  store i32 %i159, i32* %i162
-  %i164 = add i32 %p10, 1
-  br label %matrixMulti_b139
-matrixMulti_b141:
-  %i166 = add i32 %p7, 1
-  br label %matrixMulti_b131
-}
+@FIB_M = dso_local constant [2 x [2 x i32]] [[2 x i32] [i32 1, i32 1], [2 x i32] [i32 1, i32 0]]
+@N = dso_local constant i32 9
+@FIB_V = dso_local constant [2 x i32] [i32 1, i32 1]
+@a = dso_local global i32 5
+@b = dso_local global i32 7
+@c = dso_local global i32 0
+@lis = dso_local global [5 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5]
+@str.0 = private unnamed_addr constant [8 x i8] c"a is [[\00"
+@str.1 = private unnamed_addr constant [3 x i8] c", \00"
+@str.2 = private unnamed_addr constant [5 x i8] c"], [\00"
+@str.3 = private unnamed_addr constant [4 x i8] c"]]\0A\00"
+@str.4 = private unnamed_addr constant [10 x i8] c"20373743\0A\00"
+@str.5 = private unnamed_addr constant [8 x i8] c"input: \00"
+@str.6 = private unnamed_addr constant [18 x i8] c"get matrix after \00"
+@str.7 = private unnamed_addr constant [21 x i8] c" multplFIB_M turns!\0A\00"
+@str.8 = private unnamed_addr constant [25 x i8] c"given original vector: [\00"
+@str.9 = private unnamed_addr constant [3 x i8] c"]\0A\00"
+@str.10 = private unnamed_addr constant [19 x i8] c"get next vector: [\00"
+@str.11 = private unnamed_addr constant [4 x i8] c"]!\0A\00"
+@str.12 = private unnamed_addr constant [17 x i8] c"a and b is true\0A\00"
+@str.13 = private unnamed_addr constant [11 x i8] c"c is true\0A\00"
+@str.14 = private unnamed_addr constant [16 x i8] c"a || c is true\0A\00"
+@str.15 = private unnamed_addr constant [19 x i8] c"sum of a, b, c is \00"
+@str.16 = private unnamed_addr constant [21 x i8] c"sum of lis front id \00"
 define dso_local i32 @main() {
-main_b171:
-  call void @output_id()
-  %i172 = mul i32 3, 3
-  %i173 = add i32 80, %i172
-  %i174 = call i32 @isPrime(i32 %i173)
-  call void @putint(i32 %i174)
+main_b172:
+  %i173 = getelementptr [10 x i8], [10 x i8]* @str.4, i32 0, i32 0
+  call void @putstr(i8* %i173)
+  %i175 = call i32 @getint()
+  %i177 = getelementptr [8 x i8], [8 x i8]* @str.5, i32 0, i32 0
+  call void @putstr(i8* %i177)
+  call void @putint(i32 %i175)
   call void @putch(i32 10)
-  %i177 = load i32, i32* @const_b
-  %i178 = load i32, i32* @int_c
-  %i179 = icmp sge i32 %i177, %i178
-  br i1 %i179, label %main_b175, label %main_b176
-main_b175:
-  store i32 1, i32* @int_d
-  br label %main_b176
-main_b176:
-  %i182 = load i32, i32* @const_b
-  %i183 = load i32, i32* @int_d
-  %i184 = icmp eq i32 %i182, %i183
-  br i1 %i184, label %main_b180, label %main_b181
-main_b180:
-  store i32 0, i32* @int_e
-  br label %main_b181
-main_b181:
-  %i188 = load i32, i32* @const_b
-  %i189 = load i32, i32* @int_e
-  %i190 = icmp sgt i32 %i188, %i189
-  br i1 %i190, label %main_b185, label %main_b187
-main_b185:
-  store i32 3, i32* @int_d
-  br label %main_b186
-main_b186:
-  %i194 = mul i32 3, 2
-  %i195 = sdiv i32 %i194, 2
-  %i196 = add i32 5, %i195
-  store i32 %i196, i32* @int_c
-  br label %main_b197
-main_b187:
-  store i32 4, i32* @int_d
-  br label %main_b186
-main_b197:
-  %p12 = phi i32 [ 0, %main_b186 ], [ %i215, %main_b203 ]
-  %i201 = icmp slt i32 %p12, 100
-  br i1 %i201, label %main_b198, label %main_b199
-main_b198:
-  %i207 = icmp eq i32 %p12, 0
-  br i1 %i207, label %main_b202, label %main_b205
-main_b199:
-  br label %main_b216
-main_b202:
-  %i211 = getelementptr [100 x i32], [100 x i32]* @array, i32 0, i32 %p12
-  store i32 1, i32* %i211
-  br label %main_b203
+  br label %main_b297
 main_b203:
-  %i215 = add i32 %p12, 1
-  br label %main_b197
+  %i210 = getelementptr [17 x i8], [17 x i8]* @str.12, i32 0, i32 0
+  call void @putstr(i8* %i210)
+  br label %main_b204
 main_b204:
-  %i213 = getelementptr [100 x i32], [100 x i32]* @array, i32 0, i32 %p12
-  store i32 0, i32* %i213
-  br label %main_b203
-main_b205:
-  %i209 = icmp eq i32 %p12, 1
-  br i1 %i209, label %main_b202, label %main_b204
-main_b216:
-  %p14 = phi i32 [ 5, %main_b199 ], [ %i229, %main_b217 ]
-  %i221 = load i32, i32* @int_c
-  %i222 = icmp slt i32 %p14, %i221
-  br i1 %i222, label %main_b217, label %main_b219
+  %i214 = load i32, i32* @c
+  %i215 = icmp eq i32 %i214, 0
+  br i1 %i215, label %main_b211, label %main_b212
+main_b207:
+  %i208 = load i32, i32* @b
+  %i209 = icmp ne i32 %i208, 0
+  br i1 %i209, label %main_b203, label %main_b204
+main_b211:
+  %i216 = getelementptr [11 x i8], [11 x i8]* @str.13, i32 0, i32 0
+  call void @putstr(i8* %i216)
+  br label %main_b212
+main_b212:
+  %i221 = load i32, i32* @a
+  %i222 = icmp ne i32 %i221, 0
+  br i1 %i222, label %main_b217, label %main_b220
 main_b217:
-  %i227 = call i32 @factorial(i32 %p14)
-  call void @putint(i32 %i227)
-  call void @putch(i32 10)
-  %i229 = add i32 %p14, 1
-  %i234 = load i32, i32* @int_c
-  %i235 = icmp eq i32 %i229, %i234
-  br i1 %i235, label %main_b218, label %main_b216
+  %i225 = getelementptr [16 x i8], [16 x i8]* @str.14, i32 0, i32 0
+  call void @putstr(i8* %i225)
+  br label %main_b218
 main_b218:
-  %p15 = phi i32 [ %i229, %main_b217 ], [ %p14, %main_b219 ]
-  %i239 = load i32, i32* @int_c
-  %i240 = icmp eq i32 %p15, %i239
-  br i1 %i240, label %main_b236, label %main_b237
-main_b219:
-  %i224 = load i32, i32* @int_c
-  %i225 = icmp sgt i32 %p14, %i224
-  br i1 %i225, label %main_b217, label %main_b218
-main_b236:
-  %i241 = call i32 @return_one()
-  call void @putint(i32 %i241)
+  %i226 = load i32, i32* @a
+  %i227 = load i32, i32* @b
+  %i228 = load i32, i32* @c
+  br label %main_b397
+main_b220:
+  %i223 = load i32, i32* @c
+  %i224 = icmp ne i32 %i223, 0
+  br i1 %i224, label %main_b217, label %main_b218
+main_b296:
+  %p6 = phi i32 [ %p4, %main_b300 ]
+  %i181 = getelementptr [18 x i8], [18 x i8]* @str.6, i32 0, i32 0
+  call void @putstr(i8* %i181)
+  call void @putint(i32 %p6)
+  %i182 = getelementptr [21 x i8], [21 x i8]* @str.7, i32 0, i32 0
+  call void @putstr(i8* %i182)
+  %i183 = alloca [2 x i32]
+  %i184 = getelementptr [2 x i32], [2 x i32]* %i183, i32 0, i32 0
+  store i32 13, i32* %i184
+  %i185 = getelementptr [2 x i32], [2 x i32]* %i183, i32 0, i32 1
+  store i32 8, i32* %i185
+  %i186 = alloca [2 x i32]
+  %i187 = getelementptr [2 x i32], [2 x i32]* %i186, i32 0, i32 0
+  %i188 = getelementptr [2 x i32], [2 x i32]* %i183, i32 0, i32 0
+  br label %main_b401
+main_b297:
+  %i306 = alloca [2 x [2 x i32]]
+  %i307 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i306, i32 0, i32 0, i32 0
+  store i32 1, i32* %i307
+  %i308 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i306, i32 0, i32 0, i32 1
+  store i32 0, i32* %i308
+  %i309 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i306, i32 0, i32 1, i32 0
+  store i32 0, i32* %i309
+  %i310 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i306, i32 0, i32 1, i32 1
+  store i32 1, i32* %i310
+  %i311 = alloca [2 x [2 x i32]]
+  br label %main_b298
+main_b298:
+  %p3 = phi i32 [ %p5, %main_b303 ], [ 0, %main_b297 ]
+  %p4 = phi i32 [ 0, %main_b297 ], [ %i340, %main_b303 ]
+  %i312 = load i32, i32* @N
+  %i313 = icmp slt i32 %p4, %i312
+  br i1 %i313, label %main_b299, label %main_b300
+main_b299:
+  %i314 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i311, i32 0, i32 0
+  %i315 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i306, i32 0, i32 0
+  br label %main_b305
+main_b300:
+  br label %main_b296
+main_b301:
+  %p5 = phi i32 [ 0, %main_b304 ], [ %i324, %main_b302 ]
+  %i316 = icmp slt i32 %p5, 4
+  br i1 %i316, label %main_b302, label %main_b303
+main_b302:
+  %i317 = sdiv i32 %p5, 2
+  %i318 = srem i32 %p5, 2
+  %i319 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i311, i32 0, i32 %i317, i32 %i318
+  %i320 = load i32, i32* %i319
+  %i321 = sdiv i32 %p5, 2
+  %i322 = srem i32 %p5, 2
+  %i323 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i306, i32 0, i32 %i321, i32 %i322
+  store i32 %i320, i32* %i323
+  %i324 = add i32 %p5, 1
+  br label %main_b301
+main_b303:
+  %i325 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i306, i32 0, i32 0, i32 0
+  %i326 = load i32, i32* %i325
+  %i327 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i306, i32 0, i32 0, i32 1
+  %i328 = load i32, i32* %i327
+  %i329 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i306, i32 0, i32 1, i32 0
+  %i330 = load i32, i32* %i329
+  %i331 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i306, i32 0, i32 1, i32 1
+  %i332 = load i32, i32* %i331
+  %i333 = getelementptr [8 x i8], [8 x i8]* @str.0, i32 0, i32 0
+  call void @putstr(i8* %i333)
+  call void @putint(i32 %i326)
+  %i334 = getelementptr [3 x i8], [3 x i8]* @str.1, i32 0, i32 0
+  call void @putstr(i8* %i334)
+  call void @putint(i32 %i328)
+  %i335 = getelementptr [5 x i8], [5 x i8]* @str.2, i32 0, i32 0
+  call void @putstr(i8* %i335)
+  call void @putint(i32 %i330)
+  %i336 = getelementptr [3 x i8], [3 x i8]* @str.1, i32 0, i32 0
+  call void @putstr(i8* %i336)
+  call void @putint(i32 %i332)
+  %i337 = getelementptr [4 x i8], [4 x i8]* @str.3, i32 0, i32 0
+  call void @putstr(i8* %i337)
+  %i338 = add i32 %p4, 1
+  %i339 = sub i32 0, %i338
+  %i340 = sub i32 0, %i339
+  br label %main_b298
+main_b304:
+  br label %main_b301
+main_b305:
+  %i341 = alloca [2 x i32]
+  %i342 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 0, i32 1
+  %i343 = load i32, i32* %i342
+  %i344 = getelementptr [2 x i32], [2 x i32]* %i341, i32 0, i32 0
+  store i32 %i343, i32* %i344
+  %i345 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 0, i32 0
+  %i346 = load i32, i32* %i345
+  %i347 = getelementptr [2 x i32], [2 x i32]* %i341, i32 0, i32 1
+  store i32 %i346, i32* %i347
+  %i348 = getelementptr [2 x i32], [2 x i32]* %i315, i32 0, i32 0
+  %i349 = load i32, i32* %i348
+  %i350 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 0, i32 0
+  %i351 = load i32, i32* %i350
+  %i352 = mul i32 %i349, %i351
+  %i353 = getelementptr [2 x i32], [2 x i32]* %i315, i32 0, i32 1
+  %i354 = load i32, i32* %i353
+  %i355 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 1, i32 0
+  %i356 = load i32, i32* %i355
+  %i357 = mul i32 %i354, %i356
+  %i358 = add i32 %i352, %i357
+  %i359 = getelementptr [2 x i32], [2 x i32]* %i314, i32 0, i32 0
+  store i32 %i358, i32* %i359
+  %i360 = getelementptr [2 x i32], [2 x i32]* %i315, i32 0, i32 0
+  %i361 = load i32, i32* %i360
+  %i362 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 0, i32 1
+  %i363 = load i32, i32* %i362
+  %i364 = mul i32 %i361, %i363
+  %i365 = getelementptr [2 x i32], [2 x i32]* %i315, i32 0, i32 1
+  %i366 = load i32, i32* %i365
+  %i367 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 1, i32 1
+  %i368 = load i32, i32* %i367
+  %i369 = mul i32 %i366, %i368
+  %i370 = add i32 %i364, %i369
+  %i371 = getelementptr [2 x i32], [2 x i32]* %i314, i32 0, i32 1
+  store i32 %i370, i32* %i371
+  %i372 = getelementptr [2 x i32], [2 x i32]* %i315, i32 1, i32 0
+  %i373 = load i32, i32* %i372
+  %i374 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 0, i32 0
+  %i375 = load i32, i32* %i374
+  %i376 = mul i32 %i373, %i375
+  %i377 = getelementptr [2 x i32], [2 x i32]* %i315, i32 1, i32 1
+  %i378 = load i32, i32* %i377
+  %i379 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 1, i32 0
+  %i380 = load i32, i32* %i379
+  %i381 = mul i32 %i378, %i380
+  %i382 = add i32 %i376, %i381
+  %i383 = getelementptr [2 x i32], [2 x i32]* %i314, i32 1, i32 0
+  store i32 %i382, i32* %i383
+  %i384 = getelementptr [2 x i32], [2 x i32]* %i315, i32 1, i32 0
+  %i385 = load i32, i32* %i384
+  %i386 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 0, i32 1
+  %i387 = load i32, i32* %i386
+  %i388 = mul i32 %i385, %i387
+  %i389 = getelementptr [2 x i32], [2 x i32]* %i315, i32 1, i32 1
+  %i390 = load i32, i32* %i389
+  %i391 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 1, i32 1
+  %i392 = load i32, i32* %i391
+  %i393 = mul i32 %i390, %i392
+  %i394 = add i32 %i388, %i393
+  %i395 = getelementptr [2 x i32], [2 x i32]* %i314, i32 1, i32 1
+  store i32 %i394, i32* %i395
+  br label %main_b304
+main_b396:
+  %p7 = phi i32 [ %i399, %main_b397 ]
+  %i230 = getelementptr [19 x i8], [19 x i8]* @str.15, i32 0, i32 0
+  call void @putstr(i8* %i230)
+  call void @putint(i32 %p7)
   call void @putch(i32 10)
-  br label %main_b237
-main_b237:
-  %i242 = call i32 @A_plus_B(i32 1, i32 1)
-  call void @putint(i32 %i242)
-  call void @putch(i32 10)
-  call void @output_a_plus_b(i32 2, i32 2)
-  %i243 = call i32 @getint()
-  call void @putint(i32 %i243)
-  call void @putch(i32 10)
-  br label %main_b245
-main_b245:
-  %p17 = phi i32 [ 0, %main_b237 ], [ %p16, %main_b252 ]
-  %p13 = phi i32 [ 0, %main_b237 ], [ %i268, %main_b252 ]
-  %i249 = icmp slt i32 %p13, 10
-  br i1 %i249, label %main_b246, label %main_b247
-main_b246:
-  br label %main_b250
-main_b247:
-  %i269 = getelementptr [10 x [10 x i32]], [10 x [10 x i32]]* @matrix_A, i32 0, i32 0
-  %i270 = getelementptr [10 x [10 x i32]], [10 x [10 x i32]]* @matrix_B, i32 0, i32 0
-  %i271 = getelementptr [10 x [10 x i32]], [10 x [10 x i32]]* @matrix_A, i32 0, i32 1, i32 1
-  %i272 = load i32, i32* %i271
-  %i273 = call i32 @matrixMulti([10 x i32]* %i269, [10 x i32]* %i270, i32 %i272)
-  call void @putint(i32 %i273)
+  %i231 = getelementptr [5 x i32], [5 x i32]* @lis, i32 0, i32 0
+  %i232 = load i32, i32* %i231
+  %i233 = getelementptr [5 x i32], [5 x i32]* @lis, i32 0, i32 1
+  %i234 = load i32, i32* %i233
+  %i235 = getelementptr [5 x i32], [5 x i32]* @lis, i32 0, i32 2
+  %i236 = load i32, i32* %i235
+  br label %main_b427
+main_b397:
+  %i398 = add i32 %i226, %i227
+  %i399 = add i32 %i398, %i228
+  br label %main_b396
+main_b400:
+  %i189 = getelementptr [2 x i32], [2 x i32]* %i183, i32 0, i32 0
+  %i190 = load i32, i32* %i189
+  %i191 = getelementptr [2 x i32], [2 x i32]* %i183, i32 0, i32 1
+  %i192 = load i32, i32* %i191
+  %i193 = getelementptr [25 x i8], [25 x i8]* @str.8, i32 0, i32 0
+  call void @putstr(i8* %i193)
+  call void @putint(i32 %i190)
+  %i194 = getelementptr [3 x i8], [3 x i8]* @str.1, i32 0, i32 0
+  call void @putstr(i8* %i194)
+  call void @putint(i32 %i192)
+  %i195 = getelementptr [3 x i8], [3 x i8]* @str.9, i32 0, i32 0
+  call void @putstr(i8* %i195)
+  %i196 = getelementptr [2 x i32], [2 x i32]* %i186, i32 0, i32 0
+  %i197 = load i32, i32* %i196
+  %i198 = getelementptr [2 x i32], [2 x i32]* %i186, i32 0, i32 1
+  %i199 = load i32, i32* %i198
+  %i200 = getelementptr [19 x i8], [19 x i8]* @str.10, i32 0, i32 0
+  call void @putstr(i8* %i200)
+  call void @putint(i32 %i197)
+  %i201 = getelementptr [3 x i8], [3 x i8]* @str.1, i32 0, i32 0
+  call void @putstr(i8* %i201)
+  call void @putint(i32 %i199)
+  %i202 = getelementptr [4 x i8], [4 x i8]* @str.11, i32 0, i32 0
+  call void @putstr(i8* %i202)
+  %i205 = load i32, i32* @a
+  %i206 = icmp ne i32 %i205, 0
+  br i1 %i206, label %main_b207, label %main_b204
+main_b401:
+  %i402 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 0, i32 0
+  %i403 = load i32, i32* %i402
+  %i404 = getelementptr i32, i32* %i188, i32 0
+  %i405 = load i32, i32* %i404
+  %i406 = mul i32 %i403, %i405
+  %i407 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 0, i32 1
+  %i408 = load i32, i32* %i407
+  %i409 = getelementptr i32, i32* %i188, i32 1
+  %i410 = load i32, i32* %i409
+  %i411 = mul i32 %i408, %i410
+  %i412 = add i32 %i406, %i411
+  %i413 = getelementptr i32, i32* %i187, i32 0
+  store i32 %i412, i32* %i413
+  %i414 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 1, i32 0
+  %i415 = load i32, i32* %i414
+  %i416 = getelementptr i32, i32* %i188, i32 0
+  %i417 = load i32, i32* %i416
+  %i418 = mul i32 %i415, %i417
+  %i419 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* @FIB_M, i32 0, i32 1, i32 1
+  %i420 = load i32, i32* %i419
+  %i421 = getelementptr i32, i32* %i188, i32 1
+  %i422 = load i32, i32* %i421
+  %i423 = mul i32 %i420, %i422
+  %i424 = add i32 %i418, %i423
+  %i425 = getelementptr i32, i32* %i187, i32 1
+  store i32 %i424, i32* %i425
+  br label %main_b400
+main_b426:
+  %p8 = phi i32 [ %i429, %main_b427 ]
+  %i238 = getelementptr [21 x i8], [21 x i8]* @str.16, i32 0, i32 0
+  call void @putstr(i8* %i238)
+  call void @putint(i32 %p8)
   call void @putch(i32 10)
   ret i32 0
-main_b250:
-  %p16 = phi i32 [ 0, %main_b246 ], [ %i266, %main_b251 ]
-  %i254 = icmp slt i32 %p16, 10
-  br i1 %i254, label %main_b251, label %main_b252
-main_b251:
-  %i256 = add i32 %p13, 1
-  %i259 = getelementptr [10 x [10 x i32]], [10 x [10 x i32]]* @matrix_A, i32 0, i32 %p13, i32 %p16
-  store i32 %i256, i32* %i259
-  %i261 = add i32 %p16, 1
-  %i264 = getelementptr [10 x [10 x i32]], [10 x [10 x i32]]* @matrix_B, i32 0, i32 %p13, i32 %p16
-  store i32 %i261, i32* %i264
-  %i266 = add i32 %p16, 1
-  br label %main_b250
-main_b252:
-  %i268 = add i32 %p13, 1
-  br label %main_b245
+main_b427:
+  %i428 = add i32 %i232, %i234
+  %i429 = add i32 %i428, %i236
+  br label %main_b426
 }
