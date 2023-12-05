@@ -35,6 +35,12 @@ public class Phi extends Instr {
     public void replacePhiBB(int idx, BasicBlock newBB) {
         phiBBs.set(idx, newBB);
     }
+    public void replacePhiBB(BasicBlock oldBB, BasicBlock newBB) {
+        for (int i = 0; i < phiBBs.size(); i++) {
+            if (phiBBs.get(i).equals(oldBB))
+                phiBBs.set(i, newBB);
+        }
+    }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

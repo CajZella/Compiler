@@ -55,9 +55,38 @@ main_b58:
   %i91 = load i32, i32* %i90
   %i92 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i84, i32 0, i32 1, i32 1
   store i32 %i91, i32* %i92
-  br label %main_b153
-main_b153:
-  br label %main_b152
+  %i98 = alloca [20 x i32]
+  %i99 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 0
+  store i32 1, i32* %i99
+  %i100 = add i32 1, 2
+  %i101 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 1
+  store i32 %i100, i32* %i101
+  %i102 = sub i32 1, 2
+  %i103 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 2
+  store i32 %i102, i32* %i103
+  %i104 = mul i32 1, 2
+  %i105 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 3
+  store i32 %i104, i32* %i105
+  %i106 = sdiv i32 1, 2
+  %i107 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 4
+  store i32 %i106, i32* %i107
+  %i108 = srem i32 1, 2
+  %i109 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 5
+  store i32 %i108, i32* %i109
+  %i110 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 6
+  store i32 1, i32* %i110
+  %i111 = sub i32 0, 1
+  %i112 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 7
+  store i32 %i111, i32* %i112
+  %i114 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 8
+  store i32 1, i32* %i114
+  %i116 = sub i32 0, 1
+  %i117 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 9
+  store i32 %i116, i32* %i117
+  %i118 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 10
+  store i32 0, i32* %i118
+  %i122 = icmp slt i32 1, 2
+  br i1 %i122, label %main_b119, label %main_b121
 main_b119:
   %i123 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 11
   store i32 1, i32* %i123
@@ -119,48 +148,4 @@ main_b139:
   %i142 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 14
   store i32 0, i32* %i142
   br label %main_b138
-main_b152:
-  br label %main_b155
-main_b155:
-  br label %main_b154
-main_b154:
-  %p5 = phi i32 [ 1, %main_b155 ]
-  %i96 = getelementptr [2 x i32], [2 x i32]* %i83, i32 0, i32 0
-  %i97 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %i84, i32 0, i32 0
-  br label %main_b157
-main_b157:
-  br label %main_b156
-main_b156:
-  %i98 = alloca [20 x i32]
-  %i99 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 0
-  store i32 1, i32* %i99
-  %i100 = add i32 1, 2
-  %i101 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 1
-  store i32 %i100, i32* %i101
-  %i102 = sub i32 1, 2
-  %i103 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 2
-  store i32 %i102, i32* %i103
-  %i104 = mul i32 1, 2
-  %i105 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 3
-  store i32 %i104, i32* %i105
-  %i106 = sdiv i32 1, 2
-  %i107 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 4
-  store i32 %i106, i32* %i107
-  %i108 = srem i32 1, 2
-  %i109 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 5
-  store i32 %i108, i32* %i109
-  %i110 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 6
-  store i32 1, i32* %i110
-  %i111 = sub i32 0, 1
-  %i112 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 7
-  store i32 %i111, i32* %i112
-  %i114 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 8
-  store i32 1, i32* %i114
-  %i116 = sub i32 0, 1
-  %i117 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 9
-  store i32 %i116, i32* %i117
-  %i118 = getelementptr [20 x i32], [20 x i32]* %i98, i32 0, i32 10
-  store i32 0, i32* %i118
-  %i122 = icmp slt i32 1, 2
-  br i1 %i122, label %main_b119, label %main_b121
 }

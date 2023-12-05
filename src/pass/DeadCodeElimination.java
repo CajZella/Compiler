@@ -1,15 +1,19 @@
 package pass;
 
+import backend.lir.mipsInstr.MpMove;
 import ir.BasicBlock;
 import ir.Function;
 import ir.Module;
+import ir.Use;
 import ir.Value;
 import ir.instrs.Br;
 import ir.instrs.Call;
 import ir.instrs.Instr;
+import ir.instrs.Phi;
 import ir.instrs.Ret;
 import ir.instrs.Store;
 import ir.types.FunctionType;
+import util.MyLinkedList;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,7 +32,9 @@ public class DeadCodeElimination {
         while (!finished) {
             finished = true;
             finished &= functionElimination();
-            //finished &= codeElimination();
+            finished &= codeElimination();
+            finished &= deleteRedundantPhi();
+            finished &= mergeBlock();
             all &= finished;
         }
         return all;
@@ -130,6 +136,57 @@ public class DeadCodeElimination {
                         instr.remove();
                         finished = false;
                     }
+                }
+            }
+        }
+        return finished;
+    }
+    private boolean deleteRedundantPhi() {
+        boolean finished = true;
+        for (Function function : module.getFunctions()) {
+            for (BasicBlock block : function.getBlocks()) {
+                Iterator<Instr> iterator = block.getInstrs().iterator();
+                while(iterator.hasNext()) {
+                    Instr instr = iterator.next();
+                    if (!(instr instanceof Phi))
+                        break;
+                    Phi phi = (Phi) instr;
+                    if (phi.operandsSize() == 1) {
+                        finished = false;
+                        phi.replaceAllUsesWith(phi.getOperand(0));
+                        iterator.remove();
+                    }
+                }
+            }
+        }
+        return finished;
+    }
+    private boolean mergeBlock() {
+        boolean finished = true;
+        for (Function function : module.getFunctions()) {
+            for (BasicBlock block : function.getBlocks()) {
+                if (block.getSuccBBs().size() == 1
+                        && block.getSuccBBs().iterator().next().getPrecBBs().size() == 1) {
+                    finished = false;
+                    BasicBlock succBlock = block.getSuccBBs().iterator().next();
+                    MyLinkedList<Instr> instrs = block.getInstrs();
+                    instrs.remove(instrs.getTail());
+                    for (Instr instr : succBlock.getInstrs())
+                        instr.setParent(block);
+                    instrs.addAll(succBlock.getInstrs());
+
+                    for (BasicBlock succ : succBlock.getSuccBBs())
+                        for (Instr instr : succ.getInstrs())
+                            if (instr instanceof Phi)
+                                ((Phi) instr).replacePhiBB(succBlock, block);
+
+                    block.getSuccBBs().remove(succBlock);
+                    block.getSuccBBs().addAll(succBlock.getSuccBBs());
+                    for (BasicBlock succ : succBlock.getSuccBBs()) {
+                        succ.getPrecBBs().remove(succBlock);
+                        succ.getPrecBBs().add(block);
+                    }
+                    succBlock.remove();
                 }
             }
         }
