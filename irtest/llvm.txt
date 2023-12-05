@@ -1,0 +1,77 @@
+declare i32 @getint()
+declare void @putint(i32)
+declare void @putstr(i8*)
+declare void @putch(i32)
+@.str.0 = private unnamed_addr constant [10 x i8] c"20376156\0A\00"
+@.str.1 = private unnamed_addr constant [5 x i8] c"hhh\0A\00"
+define dso_local i32 @main() {
+b0:
+  %i1 = getelementptr [10 x i8], [10 x i8]* @.str.0, i32 0, i32 0
+  call void @putstr(i8* %i1)
+  %i2 = alloca i32
+  store i32 2, i32* %i2
+  %i6 = load i32, i32* %i2
+  %i7 = icmp eq i32 %i6, 1
+  br i1 %i7, label %b3, label %b5
+b3:
+  br label %b4
+b4:
+  %i17 = load i32, i32* %i2
+  %i18 = icmp eq i32 %i17, 1
+  br i1 %i18, label %b15, label %b16
+b5:
+  %i11 = load i32, i32* %i2
+  %i12 = icmp eq i32 %i11, 2
+  br i1 %i12, label %b8, label %b10
+b8:
+  %i13 = sub i32 9, 8
+  store i32 %i13, i32* %i2
+  br label %b9
+b9:
+  br label %b4
+b10:
+  %i14 = load i32, i32* %i2
+  call void @putint(i32 %i14)
+  call void @putch(i32 10)
+  br label %b9
+b15:
+  %i19 = getelementptr [5 x i8], [5 x i8]* @.str.1, i32 0, i32 0
+  call void @putstr(i8* %i19)
+  br label %b16
+b16:
+  store i32 11, i32* %i2
+  br label %b20
+b20:
+  %i23 = load i32, i32* %i2
+  %i24 = icmp sge i32 %i23, 0
+  br i1 %i24, label %b21, label %b22
+b21:
+  %i25 = load i32, i32* %i2
+  %i26 = sub i32 %i25, 2
+  store i32 %i26, i32* %i2
+  %i30 = load i32, i32* %i2
+  %i31 = icmp eq i32 %i30, 1
+  br i1 %i31, label %b27, label %b29
+b22:
+  %i38 = load i32, i32* %i2
+  call void @putint(i32 %i38)
+  call void @putch(i32 10)
+  ret i32 0
+b27:
+  br label %b20
+  br label %b28
+b28:
+  %i36 = load i32, i32* %i2
+  %i37 = sub i32 %i36, 1
+  store i32 %i37, i32* %i2
+  br label %b20
+b29:
+  %i34 = load i32, i32* %i2
+  %i35 = icmp eq i32 %i34, 3
+  br i1 %i35, label %b32, label %b33
+b32:
+  br label %b22
+  br label %b33
+b33:
+  br label %b28
+}

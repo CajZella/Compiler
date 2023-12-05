@@ -1,0 +1,16 @@
+../2022test/full/C/testfile23.txt
+../2022test/full/C/testfile24.txt
+../2022test/full/C/testfile25.txt
+../2022test/full/C/testfile26.txt
+../2022test/full/C/testfile27.txt
+../2022test/full/C/testfile28.txt
+../2022test/full/C/testfile29.txt
+../2022test/full/B/testfile23.txt
+../2022test/full/B/testfile24.txt
+../2022test/full/B/testfile25.txt
+../2022test/full/B/testfile26.txt
+../2022test/full/B/testfile27.txt
+../2022test/full/A/testfile23.txt
+../2022test/full/A/testfile24.txt
+../2022test/full/A/testfile25.txt
+../2022test/full/A/testfile26.txt

@@ -1,0 +1,152 @@
+.data
+str.0:
+	.asciiz "20373380\n"
+str.1:
+	.asciiz "2\n"
+str.2:
+	.asciiz "3\n"
+str.3:
+	.asciiz "4\n"
+str.4:
+	.asciiz "5\n"
+str.5:
+	.asciiz "6\n"
+str.6:
+	.asciiz "7\n"
+str.7:
+	.asciiz "8\n"
+str.8:
+	.asciiz "9\n"
+str.9:
+	.asciiz "10\n"
+
+
+.text
+main:
+main_b58:
+	addiu $sp, $sp, -152
+	la $a0, str.0
+	li $v0, 4
+	syscall
+	li $t9, 1
+	sw $t9, 0($sp)
+	li $t9, 2
+	sw $t9, 4($sp)
+	li $t9, 1
+	sw $t9, 8($sp)
+	li $t9, 2
+	sw $t9, 12($sp)
+	li $t9, 3
+	sw $t9, 16($sp)
+	li $t9, 4
+	sw $t9, 20($sp)
+	li $t9, 1
+	sw $t9, 24($sp)
+	li $t9, 2
+	sw $t9, 28($sp)
+	li $t9, 1
+	sw $t9, 32($sp)
+	li $t9, 2
+	sw $t9, 36($sp)
+	li $t9, 3
+	sw $t9, 40($sp)
+	li $t9, 4
+	sw $t9, 44($sp)
+	li $v0, 5
+	syscall
+	lw $t9, 4($sp)
+	sw $t9, 52($sp)
+	lw $t9, 20($sp)
+	sw $t9, 68($sp)
+	li $t9, 1
+	sw $t9, 72($sp)
+	li $t9, 3
+	sw $t9, 76($sp)
+	li $t9, -1
+	sw $t9, 80($sp)
+	li $t9, 2
+	sw $t9, 84($sp)
+	li $t9, 0
+	sw $t9, 88($sp)
+	li $t9, 1
+	sw $t9, 92($sp)
+	li $t9, 1
+	sw $t9, 96($sp)
+	li $t9, -1
+	sw $t9, 100($sp)
+	li $t9, 1
+	sw $t9, 104($sp)
+	li $t9, -1
+	sw $t9, 108($sp)
+	li $t9, 0
+	sw $t9, 112($sp)
+	j main_b119
+main_b119:
+	li $t9, 1
+	sw $t9, 116($sp)
+	j main_b120
+main_b120:
+	j main_b127
+main_b121:
+	li $t9, 0
+	sw $t9, 116($sp)
+	j main_b120
+main_b125:
+	li $t9, 1
+	sw $t9, 120($sp)
+	j main_b126
+main_b126:
+	j main_b131
+main_b127:
+	li $t9, 0
+	sw $t9, 120($sp)
+	j main_b126
+main_b131:
+	li $t9, 1
+	sw $t9, 124($sp)
+	j main_b132
+main_b132:
+	j main_b139
+main_b133:
+	li $t9, 0
+	sw $t9, 124($sp)
+	j main_b132
+main_b137:
+	li $t9, 1
+	sw $t9, 128($sp)
+	j main_b138
+main_b138:
+	la $a0, str.1
+	li $v0, 4
+	syscall
+	la $a0, str.2
+	li $v0, 4
+	syscall
+	la $a0, str.3
+	li $v0, 4
+	syscall
+	la $a0, str.4
+	li $v0, 4
+	syscall
+	la $a0, str.5
+	li $v0, 4
+	syscall
+	la $a0, str.6
+	li $v0, 4
+	syscall
+	la $a0, str.7
+	li $v0, 4
+	syscall
+	la $a0, str.8
+	li $v0, 4
+	syscall
+	la $a0, str.9
+	li $v0, 4
+	syscall
+	li $v0, 10
+	syscall
+main_b139:
+	li $t9, 0
+	sw $t9, 128($sp)
+	j main_b138
+
