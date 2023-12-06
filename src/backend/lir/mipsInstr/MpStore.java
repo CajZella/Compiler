@@ -9,36 +9,24 @@ import backend.lir.mipsOperand.MpReg;
 import java.util.ArrayList;
 
 public class MpStore extends MpInstr {
-    private MpData base = null;
+    private MpData base;
     private MpImm offset = null;
     public MpStore(MpBlock block, MpReg targetReg, MpReg base, MpImm offset) {
         super(MipsInstrType.sw, block);
         replaceSrc1(targetReg);
         replaceSrc2(base);
-        if (null != offset && offset.getVal() != 0) this.offset = offset;
+        this.offset = offset;
     }
-    public MpStore(MpBlock block, MpReg targetReg, MpData data, MpReg base, MpImm offset) {
+    public MpStore(MpBlock block, MpReg targetReg, MpData base) {
         super(MipsInstrType.sw, block);
-        if (null != targetReg) replaceSrc1(targetReg);
-        if (null != data) this.base = data;
-        if (null != base) replaceSrc2(base);
-        if (null != offset && offset.getVal() != 0) this.offset = offset;
+        replaceSrc1(targetReg);
+        this.base = base;
     }
     public MpImm getOffset() { return offset; }
     public MpData getBase() { return base; }
     public String toString() {
-        if (null != base && null != src2Reg && null != offset)
-            return String.format("%s %s, %s+%s(%s)", instrType, src1Reg, base, offset, src2Reg);
-        else if (null == base && null != src2Reg && null != offset)
-            return String.format("%s %s, %s(%s)", instrType, src1Reg, offset, src2Reg);
-        else if (null != base && null != src2Reg && null == offset)
-            return String.format("%s %s, %s(%s)", instrType, src1Reg, base, src2Reg);
-        else if (null != base && null == src2Reg && null != offset)
-            return String.format("%s %s, %s+%s", instrType, src1Reg, base, offset);
-        else if (null != base && null == src2Reg && null == offset)
-            return String.format("%s %s, %s", instrType, src1Reg, base);
-        else if (null == base && null != src1Reg && null == offset)
-            return String.format("%s %s, (%s)", instrType, src1Reg, src2Reg);
-        else return null;
+        return null == offset ?
+                String.format("%s %s, %s", instrType.toString(), src1Reg, base) :
+                String.format("%s %s, %s(%s)", instrType.toString(), src1Reg, offset, src2Reg);
     }
 }

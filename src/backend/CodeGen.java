@@ -203,12 +203,24 @@ public class CodeGen {
         for (BasicBlock basicBlock : basicBlocks) {
             curIB = basicBlock;
             curMB = bb2mb.get(curIB);
+            gv2cnt = new HashMap<>();
+            gv2mr = new HashMap<>();
+            for (Instr instr : curIB.getInstrs())
+                if (instr instanceof GetElementPtr) {
+                    GetElementPtr gep = (GetElementPtr) instr;
+                    if (gep.getOperand(0) instanceof GlobalVariable) {
+                        GlobalVariable gv = (GlobalVariable) gep.getOperand(0);
+                        gv2cnt.put(gv, gv2cnt.getOrDefault(gv, 0) + 1);
+                    }
+                }
             genBlock();
         }
         /* step7. 处理 parallel copies */
         if(Config.isLLVMopt)
             handleParallelCopies();
     }
+    private HashMap<GlobalVariable, Integer> gv2cnt;
+    private HashMap<GlobalVariable, MpReg> gv2mr;
     private void handleParallelCopies() {
         MyLinkedList<BasicBlock> basicBlocks = curIF.getBlocks();
         for (BasicBlock basicBlock : basicBlocks) {
@@ -269,11 +281,11 @@ public class CodeGen {
         Value irPtr = instr.getOperand(0);
         MpReg dst = (MpReg) genOperand(instr);
         if (irPtr instanceof GlobalVariable) {
-            curMB.addMpInstr(new MpLoad(curMB, dst, gv2md.get(irPtr), null, null));
+            curMB.addMpInstr(new MpLoad(curMB, dst, gv2md.get(irPtr)));
         } else {
             MpOpd mipsPtr = val2opd.get(irPtr);
             MpStackOffset mipsSO = (MpStackOffset) mipsPtr;
-            curMB.addMpInstr(new MpLoad(curMB, dst, mipsSO.getData(), mipsSO.getBase(), mipsSO.getOffset()));
+            curMB.addMpInstr(new MpLoad(curMB, dst, mipsSO.getBase(), mipsSO.getOffset()));
         }
     }
     private void genStoreInstr(Store instr) {
@@ -286,11 +298,11 @@ public class CodeGen {
             val = tmp;
         }
         if (irPtr instanceof GlobalVariable) {
-            curMB.addMpInstr(new MpStore(curMB, (MpReg) val, gv2md.get(irPtr), null, null));
+            curMB.addMpInstr(new MpStore(curMB, (MpReg) val, gv2md.get(irPtr)));
         } else {
             MpOpd mipsPtr = val2opd.get(irPtr);
             MpStackOffset mipsSO = (MpStackOffset) mipsPtr;
-            curMB.addMpInstr(new MpStore(curMB, (MpReg) val, mipsSO.getData(), mipsSO.getBase(), mipsSO.getOffset()));
+            curMB.addMpInstr(new MpStore(curMB, (MpReg) val, mipsSO.getBase(), mipsSO.getOffset()));
         }
     }
     private void genBrInstr(Br instr) {
@@ -358,9 +370,8 @@ public class CodeGen {
             val2opd.put(irVal, dst);
         }
         if (dst instanceof MpStackOffset) {
-            MpStackOffset so = (MpStackOffset) dst;
             MpReg tmp = new MpReg();
-            curMB.addMpInstr(new MpLoad(curMB, tmp, so.getData(), so.getBase(), so.getOffset()));
+            curMB.addMpInstr(new MpLoad(curMB, tmp, ((MpStackOffset) dst).getBase(), ((MpStackOffset) dst).getOffset()));
             return tmp;
         } else return dst;
 
@@ -379,12 +390,14 @@ public class CodeGen {
                     val2opd.put(irArg, arg);
                 }
                 if (arg instanceof MpStackOffset) {
-                    MpStackOffset so = (MpStackOffset) arg;
+                    MpReg base = ((MpStackOffset) arg).getBase();
+                    MpImm soOffset = ((MpStackOffset) arg).getOffset();
                     if (irArg.getType().isIntegerTy())
-                        curMB.addMpInstr(new MpLoad(curMB, dst, so.getData(), so.getBase(), so.getOffset()));
-                    else {
-                        curMB.addMpInstr(new MpLoadAddr(curMB, dst, so.getData(), so.getBase(), so.getOffset()));
-                    }
+                        curMB.addMpInstr(new MpLoad(curMB, dst, base, soOffset));
+                    else if (soOffset.getVal() == 0)
+                        curMB.addMpInstr(new MpMove(curMB, dst, base));
+                    else
+                        curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, base, soOffset));
                 } else if (arg instanceof MpImm)
                     curMB.addMpInstr(new MpLoadImm(curMB, dst, (MpImm) arg));
                 else
@@ -421,11 +434,14 @@ public class CodeGen {
                 else {
                     MpOpd arg = val2opd.get(irArg);
                     if (arg instanceof MpStackOffset) {
-                        MpStackOffset so = (MpStackOffset) arg;
+                        MpReg base = ((MpStackOffset) arg).getBase();
+                        MpImm soOffset = ((MpStackOffset) arg).getOffset();
                         if (irArg.getType().isIntegerTy())
-                            curMB.addMpInstr(new MpLoad(curMB, dst, so.getData(), so.getBase(), so.getOffset()));
+                            curMB.addMpInstr(new MpLoad(curMB, dst, base, soOffset));
+                        else if (soOffset.getVal() == 0)
+                            curMB.addMpInstr(new MpMove(curMB, dst, base));
                         else
-                            curMB.addMpInstr(new MpLoadAddr(curMB, dst, so.getData(), so.getBase(), so.getOffset()));
+                            curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, base, soOffset));
                     } else if (arg instanceof MpImm)
                         curMB.addMpInstr(new MpLoadImm(curMB, dst, (MpImm) arg));
                     else
@@ -440,14 +456,16 @@ public class CodeGen {
                     MpReg dst = new MpReg();
                     MpOpd arg = val2opd.get(irArg);
                     if (arg instanceof MpStackOffset) {
-                        MpStackOffset so = (MpStackOffset) arg;
+                        MpReg base = ((MpStackOffset) arg).getBase();
+                        MpImm soOffset = ((MpStackOffset) arg).getOffset();
                         if (irArg.getType().isIntegerTy()) {
-                            curMB.addMpInstr(new MpLoad(curMB, dst, so.getData(), so.getBase(), so.getOffset()));
+                            curMB.addMpInstr(new MpLoad(curMB, dst, base, soOffset));
                             curMB.addMpInstr(new MpStore(curMB, dst, mipsPhyRegs.get(27), new MpImm(curStackSize + (i-1)*4)));
-                        } else if (null == so.getData() && null == so.getOffset()) {
-                            curMB.addMpInstr(new MpStore(curMB, so.getBase(), mipsPhyRegs.get(27), new MpImm(curStackSize + (i-1)*4)));
-                        } else {
-                            curMB.addMpInstr(new MpLoadAddr(curMB, dst, so.getData(), so.getBase(), so.getOffset()));
+                        }
+                        else if (soOffset.getVal() == 0)
+                            curMB.addMpInstr(new MpStore(curMB, base, mipsPhyRegs.get(27), new MpImm(curStackSize + (i-1)*4)));
+                        else {
+                            curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, base, soOffset));
                             curMB.addMpInstr(new MpStore(curMB, dst, mipsPhyRegs.get(27), new MpImm(curStackSize + (i-1)*4)));
                         }
                     } else
@@ -702,61 +720,31 @@ public class CodeGen {
      * ptr为一维数组、二维数组
      * gep结果为int，一维数组指针，二维数组指针
      */
-    private void genGVGepInstr(GetElementPtr instr) {
-        Value irPtr = instr.getOperand(0);
-        GlobalVariable gv = (GlobalVariable) irPtr;
-        MpImm offset = new MpImm(0);
-        MpReg base = null;
-        MpData data = gv2md.get(gv);
-        ArrayList<Integer> dimSizes;
-        Type gvType = ((PointerType)gv.getType()).getReferencedType();
-        if (gvType.isIntegerTy()) {
-            dimSizes = new ArrayList<>();
-            dimSizes.add(4);
-        } else
-            dimSizes = ((ArrayType)gvType).getDimSizes();
-        /* 计算base和offset */
-        for (int i = 1; i < instr.operandsSize(); i++) {
-            Value irIdx = instr.getOperand(i);
-            if (irIdx instanceof ConstantInt)
-                offset.addVal(((ConstantInt) irIdx).getVal() * dimSizes.get(i-1));
-            else {
-                MpOpd idx =  genOperand(irIdx);
-                if (idx instanceof MpImm) {
-                    offset.addVal(((MpImm) idx).getVal() * dimSizes.get(i-1));
-                } else {
-                    if (null == base) {
-                        base = new MpReg();
-                        mulOptimize(base, (MpReg) idx, new MpImm(dimSizes.get(i - 1)));
-                    } else {
-                        MpReg preBase = base;
-                        base = new MpReg();
-                        mulOptimize(base, (MpReg) idx, new MpImm(dimSizes.get(i - 1)));
-                        curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addu, curMB, base, preBase, base));
-                    }
-                }
-            }
-        }
-        MpStackOffset mipsSO = new MpStackOffset(data, base, offset);
-        val2opd.put(instr, mipsSO);
-    }
     private void genGepInstr(GetElementPtr instr) {
-        MpData data = null;
         MpImm offset;
         MpReg base;
         MpReg preBase = null;
         Value irPtr = instr.getOperand(0);
         /* step1. 预处理base 和 offset */
         if (irPtr instanceof GlobalVariable) {
-            genGVGepInstr(instr);
-            return;
+            base = new MpReg();
+            offset = new MpImm(0);
+            GlobalVariable gv = (GlobalVariable) irPtr;
+            if (gv2cnt.get(gv) == 1)
+                curMB.addMpInstr(new MpLoadAddr(curMB, base, gv2md.get(gv)));
+            else if (gv2mr.containsKey(gv))
+                curMB.addMpInstr(new MpMove(curMB, base, gv2mr.get(gv)));
+            else {
+                MpReg reg = new MpReg();
+                curMB.addMpInstr(new MpLoadAddr(curMB, reg, gv2md.get(gv)));
+                gv2mr.put(gv, reg);
+                curMB.addMpInstr(new MpMove(curMB, base, reg));
+            }
         } else {
             MpOpd ptr = val2opd.get(irPtr);
             if (ptr instanceof MpStackOffset) {
-                MpStackOffset so = (MpStackOffset) ptr;
-                data = so.getData();
-                base = so.getBase();
-                offset = so.getOffset().clone();
+                base = ((MpStackOffset) ptr).getBase();
+                offset = ((MpStackOffset) ptr).getOffset().clone();
             }
             else {
                 base = ((MpReg) ptr);
@@ -782,19 +770,14 @@ public class CodeGen {
                 if (idx instanceof MpImm) {
                     offset.addVal(((MpImm) idx).getVal() * dimSizes.get(i-1));
                 } else {
-                    if (null == base) {
-                        base = new MpReg();
-                        mulOptimize(base, (MpReg) idx, new MpImm(dimSizes.get(i-1)));
-                    } else {
-                        preBase = base;
-                        base = new MpReg();
-                        mulOptimize(base, (MpReg) idx, new MpImm(dimSizes.get(i - 1)));
-                        curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addu, curMB, base, preBase, base));
-                    }
+                    preBase = base;
+                    base = new MpReg();
+                    mulOptimize(base, (MpReg) idx, new MpImm(dimSizes.get(i-1)));
+                    curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addu, curMB, base, preBase, base));
                 }
             }
         }
-        MpStackOffset mipsSO = new MpStackOffset(data, base, offset);
+        MpStackOffset mipsSO = new MpStackOffset(base, offset);
         val2opd.put(instr, mipsSO);
     }
     private void genZextInstr(Zext instr) {
