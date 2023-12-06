@@ -75,7 +75,7 @@ public class Visitor {
         String name = constDef.getIdent().getValue();
         Symbol symbol = curTab.getSymbol(name);
         if (symbol.isGlobal()) {
-            GlobalVariable globalVariable = new GlobalVariable(name, new PointerType(symbol.getType()), true, symbol.getConstantInit());
+            GlobalVariable globalVariable = new GlobalVariable(name + ".var", new PointerType(symbol.getType()), true, symbol.getConstantInit());
             module.addGlobalVariable(globalVariable);
             symbol.setIrPtr(globalVariable);
         }
@@ -125,7 +125,7 @@ public class Visitor {
                     constant = new ConstantArray(symbol.getType());
             } else
                 constant = symbol.getConstantInit();
-            GlobalVariable globalVariable = new GlobalVariable(name, new PointerType(symbol.getType()), false, constant);
+            GlobalVariable globalVariable = new GlobalVariable(name + ".var", new PointerType(symbol.getType()), false, constant);
             module.addGlobalVariable(globalVariable);
             symbol.setIrPtr(globalVariable);
         } else {
@@ -579,25 +579,11 @@ public class Visitor {
         String str1 = str.replaceAll("\\\\n", "\\\\0A");
         str1 = str1 + "\\00";
         ArrayType arrayType = new ArrayType(new IntegerType(8), str.length() + 1 - count);
-        LinkedList<GlobalVariable> globalVariables = module.getGlobalVariables();
-        GlobalVariable gv = null;
-        for (GlobalVariable globalVariable : globalVariables) {
-            if (globalVariable.isConstant()) {
-                Constant constant = globalVariable.getInitializer();
-                if (constant instanceof ConstantStr) {
-                    ConstantStr constantStr = (ConstantStr) constant;
-                    if (constantStr.getVal().equals(str1))
-                        gv = globalVariable;
-                }
-            }
-        }
-        if (null == gv) {
-            ConstantStr constantStr = new ConstantStr(str1, arrayType);
-            gv = new GlobalVariable(new PointerType(arrayType), constantStr);
-            module.addGlobalVariable(gv);
-        }
+        ConstantStr constantStr = new ConstantStr(str1, arrayType);
+        GlobalVariable globalVariable = new GlobalVariable(new PointerType(arrayType), constantStr);
+        module.addGlobalVariable(globalVariable);
         Function putstr = module.getFunction("putstr");
-        GetElementPtr getElementPtr = new GetElementPtr(new PointerType(new IntegerType(8)), curBB, gv, new ConstantInt(new IntegerType(32), 0), new ConstantInt(new IntegerType(32), 0));
+        GetElementPtr getElementPtr = new GetElementPtr(new PointerType(new IntegerType(8)), curBB, globalVariable, new ConstantInt(new IntegerType(32), 0), new ConstantInt(new IntegerType(32), 0));
         curBB.addInstr(getElementPtr);
         curBB.addInstr(new Call(((FunctionType) putstr.getType()).getReturnType(), curBB, putstr, getElementPtr));
     }
