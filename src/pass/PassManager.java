@@ -9,14 +9,18 @@ public class PassManager {
         MakeCFG.run(module);
         DeadControlFlowElimination deadControlFlowElimination = new DeadControlFlowElimination(module);
         DeadCodeElimination deadCodeElimination = new DeadCodeElimination(module);
+        Mem2reg mem2reg = new Mem2reg(module);
         deadControlFlowElimination.run();
         MakeDom.run(module);
         if (Config.isLLVMopt) {
-            new Mem2reg(module).run();
+            mem2reg.run();
             deadCodeElimination.run();
             MyIO.writeFile(Config.LLVMFile, ManageFrontend.getModule().toString());
             new FunctionInline(module).run();
             deadCodeElimination.run();
+            new GlobalSymplify(module).run();
+            MakeDom.run(module);
+            mem2reg.run();
             new LVN(module).run();
             deadCodeElimination.run();
             MyIO.writeFile(Config.LLVMOptFile, ManageFrontend.getModule().toString());
