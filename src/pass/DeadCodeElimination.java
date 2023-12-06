@@ -6,6 +6,7 @@ import ir.Function;
 import ir.Module;
 import ir.Use;
 import ir.Value;
+import ir.constants.ConstantInt;
 import ir.instrs.Br;
 import ir.instrs.Call;
 import ir.instrs.Instr;
@@ -109,11 +110,19 @@ public class DeadCodeElimination {
             if (function.isBuiltin()) continue;
             for (BasicBlock block : function.getBlocks()) {
                 for (Instr instr : block.getInstrs()) {
-                    if (instr instanceof Call && sideEffectFunctions.contains(instr.getOperand(0))
-                            || instr instanceof Ret
-                            || instr instanceof Br
-                            || instr instanceof Store)
+                    if (instr.getValueTy() == Value.ValueType.call && sideEffectFunctions.contains(instr.getOperand(0))
+                            || instr.getValueTy() == Value.ValueType.ret
+                            || instr.getValueTy() == Value.ValueType.br
+                            || instr.getValueTy() == Value.ValueType.store) {
+                        if (instr.getValueTy() == Value.ValueType.br && ((Br) instr).isCondBr() && instr.getOperand(0) instanceof ConstantInt) {
+                            int cond = ((ConstantInt) instr.getOperand(0)).getVal();
+                            if (cond == 0)
+                                instr.replaceAllUses(instr.getOperand(2));
+                            else
+                                instr.replaceAllUses(instr.getOperand(1));
+                        }
                         worklist.add(instr);
+                    }
                 }
             }
         }
@@ -121,8 +130,9 @@ public class DeadCodeElimination {
             Instr instr = worklist.poll();
             live.add(instr);
             for (Value operand : instr.getOperands()) {
-                if (operand instanceof Instr && !live.contains(operand))
+                if (operand instanceof Instr && !live.contains(operand)) {
                     worklist.add((Instr) operand);
+                }
             }
         }
         for (Function function : module.getFunctions()) {
@@ -161,6 +171,7 @@ public class DeadCodeElimination {
         }
         return finished;
     }
+
     private boolean mergeBlock() {
         boolean finished = true;
         for (Function function : module.getFunctions()) {

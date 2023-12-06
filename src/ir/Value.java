@@ -52,18 +52,16 @@ public abstract class Value extends MyLinkedNode {
     public String getName() { return this.name; }
     public String getMipsName() { return this.name.substring(1); }
     public void addUser(Use use) { useList.add(use); }
-    public void removeUser(Use use) { useList.remove(use); }
+    public void removeUser(Use use) { useList.remove(use); } // use不再使用this value
     public ArrayList<Use> getUseList() { return this.useList; }
     /*
         traverses the use list of a Value changing all Users of the current value to refer to “V” instead
      */
-    public void replaceAllUsesWith(Value V) {
+    public void replaceAllUsesWith(Value V) { // 所有使用该value的都改为使用V
         for (Use use : this.useList) {
             use.setVal(V);
         }
         V.useList.addAll(this.useList);
         this.useList.clear();
     }
-    public boolean isConstantInt() { return this.valueTy == ValueType.ConstantInt; }
-    public boolean isConstantArray() { return this.valueTy == ValueType.ConstantArray; }
 }

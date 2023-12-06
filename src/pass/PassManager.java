@@ -14,7 +14,10 @@ public class PassManager {
         if (Config.isLLVMopt) {
             new Mem2reg(module).run();
             deadCodeElimination.run();
+            MyIO.writeFile(Config.LLVMFile, ManageFrontend.getModule().toString());
             new FunctionInline(module).run();
+            deadCodeElimination.run();
+            new LVN(module).run();
             deadCodeElimination.run();
             MyIO.writeFile(Config.LLVMOptFile, ManageFrontend.getModule().toString());
             new RemovePhi(module).run();

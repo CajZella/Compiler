@@ -35,27 +35,29 @@ public abstract class User extends Value {
     public boolean isOperandsEmpty() { return this.operands.isEmpty(); }
     public Value getOperand(int index) { return this.operands.get(index).getVal(); }
     public int operandsSize() { return this.operands.size(); }
-    public void dropAllReferences() {
+    public void dropAllReferences() { // 同时删除this use 的 value关系
         for (Use use : this.operands) {
             use.getVal().removeUser(use);
         }
         this.operands.clear();
     }
-    public void replaceUsesOfWith(Value from, Value to) {
+    public void replaceUsesOfWith(Value from, Value to) { // 原来use from，改为use to
         for (Use use : this.operands) {
             if (use.getVal() == from) {
+                from.getUseList().remove(use);
                 use.setVal(to);
+                to.addUser(use);
             }
         }
     }
-    public void replaceAllUses(Value... operands) {
+    public void replaceAllUses(Value... operands) { // use 的 value全部更新
         this.dropAllReferences();
         this.operands.clear();
         for (Value operand : operands) {
             use(operand);
         }
     }
-    public void replaceAllUses(ArrayList<Value> operands) {
+    public void replaceAllUses(ArrayList<Value> operands) { // use 的 value全部更新
         this.dropAllReferences();
         this.operands.clear();
         for (Value operand : operands) {
@@ -63,7 +65,10 @@ public abstract class User extends Value {
         }
     }
     public ArrayList<Use> getUserUses() { return this.operands; }
-    public void replaceUsesOfWith(int idx, Value to) {
-        operands.get(idx).setVal(to);
+    public void replaceUsesOfWith(int idx, Value to) { // use operands[idx] 改为 use to
+        this.operands.get(idx).getVal().getUseList().remove(this.operands.get(idx));
+        Use use = new Use(this, to);
+        this.operands.set(idx, use);
+        to.addUser(use);
     }
 }

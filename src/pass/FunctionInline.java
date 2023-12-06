@@ -88,14 +88,10 @@ public class FunctionInline {
                     inlineSingleFunction(call);
                 }
             }
-        // 修正函数调用关系
     }
     private void inlineSingleFunction(Call call) {
         Function caller = call.getParent().getParent();
         Function callee = call.getFunction();
-        if (callee.getMipsName().equals("func1")) {
-            int x = 1;
-        }
         BasicBlock block = call.getParent();
         /* step1. 将call之前和之后分成两个block */
         BasicBlock nextBlock = new BasicBlock(caller);
