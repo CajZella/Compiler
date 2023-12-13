@@ -224,9 +224,6 @@ public class CodeGen {
     private void handleParallelCopies() {
         MyLinkedList<BasicBlock> basicBlocks = curIF.getBlocks();
         for (BasicBlock basicBlock : basicBlocks) {
-            if (basicBlock.getMipsName().equals("main_b16")) {
-                int x = 1;
-            }
             PCs pcs = basicBlock.getPcs();
             if (pcs == null) continue;
             curMB = bb2mb.get(basicBlock);

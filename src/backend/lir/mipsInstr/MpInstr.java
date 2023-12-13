@@ -51,8 +51,6 @@ public abstract class MpInstr extends MyLinkedNode {
         li,
         la,
         move,
-
-        comment,
     }
     protected MipsInstrType instrType;
     protected MpBlock block;

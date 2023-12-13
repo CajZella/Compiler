@@ -285,83 +285,41 @@ public class Visitor {
         String name = lVal.getIdent().getValue();
         Symbol symbol = curTab.getSymbol(name);
         if (null == symbol.getIrPtr())
-            symbol = curTab.getParent().getSymbol(name);
+            symbol = curTab.getParent().getSymbol(name); // 重用符号表所需的操作
+
         Value ptr = symbol.getIrPtr();
-        if (symbol.getType().isPointerTy()) {
+        Type type = symbol.getType();
+        ArrayList<Value> values = new ArrayList<>();
+        if (type.isPointerTy()) {
             ptr = new Load((PointerType) symbol.getType(), curBB, ptr);
             curBB.addInstr((Instr) ptr);
         }
-        if (!lVal.hasExps()) {
-            if (symbol.getType().isArrayTy()) {
-                GetElementPtr getElementPtr = new GetElementPtr(new PointerType(((ArrayType) symbol.getType()).getElementType()), curBB, ptr,
-                        new ConstantInt(new IntegerType(32), 0), new ConstantInt(new IntegerType(32), 0));
-                curBB.addInstr(getElementPtr);
-                return getElementPtr;
-            } else{
-                if (isAddr || symbol.getType().isPointerTy()) return ptr;
-                else {
-                    Load load = new Load((DataType) (symbol.getType()), curBB, ptr);
-                    curBB.addInstr(load);
-                    return load;
-                }
-            }
-        } else {
-            ArrayList<Value> values = new ArrayList<>();
-            for (Exp exp : lVal.getExps())
-                values.add(visitExp(exp));
-            Type type = symbol.getType();
-            GetElementPtr getElementPtr;
-            if (type.isArrayTy()) {
-                for (int i = 0; i < values.size(); i++)
-                    type = ((ArrayType) type).getElementType();
-                values.add(0, new ConstantInt(new IntegerType(32), 0));
-                values.add(0, ptr);
-                if (isAddr) {
-                    getElementPtr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
-                    curBB.addInstr(getElementPtr);
-                    return getElementPtr;
-                } else {
-                    if (type.isIntegerTy()) {
-                        getElementPtr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
-                        curBB.addInstr(getElementPtr);
-                        Load load = new Load((IntegerType) type, curBB, getElementPtr);
-                        curBB.addInstr(load);
-                        return load;
-                    } else {
-                        values.add(new ConstantInt(new IntegerType(32), 0));
-                        type = ((ArrayType)type).getElementType();
-                        getElementPtr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
-                        curBB.addInstr(getElementPtr);
-                        return getElementPtr;
-                    }
-                }
-            } else {
+        if (type.isArrayTy())
+            values.add(new ConstantInt(new IntegerType(32), 0));
+        for (Exp exp : lVal.getExps()) {
+            values.add(visitExp(exp));
+            if (type.isArrayTy())
+                type = ((ArrayType) type).getElementType();
+            else if (type.isPointerTy())
                 type = ((PointerType) type).getReferencedType();
-                if (lVal.getExps().size() == 2) {
-                    type = ((ArrayType) type).getElementType();
-                }
-                values.add(0, ptr);
-                if (isAddr) {
-                    getElementPtr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
-                    curBB.addInstr(getElementPtr);
-                    return getElementPtr;
-                } else {
-                    if (type.isIntegerTy()) {
-                        getElementPtr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
-                        curBB.addInstr(getElementPtr);
-                        Load load = new Load((DataType) type, curBB, getElementPtr);
-                        curBB.addInstr(load);
-                        return load;
-                    } else {
-                        values.add(new ConstantInt(new IntegerType(32), 0));
-                        type = ((ArrayType)type).getElementType();
-                        getElementPtr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
-                        curBB.addInstr(getElementPtr);
-                        return getElementPtr;
-                    }
-                }
+        }
+        boolean flag = false;
+        if (!values.isEmpty()) {
+            if (type.isArrayTy()) {
+                flag = true;
+                values.add(new ConstantInt(new IntegerType(32), 0));
+                type = ((ArrayType) type).getElementType();
             }
-
+            values.add(0, ptr);
+            ptr = new GetElementPtr(new PointerType(type), curBB, values.toArray(new Value[values.size()]));
+            curBB.addInstr((Instr) ptr);
+        }
+        if (isAddr || !type.isIntegerTy() || flag)
+            return ptr;
+        else {
+            Load load = new Load((DataType) type, curBB, ptr);
+            curBB.addInstr(load);
+            return load;
         }
     }
     private Value visitNumber(Number number) {

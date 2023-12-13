@@ -17,9 +17,6 @@ public abstract class User extends Value {
         }
     }
     public User(String name) { super(name); }
-    public void removeOperand(int index) {
-        this.operands.remove(index);
-    }
     public void use(Value value) {
         Use use = new Use(this, value);
         this.operands.add(use);

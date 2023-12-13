@@ -15,7 +15,6 @@ public class PassManager {
         if (Config.isLLVMopt) {
             mem2reg.run();
             deadCodeElimination.run();
-            MyIO.writeFile(Config.LLVMFile, ManageFrontend.getModule().toString());
             new FunctionInline(module).run();
             deadCodeElimination.run();
             new GlobalSymplify(module).run();
