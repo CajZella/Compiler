@@ -16,7 +16,7 @@ public class Call extends Instr {
     public Call(DataType type, BasicBlock pBB, Value...operands) {
         super(ValueType.call, type, pBB, operands);
     }
-    public Function getFunction() { return (Function) getOperand(0); }
+    public Function getCallee() { return (Function) getOperand(0); }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

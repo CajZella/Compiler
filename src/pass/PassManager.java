@@ -22,6 +22,7 @@ public class PassManager {
             mem2reg.run();
             new LVN(module).run();
             deadCodeElimination.run();
+            PureFunctionAnalysis.run(module);
             MyIO.writeFile(Config.LLVMOptFile, ManageFrontend.getModule().toString());
             new RemovePhi(module).run();
         }

@@ -92,7 +92,7 @@ public class Visitor {
                 ArrayList<Integer> dims = arrayType.getDims();
                 if (dims.size() == 1) {
                     for (int i = 0; i < dims.get(0); i++) {
-                        ConstantInt constantInt = constantArray.getBase(i);
+                        ConstantInt constantInt = (ConstantInt) constantArray.getElement(i);
                         GetElementPtr getElementPtr = new GetElementPtr(new PointerType(constantInt.getType()),
                                 curBB, symbol.getIrPtr(), new ConstantInt(new IntegerType(32), 0),
                                 new ConstantInt(new IntegerType(32), i));
@@ -102,7 +102,7 @@ public class Visitor {
                 } else {
                     for (int i = 0; i < dims.get(1); i++)
                         for (int j = 0; j < dims.get(0); j++) {
-                            ConstantInt constantInt = constantArray.getBase(i, j);
+                            ConstantInt constantInt = (ConstantInt) constantArray.getElement(i, j);
                             GetElementPtr getElementPtr = new GetElementPtr(new PointerType(constantInt.getType()),
                                     curBB, symbol.getIrPtr(), new ConstantInt(new IntegerType(32), 0),
                                     new ConstantInt(new IntegerType(32), i), new ConstantInt(new IntegerType(32), j));

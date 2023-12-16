@@ -82,7 +82,7 @@ public class FunctionInline {
             for (Instr instr : block.getInstrs()) {
                 if (instr instanceof Call) {
                     Call call = (Call) instr;
-                    Function callee = call.getFunction();
+                    Function callee = call.getCallee();
                     if (callee.isBuiltin() || function.equals(callee) || recursiveFunctions.contains(callee))
                         continue;
                     inlineSingleFunction(call);
@@ -91,7 +91,7 @@ public class FunctionInline {
     }
     private void inlineSingleFunction(Call call) {
         Function caller = call.getParent().getParent();
-        Function callee = call.getFunction();
+        Function callee = call.getCallee();
         BasicBlock block = call.getParent();
         /* step1. 将call之前和之后分成两个block */
         BasicBlock nextBlock = new BasicBlock(caller);

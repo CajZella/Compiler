@@ -1,19 +1,15 @@
 package pass;
 
-import backend.lir.mipsInstr.MpMove;
 import ir.BasicBlock;
 import ir.Function;
 import ir.Module;
-import ir.Use;
 import ir.Value;
 import ir.constants.ConstantInt;
 import ir.instrs.Br;
 import ir.instrs.Call;
 import ir.instrs.Instr;
 import ir.instrs.Phi;
-import ir.instrs.Ret;
 import ir.instrs.Store;
-import ir.types.FunctionType;
 import util.MyLinkedList;
 
 import java.util.HashMap;
@@ -83,7 +79,7 @@ public class DeadCodeElimination {
             for (Instr instr : basicBlock.getInstrs()) {
                 if (instr instanceof Call) { // 函数调用
                     Call callInstr = (Call) instr;
-                    Function callee = callInstr.getFunction();
+                    Function callee = callInstr.getCallee();
                     if (callee.isBuiltin())
                         sideEffectFunctions.add(function);
                     else {

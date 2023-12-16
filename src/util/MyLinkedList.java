@@ -31,6 +31,16 @@ public class MyLinkedList<T extends  MyLinkedNode> implements Iterable<T> {
     }
     public T getHead() { return (T) this.head.getNext(); }
     public T getTail() { return (T)this.tail.getPrev(); }
+    public T get(int idx) {
+        int i = 0;
+        T now = (T) head.getNext();
+        while (now != tail) {
+            if (i == idx) return now;
+            now = (T) now.getNext();
+            i++;
+        }
+        return null;
+    }
     public void clear() {
         head.setNext(tail);
         tail.setPrev(head);

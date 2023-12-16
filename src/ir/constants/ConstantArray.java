@@ -1,8 +1,10 @@
 package ir.constants;
 
 import ir.types.Type;
+import util.MyLinkedList;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /*
     constant array
@@ -12,26 +14,29 @@ import java.util.ArrayList;
     不必考虑c这种情况，因为InitVal若有，则必须是于多维数组中数组维数和各维长度完全对应的初始值
  */
 public class ConstantArray extends Constant {
-    private ArrayList<Constant> vals;
+    private MyLinkedList<Constant> vals;
     public ConstantArray(Type type) {
         super(ValueType.ConstantArray, null, type);
-        this.vals = new ArrayList<>();
+        this.vals = new MyLinkedList<>();
     }
-    public ArrayList<Constant> getVals() { return this.vals; }
-    public void addVal(Constant val) { this.vals.add(val); }
-    public int getVal(int... idxs) {
+    public boolean isEmpty() {return this.vals.isEmpty(); }
+    public Constant get(int idx) { return this.vals.get(idx); }
+    public void addVal(Constant val) { this.vals.insertAtTail(val); }
+    public Constant getElement(int... idxs) {
         Constant constant = this;
         for (int idx : idxs) {
-            constant = ((ConstantArray)constant).getVals().get(idx);
+            constant = ((ConstantArray)constant).get(idx);
         }
-        return ((ConstantInt)constant).getVal();
+        return constant;
     }
-    public ConstantInt getBase(int...idxs) {
+    public Constant getElement(ArrayList<Integer> idxs, Type type) {
+        if (type.equals(type))
+            idxs.remove(0);
         Constant constant = this;
-        for (int idx : idxs) {
-            constant = ((ConstantArray)constant).getVals().get(idx);
+        for (Integer idx : idxs) {
+            constant = ((ConstantArray)constant).get(idx);
         }
-        return (ConstantInt)constant;
+        return constant;
     }
     public ArrayList<Integer> getBases() {
         ArrayList<Integer> bases = new ArrayList<>();

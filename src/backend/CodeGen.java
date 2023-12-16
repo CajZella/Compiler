@@ -1,6 +1,7 @@
 package backend;
 
 import backend.Optimize.DivByConst;
+import backend.Optimize.Interpreter;
 import backend.lir.MpBlock;
 import backend.lir.mipsInstr.MpAlu;
 import backend.lir.mipsInstr.MpBranch;
@@ -45,6 +46,7 @@ import ir.instrs.Store;
 import ir.instrs.Trunc;
 import ir.instrs.Zext;
 import ir.types.ArrayType;
+import ir.types.IntegerType;
 import ir.types.PointerType;
 import ir.types.Type;
 import pass.PCs;
@@ -54,7 +56,6 @@ import util.MyLinkedList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 // 不涉及栈的管理，这需要在寄存器分配后，在这里还是用虚拟寄存器
@@ -148,7 +149,7 @@ public class CodeGen {
         Type type = globalVariable.getType();
         if (globalVariable.isString())
             mipsData = new MpData(globalVariable.getMipsName(), ((ConstantStr)initializer).getVal());
-        else if (initializer instanceof ConstantArray && ((ConstantArray)initializer).getVals().isEmpty())
+        else if (initializer instanceof ConstantArray && ((ConstantArray)initializer).isEmpty())
             mipsData = new MpData(globalVariable.getMipsName(), type.size());
         else if (initializer instanceof ConstantInt)
             mipsData = new MpData(globalVariable.getMipsName(), new ArrayList<>(){{add(((ConstantInt)initializer).getVal());}});
@@ -418,6 +419,30 @@ public class CodeGen {
         Function irFunc = (Function) instr.getOperand(0);
         if (irFunc.isBuiltin()) {
             genBuiltinCall(instr);
+            return;
+        }
+        boolean isConstant = true;
+        for (int i = 1; i < instr.operandsSize(); i++) {
+            Value irArg = instr.getOperand(i);
+            MpOpd arg = val2opd.get(irArg);
+            if (arg instanceof MpStackOffset || arg instanceof MpReg)
+                isConstant = false;
+        }
+        if (irFunc.isPure && isConstant) {
+            ArrayList<Constant> args = new ArrayList<>();
+            for (int i = 1; i < instr.operandsSize(); i++) {
+                Value irArg = instr.getOperand(i);
+                if (irArg instanceof ConstantInt)
+                    args.add((Constant)irArg);
+                else {
+                    MpOpd arg = val2opd.get(irArg);
+                    if (arg instanceof MpImm)
+                        args.add(new ConstantInt(new IntegerType(32), ((MpImm) arg).getVal()));
+                }
+            }
+            Interpreter interpreter = new Interpreter(args, irFunc);
+            int result = interpreter.interpretFunc();
+            val2opd.put(instr, new MpImm(result));
             return;
         }
         // step1.腾出寄存器

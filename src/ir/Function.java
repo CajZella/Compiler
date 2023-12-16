@@ -16,6 +16,7 @@ public class Function extends Value {
     private ArrayList<Argument> arguments;
     private ValueSymtab symtab;
     private boolean isBuiltin;
+    public boolean isPure = true;
     private HashSet<Function> callees = new HashSet<>();
     private HashSet<Function> callers = new HashSet<>();
     public Function(String name, FunctionType functionType, boolean isBuiltin) {

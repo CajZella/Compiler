@@ -5,6 +5,7 @@ import frontend.ErrorHandle.ErrorType;
 import frontend.lexer.Token;
 import frontend.symbolTable.Symbol;
 import frontend.symbolTable.SymbolTable;
+import ir.constants.Constant;
 import ir.constants.ConstantArray;
 import ir.constants.ConstantInt;
 import ir.types.ArrayType;
@@ -73,9 +74,11 @@ public class LVal extends AstNode {
         else if (hasExps()) {
             ConstantArray constantArray = (ConstantArray)symbol.getConstantInit();
             if (exps.size() == 1)
-                return constantArray.getVal(exps.get(0).getOpResult());
-            else
-                return constantArray.getVal(exps.get(0).getOpResult(), exps.get(1).getOpResult());
+                return ((ConstantInt)constantArray.getElement(exps.get(0).getOpResult())).getVal();
+            else {
+                Constant element = constantArray.getElement(exps.get(0).getOpResult(), exps.get(1).getOpResult());
+                return ((ConstantInt) element).getVal();
+            }
         } else
             return ((ConstantInt)symbol.getConstantInit()).getVal();
     }
