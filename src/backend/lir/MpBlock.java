@@ -29,7 +29,7 @@ public class MpBlock extends MyLinkedNode {
     public HashSet<MpBlock> getSuccMBs() { return succMBs; }
     public MpLabel getLabel() { return this.label; }
     public MpInstr getFirstMpInstr() { return mpInstrs.getHead(); }
-    public MpInstr getLastMpInstr() { return mpInstrs.getTail(); }
+    public MpInstr getLastMpInstr() { return mpInstrs.isEmpty() ? null : mpInstrs.getTail(); }
     public void removeInstr(MpInstr instr) { mpInstrs.remove(instr); }
     public void addMpInstr(MpInstr mpInstr) { this.mpInstrs.insertAtTail(mpInstr); }
     public MyLinkedList<MpInstr> getMpInstrs() { return mpInstrs; }

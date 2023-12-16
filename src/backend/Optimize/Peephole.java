@@ -14,6 +14,7 @@ import backend.lir.mipsInstr.MpMove;
 import backend.lir.mipsInstr.MpStore;
 import backend.lir.mipsOperand.MpImm;
 import backend.lir.mipsOperand.MpReg;
+import ir.instrs.Instr;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,7 +36,9 @@ public class Peephole {
             finished &= redundantPreserveWhenCall();
             finished &= removeRedundantMove();
             finished &= removeUselessBlock();
+            finished &= removeRedundantLS();
         }
+        removeUselessJump();
     }
 
     /*
@@ -113,8 +116,7 @@ public class Peephole {
             Iterator<MpBlock> iterator = function.getMpBlocks().iterator();
             while (iterator.hasNext()) {
                 MpBlock block = iterator.next();
-                if (block.getFirstMpInstr().getInstrType() == MpInstr.MipsInstrType.j
-                        && block.getPrecMBs().size() == 1) { // todo: 具体判断还是需要等到中间优化完成后
+                if (block.getFirstMpInstr().getInstrType() == MpInstr.MipsInstrType.j) { // todo: 具体判断还是需要等到中间优化完成后
                     finished = false;
                     MpJump jump = (MpJump) block.getFirstMpInstr();
                     for (MpBlock precBlock : block.getPrecMBs()) {
@@ -126,6 +128,36 @@ public class Peephole {
                         succBlock.addPrecMB(precBlock);
                     }
                     iterator.remove();
+                }
+            }
+        }
+        return finished;
+    }
+    private boolean removeUselessJump() {
+        boolean finished = true;
+        HashSet<MpBlock> processed = new HashSet<>();
+        for(MpFunction function : module.getMpFunctions()) {
+            Iterator<MpBlock> iterator = function.getMpBlocks().iterator();
+            while (iterator.hasNext()) {
+                MpBlock block = iterator.next();
+                MpInstr lastInstr = block.getLastMpInstr();
+                if (null == lastInstr) continue;
+                if (lastInstr.getInstrType() == MpInstr.MipsInstrType.j) {
+                    MpJump jump = (MpJump) lastInstr;
+                    MpBlock target = jump.getLabel().getBlock();
+                    if (block.getNext() == target) {
+                        finished = false;
+                        jump.remove();
+                        processed.add(block);
+                        processed.add(target);
+                    } else if (!processed.contains(target)) {
+                        finished = false;
+                        target.remove();
+                        block.insertAfter(target);
+                        jump.remove();
+                        processed.add(block);
+                        processed.add(target);
+                    }
                 }
             }
         }
@@ -165,6 +197,11 @@ public class Peephole {
     /*
      * 相邻的store和load 目前有bug
      */
+    private boolean checkPosition(MpStore store, MpLoad load) {
+        if (null == store.getSrc2Reg() || null == load.getSrc1Reg())
+            return false;
+        return store.getSrc2Reg() != load.getSrc1Reg() && store.getOffset() == load.getOffset();
+    }
     private boolean removeRedundantLS() {
         boolean finished = true;
         for (MpFunction function : module.getMpFunctions())
@@ -178,15 +215,7 @@ public class Peephole {
                             MpInstr nextInst = (MpInstr) instr.getNext();
                             if (nextInst instanceof MpLoad) {
                                 MpLoad load = (MpLoad) nextInst;
-                                if (null != load.getBase() && null != store.getBase() && load.getBase() == store.getBase()) {
-                                    instr.insertBefore(new MpMove(block, load.getDstReg(), store.getSrc1Reg()));
-                                    iterator.remove();
-                                    load.remove();
-                                    finished = false;
-                                }
-                                if (null != load.getOffset() && null != store.getOffset()
-                                        && load.getOffset().getVal() == store.getOffset().getVal()
-                                        && load.getSrc1Reg() == store.getSrc2Reg()) {
+                                if (checkPosition(store, load)) {
                                     instr.insertBefore(new MpMove(block, load.getDstReg(), store.getSrc1Reg()));
                                     iterator.remove();
                                     load.remove();

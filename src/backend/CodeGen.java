@@ -480,7 +480,7 @@ public class CodeGen {
     private void genIcmpInstr(Icmp instr) {
         MpOpd lhs = genOperand(instr.getOperand(0));
         MpOpd rhs = genOperand(instr.getOperand(1));
-        if (lhs instanceof MpImm & rhs instanceof MpImm) {
+        if (lhs instanceof MpImm && rhs instanceof MpImm) {
             int lhsVal = ((MpImm)lhs).getVal();
             int rhsVal = ((MpImm)rhs).getVal();
             int val;
@@ -554,9 +554,15 @@ public class CodeGen {
         } else {
             MpReg dst = (MpReg) genOperand(instr);
             if (lhs instanceof MpImm) {
-                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) rhs, (MpImm)lhs));
+                if (((MpImm) lhs).getVal() == 0)
+                    curMB.addMpInstr(new MpMove(curMB, dst, (MpReg) rhs));
+                else
+                    curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) rhs, (MpImm)lhs));
             } else if (rhs instanceof MpImm) {
-                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) lhs, (MpImm) rhs));
+                if (((MpImm) rhs).getVal() == 0)
+                    curMB.addMpInstr(new MpMove(curMB, dst, (MpReg) lhs));
+                else
+                    curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) lhs, (MpImm) rhs));
             } else {
                 curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addu, curMB, dst, (MpReg) lhs, (MpReg) rhs));
             }
@@ -567,9 +573,6 @@ public class CodeGen {
      * 同加法
      */
     private void genSubInstr(Alu instr) {
-        if (instr.getName().equals("%i484")) {
-            int x = 1;
-        }
         MpOpd lhs = genOperand(instr.getOperand(0));
         MpOpd rhs = genOperand(instr.getOperand(1));
         if (lhs instanceof MpImm && rhs instanceof MpImm) {
@@ -583,7 +586,10 @@ public class CodeGen {
                 curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, dst, (MpReg) rhs));
             } else if (rhs instanceof MpImm) {
                 MpImm imm = new MpImm(-((MpImm)rhs).getVal());
-                curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) lhs, imm));
+                if (imm.getVal() == 0)
+                    curMB.addMpInstr(new MpMove(curMB, dst, (MpReg) lhs));
+                else
+                    curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.addiu, curMB, dst, (MpReg) lhs, imm));
             } else {
                 curMB.addMpInstr(new MpAlu(MpInstr.MipsInstrType.subu, curMB, dst, (MpReg) lhs, (MpReg) rhs));
             }
