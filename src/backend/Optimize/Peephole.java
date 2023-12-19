@@ -150,7 +150,7 @@ public class Peephole {
                         jump.remove();
                         processed.add(block);
                         processed.add(target);
-                    } else if (!processed.contains(target)) {
+                    } else if (!processed.contains(target) && target != block) {
                         finished = false;
                         target.remove();
                         block.insertAfter(target);

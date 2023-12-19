@@ -6,6 +6,7 @@ import ir.types.Type;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /*
     <result> = phi <ty> [ <val0>, <label0>], ...
@@ -35,11 +36,40 @@ public class Phi extends Instr {
     public void replacePhiBB(int idx, BasicBlock newBB) {
         phiBBs.set(idx, newBB);
     }
+    public void replacePhiBB(BasicBlock oldBB, HashSet<BasicBlock> newBBs) {
+        boolean flag = false;
+        Value value = null;
+        for (BasicBlock block : newBBs) {
+            if (phiBBs.contains(block))
+                remove(block);
+            if (!flag)
+                for (int i = 0; i < phiBBs.size(); i++) {
+                    if (phiBBs.get(i).equals(oldBB)) {
+                        phiBBs.set(i, block);
+                        value = getOperand(i);
+                        flag = true;
+                    }
+                }
+            else
+                addIncoming(value, block);
+        }
+    }
     public void replacePhiBB(BasicBlock oldBB, BasicBlock newBB) {
+        if (phiBBs.contains(newBB)) {
+            remove(newBB);
+        }
         for (int i = 0; i < phiBBs.size(); i++) {
             if (phiBBs.get(i).equals(oldBB))
                 phiBBs.set(i, newBB);
         }
+    }
+    public void remove(BasicBlock block) {
+        int index = 0;
+        for (int i = 0; i < phiBBs.size(); i++)
+            if (phiBBs.get(i).equals(block))
+                index = i;
+        phiBBs.remove(index);
+        removeOperand(index);
     }
     @Override
     public String toString() {

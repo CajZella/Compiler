@@ -10,7 +10,6 @@ import ir.instrs.Icmp;
 import ir.instrs.Instr;
 import ir.instrs.Trunc;
 import ir.instrs.Zext;
-import ir.types.IntegerType;
 
 import java.util.HashMap;
 
@@ -22,10 +21,15 @@ public class LVN {
     }
     public void run() {
         for (Function function : module.getFunctions()) {
-            for (BasicBlock block : function.getBlocks()) {
-                while (!runLVN(block));
-            }
+            while (!runFuncLVN(function));
         }
+    }
+    public boolean runFuncLVN(Function function) {
+        boolean finished = true;
+        for (BasicBlock block : function.getBlocks()) {
+             finished &= runLVN(block);
+        }
+        return finished;
     }
     private boolean runLVN(BasicBlock block) {
         boolean finished = true;
@@ -36,14 +40,16 @@ public class LVN {
                 Value op2 = instr.getOperand(1);
                 if (op1.getValueTy() == Value.ValueType.ConstantInt && op2.getValueTy() == Value.ValueType.ConstantInt) {
                     int result = 0;
+                    int lhs = ((ConstantInt) op1).getVal();
+                    int rhs = ((ConstantInt) op2).getVal();
                     switch (instr.getValueTy()) {
-                        case add -> result = ((ConstantInt) op1).getVal() + ((ConstantInt) op2).getVal();
-                        case sub -> result = ((ConstantInt) op1).getVal() - ((ConstantInt) op2).getVal();
-                        case mul -> result = ((ConstantInt) op1).getVal() * ((ConstantInt) op2).getVal();
-                        case sdiv -> result = ((ConstantInt) op1).getVal() / ((ConstantInt) op2).getVal();
-                        case srem -> result = ((ConstantInt) op1).getVal() % ((ConstantInt) op2).getVal();
-                        case and -> result = ((ConstantInt) op1).getVal() & ((ConstantInt) op2).getVal();
-                        case or -> result = ((ConstantInt) op1).getVal() | ((ConstantInt) op2).getVal();
+                        case add -> result = lhs + rhs;
+                        case sub -> result = lhs - rhs;
+                        case mul -> result = lhs * rhs;
+                        case sdiv -> result = (rhs == 0 ? 0 : lhs / rhs);
+                        case srem -> result = (rhs == 0 ? 0 : lhs % rhs);
+                        case and -> result = lhs & rhs;
+                        case or -> result = lhs | rhs;
                     }
                     instr.replaceAllUsesWith(new ConstantInt(instr.getType(), result));
                     instr.remove();

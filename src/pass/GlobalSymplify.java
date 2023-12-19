@@ -15,6 +15,7 @@ import ir.instrs.Load;
 import ir.instrs.Store;
 import ir.types.PointerType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,10 +47,16 @@ public class GlobalSymplify {
         while(iterator.hasNext()) {
             GlobalVariable gv = iterator.next();
             if (checkOnlyUse(gv) && ((PointerType)gv.getType()).getReferencedType().isIntegerTy()) {
+                ArrayList<Load> loads = new ArrayList<>();
                 for (Use use : gv.getUseList()) {
-                    Load user = (Load) use.getUser();
-                    user.replaceAllUsesWith(gv.getInitializer());
+                    loads.add((Load) use.getUser());
                 }
+                for (Load load : loads) {
+                    load.replaceAllUsesWith(gv.getInitializer());
+                    load.dropAllReferences();
+                    load.remove();
+                }
+
                 iterator.remove();
             }
         }
@@ -78,7 +85,7 @@ public class GlobalSymplify {
                 User user = use.getUser();
                 if (user instanceof Store && user.getOperand(1).equals(value))
                     return false;
-                if (user instanceof GetElementPtr && user.getOperand(0).equals(value))
+                if (user instanceof Load && user.getOperand(0).equals(value))
                     queue.add(user);
             }
         }

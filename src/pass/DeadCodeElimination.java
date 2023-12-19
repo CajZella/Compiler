@@ -23,18 +23,16 @@ public class DeadCodeElimination {
     public DeadCodeElimination(Module module) {
         this.module = module;
     }
-    public boolean run() {
-        boolean all = true;
+    public void run() {
         boolean finished = false;
         while (!finished) {
             finished = true;
             finished &= functionElimination();
             finished &= codeElimination();
             finished &= deleteRedundantPhi();
+            finished &= mergeRedundantBranch();
             finished &= mergeBlock();
-            all &= finished;
         }
-        return all;
     }
 
     /*
@@ -104,19 +102,31 @@ public class DeadCodeElimination {
         HashSet<Instr> live = new HashSet<>();
         for (Function function : module.getFunctions()) {
             if (function.isBuiltin()) continue;
-            for (BasicBlock block : function.getBlocks()) {
+            Iterator<BasicBlock> iterator = function.getBlocks().iterator();
+            while (iterator.hasNext()) {
+                BasicBlock block = iterator.next();
+                if (block.getPrecBBs().isEmpty() && function.getEntryBlock() != block) {
+                    for (BasicBlock succBB : block.getSuccBBs()) {
+                        succBB.getPrecBBs().remove(block);
+                    }
+                    for (Instr instr : block.getInstrs()) {
+                        instr.dropAllReferences();
+                        instr.remove();
+                    }
+                    for (BasicBlock block1 : block.getSuccBBs()) {
+                        for (Instr instr : block1.getInstrs()) {
+                            if (instr instanceof Phi)
+                                ((Phi)instr).remove(block);
+                        }
+                    }
+                    iterator.remove();
+                    continue;
+                }
                 for (Instr instr : block.getInstrs()) {
                     if (instr.getValueTy() == Value.ValueType.call && sideEffectFunctions.contains(instr.getOperand(0))
                             || instr.getValueTy() == Value.ValueType.ret
                             || instr.getValueTy() == Value.ValueType.br
                             || instr.getValueTy() == Value.ValueType.store) {
-                        if (instr.getValueTy() == Value.ValueType.br && ((Br) instr).isCondBr() && instr.getOperand(0) instanceof ConstantInt) {
-                            int cond = ((ConstantInt) instr.getOperand(0)).getVal();
-                            if (cond == 0)
-                                instr.replaceAllUses(instr.getOperand(2));
-                            else
-                                instr.replaceAllUses(instr.getOperand(1));
-                        }
                         worklist.add(instr);
                     }
                 }
@@ -155,7 +165,7 @@ public class DeadCodeElimination {
                 while(iterator.hasNext()) {
                     Instr instr = iterator.next();
                     if (!(instr instanceof Phi))
-                        break;
+                        continue;
                     Phi phi = (Phi) instr;
                     if (phi.operandsSize() == 1) {
                         finished = false;
@@ -167,7 +177,40 @@ public class DeadCodeElimination {
         }
         return finished;
     }
-
+    private boolean mergeRedundantBranch() {
+        boolean finished = true;
+        for (Function function : module.getFunctions()) {
+            for (BasicBlock block : function.getBlocks()) {
+                Instr terminator = block.getTerminator();
+                if (terminator instanceof Br) {
+                    Br br = (Br) terminator;
+                    if (br.isCondBr() && br.getTrueBB().equals(br.getFalseBB())) {
+                        finished = false;
+                        br.replaceAllUses(br.getTrueBB());
+                    }
+                    else if (br.isCondBr() && br.getOperand(0) instanceof ConstantInt) {
+                        finished = false;
+                        ConstantInt cond = (ConstantInt) br.getOperand(0);
+                        BasicBlock toBlock;
+                        if (cond.getVal() == 0) {
+                            toBlock = br.getTrueBB();
+                            br.replaceAllUses(br.getFalseBB());
+                        } else {
+                            toBlock = br.getFalseBB();
+                            br.replaceAllUses(br.getTrueBB());
+                        }
+                        block.getSuccBBs().remove(toBlock);
+                        toBlock.getPrecBBs().remove(block);
+                        for (Instr instr : toBlock.getInstrs()) {
+                            if (instr instanceof Phi)
+                                ((Phi) instr).remove(block);
+                        }
+                    }
+                }
+            }
+        }
+        return finished;
+    }
     private boolean mergeBlock() {
         boolean finished = true;
         for (Function function : module.getFunctions()) {
@@ -194,6 +237,31 @@ public class DeadCodeElimination {
                         succ.getPrecBBs().add(block);
                     }
                     succBlock.remove();
+                }
+            }
+        }
+        return finished;
+    }
+    private boolean deleteEmptyBlock() {
+        boolean finished = true;
+        for (Function function : module.getFunctions()) {
+            for (BasicBlock block : function.getBlocks()) {
+                Instr entry = block.getEntryInstr();
+                if (entry.getValueTy() == Value.ValueType.br && !((Br) entry).isCondBr() && !block.getPrecBBs().isEmpty()) {
+                    finished = false;
+                    BasicBlock toBlock = (BasicBlock) entry.getOperand(0);
+                    for (Instr instr : toBlock.getInstrs())
+                        if (instr instanceof Phi)
+                            ((Phi) instr).replacePhiBB(block, block.getPrecBBs());
+                    for (BasicBlock precBlock : block.getPrecBBs()) {
+                        Br terminator = (Br) precBlock.getTerminator();
+                        terminator.replaceUsesOfWith(block, toBlock);
+                        precBlock.getSuccBBs().remove(block);
+                        precBlock.getSuccBBs().add(toBlock);
+                        toBlock.getPrecBBs().add(precBlock);
+                    }
+                    toBlock.getPrecBBs().remove(block);
+                    block.remove();
                 }
             }
         }

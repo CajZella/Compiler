@@ -1,4 +1,4 @@
-package backend.Optimize;
+package pass;
 
 import ir.Argument;
 import ir.BasicBlock;
@@ -23,22 +23,25 @@ import ir.instrs.Zext;
 import ir.types.ArrayType;
 import ir.types.IntegerType;
 import ir.types.PointerType;
+import ir.types.VoidType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Interpreter {
+    private Instr callIni;
     private final Function function;
     private final HashMap<Value, Constant> val2cnt = new HashMap<>();
     private int result;
     private BasicBlock lastBlock = null;
 
-    public Interpreter(ArrayList<Constant> args, Function function) {
+    public Interpreter(ArrayList<Constant> args, Function function, Instr callIni) {
         for (int i = 0; i < args.size(); i++) {
             Argument argument = function.getArguments().get(i);
             val2cnt.put(argument, args.get(i));
         }
         this.function = function;
+        this.callIni = callIni;
     }
     public int interpretFunc() {
         interpretBlock(function.getEntryBlock());
@@ -67,7 +70,7 @@ public class Interpreter {
     }
     private void interpretAlloca(Alloca alloca) {
         ArrayType arrayType = (ArrayType) ((PointerType) alloca.getType()).getReferencedType();
-        ConstantArray array = new ConstantArray(arrayType);
+        ConstantArray array = new ConstantArray(arrayType, true);
         val2cnt.put(alloca, array);
     }
     private void interpretAlu(Alu alu) {
@@ -110,12 +113,32 @@ public class Interpreter {
     }
     private void interpretCall(Call call) {
         Function callee = call.getCallee();
+        if (callee.isBuiltin()) {
+            if (callee.getName().equals("@putch")) {
+                Call newCall = new Call(new VoidType(), callIni.getParent(), callee, call.getOperand(1));
+                callIni.insertBefore(newCall);
+                callIni = newCall;
+            } else if (callee.getName().equals("@putstr")) {
+                GetElementPtr gep = (GetElementPtr) call.getOperand(1);
+                gep = new GetElementPtr((PointerType) gep.getType(), callIni.getParent(), gep.getOperands().toArray(new Value[gep.operandsSize()]));
+                callIni.insertBefore(gep);
+                Call newCall = new Call(new VoidType(), callIni.getParent(), callee, gep);
+                callIni.insertBefore(newCall);
+                callIni = newCall;
+            } else {
+                ConstantInt value = (ConstantInt) getConstant(call.getOperand(1));
+                Call newCall = new Call(new VoidType(), callIni.getParent(), callee, value);
+                callIni.insertBefore(newCall);
+                callIni = newCall;
+            }
+            return;
+        }
         ArrayList<Constant> args = new ArrayList<>();
         for (int i = 1; i < call.operandsSize(); i++) {
             Value arg = call.getOperand(i);
             args.add(getConstant(arg));
         }
-        Interpreter interpreter = new Interpreter(args, callee);
+        Interpreter interpreter = new Interpreter(args, callee, callIni);
         int ret = interpreter.interpretFunc();
         val2cnt.put(call, new ConstantInt(new IntegerType(32), ret));
     }

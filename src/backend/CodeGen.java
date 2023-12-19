@@ -1,7 +1,7 @@
 package backend;
 
 import backend.Optimize.DivByConst;
-import backend.Optimize.Interpreter;
+import pass.Interpreter;
 import backend.lir.MpBlock;
 import backend.lir.mipsInstr.MpAlu;
 import backend.lir.mipsInstr.MpBranch;
@@ -46,7 +46,6 @@ import ir.instrs.Store;
 import ir.instrs.Trunc;
 import ir.instrs.Zext;
 import ir.types.ArrayType;
-import ir.types.IntegerType;
 import ir.types.PointerType;
 import ir.types.Type;
 import pass.PCs;
@@ -416,33 +415,9 @@ public class CodeGen {
         }
     }
     private void genCallInstr(Call instr) {
-        Function irFunc = (Function) instr.getOperand(0);
+        Function irFunc = instr.getCallee();
         if (irFunc.isBuiltin()) {
             genBuiltinCall(instr);
-            return;
-        }
-        boolean isConstant = true;
-        for (int i = 1; i < instr.operandsSize(); i++) {
-            Value irArg = instr.getOperand(i);
-            MpOpd arg = val2opd.get(irArg);
-            if (arg instanceof MpStackOffset || arg instanceof MpReg)
-                isConstant = false;
-        }
-        if (irFunc.isPure && isConstant) {
-            ArrayList<Constant> args = new ArrayList<>();
-            for (int i = 1; i < instr.operandsSize(); i++) {
-                Value irArg = instr.getOperand(i);
-                if (irArg instanceof ConstantInt)
-                    args.add((Constant)irArg);
-                else {
-                    MpOpd arg = val2opd.get(irArg);
-                    if (arg instanceof MpImm)
-                        args.add(new ConstantInt(new IntegerType(32), ((MpImm) arg).getVal()));
-                }
-            }
-            Interpreter interpreter = new Interpreter(args, irFunc);
-            int result = interpreter.interpretFunc();
-            val2opd.put(instr, new MpImm(result));
             return;
         }
         // step1.腾出寄存器

@@ -61,6 +61,11 @@ public abstract class User extends Value {
             use(operand);
         }
     }
+    public void removeOperand(int index) {
+        Use use = operands.get(index);
+        operands.remove(use);
+        use.getVal().getUseList().remove(use);
+    }
     public ArrayList<Use> getUserUses() { return this.operands; }
     public void replaceUsesOfWith(int idx, Value to) { // use operands[idx] 改为 use to
         this.operands.get(idx).getVal().getUseList().remove(this.operands.get(idx));

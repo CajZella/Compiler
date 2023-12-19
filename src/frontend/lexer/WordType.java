@@ -45,4 +45,5 @@ public enum WordType {
     private final String val;
     WordType(final String val) { this.val = val; }
     public String getVal() { return this.val; }
+    public static String getVal(WordType type) { return type.getVal(); }
 }

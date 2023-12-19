@@ -1,5 +1,7 @@
 package ir.constants;
 
+import ir.types.ArrayType;
+import ir.types.IntegerType;
 import ir.types.Type;
 import util.MyLinkedList;
 
@@ -18,6 +20,18 @@ public class ConstantArray extends Constant {
     public ConstantArray(Type type) {
         super(ValueType.ConstantArray, null, type);
         this.vals = new MyLinkedList<>();
+    }
+    public ConstantArray(Type type, boolean non) {
+        super(ValueType.ConstantArray, null, type);
+        this.vals = ((ConstantArray) initial(type)).getVals();
+    }
+    public Constant initial(Type type) {
+        if (type instanceof IntegerType)
+            return new ConstantInt(new IntegerType(32), 0);
+        ConstantArray constantArray = new ConstantArray(type);
+        for (int i = 0; i < ((ArrayType)type).getLength(); i++)
+            constantArray.addVal(initial(((ArrayType)type).getElementType()));
+        return constantArray;
     }
     public boolean isEmpty() {return this.vals.isEmpty(); }
     public Constant get(int idx) { return this.vals.get(idx); }
@@ -47,6 +61,7 @@ public class ConstantArray extends Constant {
                 bases.addAll(((ConstantArray)constant).getBases());
         return bases;
     }
+    public MyLinkedList<Constant> getVals() { return this.vals; }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

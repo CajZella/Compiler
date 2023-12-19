@@ -33,7 +33,7 @@ public class PureFunctionAnalysis {
             for (Instr instr : basicBlock.getInstrs()) {
                 if (instr instanceof Call callInstr) { // 函数调用
                     Function callee = callInstr.getCallee();
-                    if (callee.isBuiltin()) // todo：可以优化
+                    if (callee.isBuiltin() && callee.getName().equals("@getint")) // todo：可以优化
                         function.isPure = false;
                     else {
                         if (!visited.contains(callee))
