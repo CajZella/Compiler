@@ -26,6 +26,17 @@ public class PureFunctionAnalysis {
                 mainFunction = function;
         }
         dfsFunction(mainFunction, visited);
+        for (Function function : module.getFunctions()) {
+            for (BasicBlock block : function.getBlocks()) {
+                for (Instr instr : block.getInstrs()) {
+                    if (instr instanceof GetElementPtr) {
+                        Value pointer = instr.getOperand(0);
+                        if (pointer instanceof Argument)
+                            function.isPure = false;
+                    }
+                }
+            }
+        }
     }
     private static void dfsFunction(Function function, HashSet<Function> visited) {
         visited.add(function);
@@ -33,13 +44,13 @@ public class PureFunctionAnalysis {
             for (Instr instr : basicBlock.getInstrs()) {
                 if (instr instanceof Call callInstr) { // 函数调用
                     Function callee = callInstr.getCallee();
-                    if (callee.isBuiltin() && callee.getName().equals("@getint")) // todo：可以优化
-                        function.isPure = false;
-                    else {
+                    if (callee.isBuiltin()) {// todo：可以优化
+                        if (callee.getName().equals("@getint"))
+                            function.isPure = false;
+                    } else {
                         if (!visited.contains(callee))
                             dfsFunction(callee, visited);
-                        if (!callee.isPure)
-                            function.isPure = false;
+                        function.isPure &= callee.isPure;
                     }
                 } else if (instr instanceof Store || instr instanceof Load) {
                     Value pointer;
@@ -49,9 +60,9 @@ public class PureFunctionAnalysis {
                         pointer = ((Store) instr).getPointer();
                     if (pointer instanceof GlobalVariable)
                         function.isPure = false;
-                    else if (pointer instanceof GetElementPtr
-                            && (((GetElementPtr) pointer).getOperand(0) instanceof GlobalVariable)
-                            || ((GetElementPtr) pointer).getOperand(0) instanceof Argument)
+                } else if (instr instanceof GetElementPtr) {
+                    Value pointer = instr.getOperand(0);
+                    if (pointer instanceof GlobalVariable && !((GlobalVariable) pointer).isString())
                         function.isPure = false;
                 }
             }

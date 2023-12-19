@@ -25,16 +25,16 @@ public class PassManager {
             new GlobalSymplify(module).run(); //todo: 有bug，如果使用全局变量的函数反复被调用
             MakeDom.run(module);
             mem2reg.run();
-            MyIO.writeFile(Config.LLVMFile, ManageFrontend.getModule().toString());
             new LVN(module).run();
             deadCodeElimination.run();
+            MyIO.writeFile(Config.LLVMFile, ManageFrontend.getModule().toString());
 
             // 函数解释器
             PureFunctionAnalysis.run(module);
             for (Function function : module.getFunctions())
                 for (BasicBlock block : function.getBlocks())
                     for (Instr instr : block.getInstrs()) {
-                        if (!(instr instanceof Call && instr.getType().isIntegerTy())) continue;
+                        if (!(instr instanceof Call)) continue;
                         Call call = (Call) instr;
                         Function callee = call.getCallee();
                         boolean isConstant = true;
@@ -49,6 +49,7 @@ public class PassManager {
                             Interpreter interpreter = new Interpreter(args, callee, call);
                             int result = interpreter.interpretFunc();
                             call.replaceAllUsesWith(new ConstantInt(new IntegerType(32), result));
+                            call.dropAllReferences();
                             call.remove();
                         }
                     }

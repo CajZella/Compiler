@@ -3,6 +3,7 @@ package pass;
 import ir.Argument;
 import ir.BasicBlock;
 import ir.Function;
+import ir.GlobalVariable;
 import ir.Value;
 import ir.constants.Constant;
 import ir.constants.ConstantArray;
@@ -76,29 +77,31 @@ public class Interpreter {
     private void interpretAlu(Alu alu) {
         int op1 = ((ConstantInt)getConstant(alu.getOperand(0))).getVal();
         int op2 = ((ConstantInt)getConstant(alu.getOperand(1))).getVal();
+        int res = 0;
         switch (alu.getValueTy()) {
-            case add -> result = op1 + op2;
-            case sub -> result = op1 - op2;
-            case mul -> result = op1 * op2;
-            case sdiv -> result = op1 / op2;
-            case srem -> result = op1 % op2;
-            case and -> result = op1 & op2;
-            case or -> result = op1 | op2;
+            case add -> res = op1 + op2;
+            case sub -> res = op1 - op2;
+            case mul -> res = op1 * op2;
+            case sdiv -> res = op1 / op2;
+            case srem -> res = op1 % op2;
+            case and -> res = op1 & op2;
+            case or -> res = op1 | op2;
         }
-        val2cnt.put(alu, new ConstantInt(new IntegerType(32), result));
+        val2cnt.put(alu, new ConstantInt(new IntegerType(32), res));
     }
     private void interpretIcmp(Icmp icmp) {
         int op1 = ((ConstantInt)getConstant(icmp.getOperand(0))).getVal();
         int op2 = ((ConstantInt)getConstant(icmp.getOperand(1))).getVal();
+        int res = 0;
         switch (icmp.getOp()) {
-            case eq -> result = op1 == op2 ? 1 : 0;
-            case ne -> result = op1 != op2 ? 1 : 0;
-            case sgt -> result = op1 > op2 ? 1 : 0;
-            case sge -> result = op1 >= op2 ? 1 : 0;
-            case slt -> result = op1 < op2 ? 1 : 0;
-            case sle -> result = op1 <= op2 ? 1 : 0;
+            case eq -> res = op1 == op2 ? 1 : 0;
+            case ne -> res = op1 != op2 ? 1 : 0;
+            case sgt -> res = op1 > op2 ? 1 : 0;
+            case sge -> res = op1 >= op2 ? 1 : 0;
+            case slt -> res = op1 < op2 ? 1 : 0;
+            case sle -> res = op1 <= op2 ? 1 : 0;
         }
-        val2cnt.put(icmp, new ConstantInt(new IntegerType(1), result));
+        val2cnt.put(icmp, new ConstantInt(new IntegerType(1), res));
     }
     private void interpretBr(Br br) {
         lastBlock = br.getParent();
@@ -143,8 +146,8 @@ public class Interpreter {
         val2cnt.put(call, new ConstantInt(new IntegerType(32), ret));
     }
     private void interpretRet(Ret instr) {
-        assert instr.hasReturnValue();
-        result = ((ConstantInt) getConstant(instr.getOperand(0))).getVal();
+        if (instr.hasReturnValue())
+            result = ((ConstantInt) getConstant(instr.getOperand(0))).getVal();
     }
     private void interpretLoad(Load instr) {
         val2cnt.put(instr, getConstant(instr.getPointer()));
@@ -155,19 +158,22 @@ public class Interpreter {
         pointer.setVal(value.getVal());
     }
     private void interpretGEP(GetElementPtr instr) {
+        if (instr.getOperand(0) instanceof GlobalVariable) return;
         Constant pointer = getConstant(instr.getOperand(0));
         ArrayList<Integer> idxs = new ArrayList<>();
         for (int i = 1; i < instr.operandsSize(); i++) {
             idxs.add(((ConstantInt)getConstant(instr.getOperand(i))).getVal());
         }
-        Constant result = pointer.getElement(idxs, ((PointerType) instr.getOperand(0).getType()).getReferencedType());
-        val2cnt.put(instr, result);
+        Constant res = pointer.getElement(idxs, ((PointerType) instr.getOperand(0).getType()).getReferencedType());
+        val2cnt.put(instr, res);
     }
     private void interpretPhi(Phi instr) {
         for (int i = 0; i < instr.getPhiBBs().size(); i++) {
             BasicBlock phiBB = instr.getBlock(i);
-            if (phiBB == lastBlock)
+            if (phiBB == lastBlock) {
                 val2cnt.put(instr, getConstant(instr.getOperand(i)));
+                break;
+            }
         }
     }
     private void interpretZext(Zext instr) {

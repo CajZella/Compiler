@@ -44,7 +44,7 @@ public class ConstantArray extends Constant {
         return constant;
     }
     public Constant getElement(ArrayList<Integer> idxs, Type type) {
-        if (type.equals(type))
+        if (this.type.equals(type))
             idxs.remove(0);
         Constant constant = this;
         for (Integer idx : idxs) {
