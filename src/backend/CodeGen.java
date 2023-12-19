@@ -735,13 +735,21 @@ public class CodeGen {
             GlobalVariable gv = (GlobalVariable) irPtr;
             if (gv2cnt.get(gv) == 1)
                 curMB.addMpInstr(new MpLoadAddr(curMB, base, gv2md.get(gv)));
-            else if (gv2mr.containsKey(gv))
-                curMB.addMpInstr(new MpMove(curMB, base, gv2mr.get(gv)));
-            else {
-                MpReg reg = new MpReg();
-                curMB.addMpInstr(new MpLoadAddr(curMB, reg, gv2md.get(gv)));
-                gv2mr.put(gv, reg);
-                curMB.addMpInstr(new MpMove(curMB, base, reg));
+            else if (gv2mr.containsKey(gv)) {
+                if (gv.isString())
+                    base = gv2mr.get(gv);
+                else
+                    curMB.addMpInstr(new MpMove(curMB, base, gv2mr.get(gv)));
+            } else {
+                if (gv.isString()) {
+                    curMB.addMpInstr(new MpLoadAddr(curMB, base, gv2md.get(gv)));
+                    gv2mr.put(gv, base);
+                } else {
+                    MpReg reg = new MpReg();
+                    curMB.addMpInstr(new MpLoadAddr(curMB, reg, gv2md.get(gv)));
+                    gv2mr.put(gv, reg);
+                    curMB.addMpInstr(new MpMove(curMB, base, reg));
+                }
             }
         } else {
             MpOpd ptr = val2opd.get(irPtr);

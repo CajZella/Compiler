@@ -29,33 +29,14 @@ public class PassManager {
             deadCodeElimination.run();
             MyIO.writeFile(Config.LLVMFile, ManageFrontend.getModule().toString());
 
-            // 函数解释器
-            PureFunctionAnalysis.run(module);
-            for (Function function : module.getFunctions())
-                for (BasicBlock block : function.getBlocks())
-                    for (Instr instr : block.getInstrs()) {
-                        if (!(instr instanceof Call)) continue;
-                        Call call = (Call) instr;
-                        Function callee = call.getCallee();
-                        boolean isConstant = true;
-                        for (int i = 1; i < instr.operandsSize(); i++) {
-                            Value operand = instr.getOperand(i);
-                            if (!(operand instanceof ConstantInt)) isConstant = false;
-                        }
-                        if (callee.isPure && isConstant) {
-                            ArrayList<Constant> args = new ArrayList<>();
-                            for (int i = 1; i < instr.operandsSize(); i++)
-                                args.add((Constant)instr.getOperand(i));
-                            Interpreter interpreter = new Interpreter(args, callee, call);
-                            int result = interpreter.interpretFunc();
-                            call.replaceAllUsesWith(new ConstantInt(new IntegerType(32), result));
-                            call.dropAllReferences();
-                            call.remove();
-                        }
-                    }
+            // 函数解释器 todo: 递归调用太多次会爆栈
+            boolean finished = false;
+            while (!finished) {
+                finished = InterpreterPack.run(module);
+                new LVN(module).run();
+                deadCodeElimination.run();
+            }
 
-            new LVN(module).run();
-            deadCodeElimination.run();
             new FunctionInline(module).run();
 
             new LVN(module).run();

@@ -22,6 +22,7 @@ public class PureFunctionAnalysis {
         for (Function function : module.getFunctions()) {
             if (function.isBuiltin())
                 function.isPure = false;
+            else function.isPure = true;
             if (function.isMain())
                 mainFunction = function;
         }

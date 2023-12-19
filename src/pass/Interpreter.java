@@ -28,12 +28,14 @@ import ir.types.VoidType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class Interpreter {
     private Instr callIni;
     private final Function function;
     private final HashMap<Value, Constant> val2cnt = new HashMap<>();
     private int result;
+    private BasicBlock curBlock = null;
     private BasicBlock lastBlock = null;
 
     public Interpreter(ArrayList<Constant> args, Function function, Instr callIni) {
@@ -45,20 +47,40 @@ public class Interpreter {
         this.callIni = callIni;
     }
     public int interpretFunc() {
-        interpretBlock(function.getEntryBlock());
+        curBlock = function.getEntryBlock();
+        interpretBlock();
         return result;
     }
-    private void interpretBlock(BasicBlock block) {
-        for (Instr instr : block.getInstrs()) {
-            interpretInstr(instr);
+    private void interpretBlock() {
+        Iterator<Instr> iterator = curBlock.getInstrs().iterator();
+        while (iterator.hasNext()){
+            Instr instr = iterator.next();
+            if (instr instanceof Br) {
+                Br br = (Br) instr;
+                lastBlock = curBlock;
+                if (br.isCondBr()) {
+                    int cond = ((ConstantInt)getConstant(br.getOperand(0))).getVal();
+                    if (cond == 1) {
+                        curBlock = br.getTrueBB();
+                        iterator = curBlock.getInstrs().iterator();
+                    } else {
+                        curBlock = br.getFalseBB();
+                        iterator = curBlock.getInstrs().iterator();
+                    }
+                } else {
+                    curBlock = br.getDestBB();
+                    iterator = curBlock.getInstrs().iterator();
+                }
+            } else
+                interpretInstr(instr);
         }
+
     }
     private void interpretInstr(Instr instr) {
         switch (instr.getValueTy()) {
             case alloca -> interpretAlloca((Alloca) instr);
             case add, sub, mul, sdiv, srem, and, or -> interpretAlu((Alu) instr);
             case icmp -> interpretIcmp((Icmp) instr);
-            case br -> interpretBr((Br) instr);
             case call -> interpretCall((Call) instr);
             case ret -> interpretRet((Ret) instr);
             case load -> interpretLoad((Load) instr);
@@ -103,36 +125,22 @@ public class Interpreter {
         }
         val2cnt.put(icmp, new ConstantInt(new IntegerType(1), res));
     }
-    private void interpretBr(Br br) {
-        lastBlock = br.getParent();
-        if (br.isCondBr()) {
-            int cond = ((ConstantInt)getConstant(br.getOperand(0))).getVal();
-            if (cond == 1)
-                interpretBlock(br.getTrueBB());
-             else
-                interpretBlock(br.getFalseBB());
-        } else
-            interpretBlock(br.getDestBB());
-    }
     private void interpretCall(Call call) {
         Function callee = call.getCallee();
         if (callee.isBuiltin()) {
             if (callee.getName().equals("@putch")) {
                 Call newCall = new Call(new VoidType(), callIni.getParent(), callee, call.getOperand(1));
                 callIni.insertBefore(newCall);
-                callIni = newCall;
             } else if (callee.getName().equals("@putstr")) {
                 GetElementPtr gep = (GetElementPtr) call.getOperand(1);
                 gep = new GetElementPtr((PointerType) gep.getType(), callIni.getParent(), gep.getOperands().toArray(new Value[gep.operandsSize()]));
                 callIni.insertBefore(gep);
                 Call newCall = new Call(new VoidType(), callIni.getParent(), callee, gep);
                 callIni.insertBefore(newCall);
-                callIni = newCall;
             } else {
                 ConstantInt value = (ConstantInt) getConstant(call.getOperand(1));
                 Call newCall = new Call(new VoidType(), callIni.getParent(), callee, value);
                 callIni.insertBefore(newCall);
-                callIni = newCall;
             }
             return;
         }
