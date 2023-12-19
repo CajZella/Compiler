@@ -20,12 +20,13 @@ public class PassManager {
         MakeCFG.run(module);
         DeadCodeElimination deadCodeElimination = new DeadCodeElimination(module);
         Mem2reg mem2reg = new Mem2reg(module);
+        new DeadControlFlowElimination(module).run();
         if (Config.isLLVMopt) {
-            new GlobalSymplify(module).run();
+            new GlobalSymplify(module).run(); //todo: 有bug，如果使用全局变量的函数反复被调用
             MakeDom.run(module);
             mem2reg.run();
-            new LVN(module).run();
             MyIO.writeFile(Config.LLVMFile, ManageFrontend.getModule().toString());
+            new LVN(module).run();
             deadCodeElimination.run();
 
             // 函数解释器

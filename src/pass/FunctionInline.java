@@ -192,6 +192,9 @@ public class FunctionInline {
             BasicBlock curBlock = (BasicBlock) valueMap.get(block);
             for (Instr instr : block.getInstrs()) {
                 Instr newInstr = null;
+                if (instr.getName() != null && instr.getName().equals("%i106")) {
+                    int x = 1;
+                }
                 if (instr instanceof Alloca) {
                     Alloca alloca = (Alloca) instr;
                     newInstr = new Alloca((PointerType) alloca.getType(), curBlock);
@@ -250,7 +253,6 @@ public class FunctionInline {
             }
         }
 
-        // 其他指令用phi时，phi未创建好
         for (Map.Entry<Value, Value> entry : valueMap.entrySet()) {
             if (entry.getKey() instanceof Phi) {
                 Phi phi = (Phi) entry.getKey();
@@ -259,6 +261,7 @@ public class FunctionInline {
                     newPhi.addIncoming(getOperand(phi.getOperand(i)), (BasicBlock) getOperand(phi.getBlock(i)));
             }
         }
+        // 其他指令用phi时，phi未创建好
         for (Map.Entry<Value, Value> entry : valueMap.entrySet()) {
             if (entry.getKey() instanceof Phi) {
                 Phi phi = (Phi) entry.getKey();

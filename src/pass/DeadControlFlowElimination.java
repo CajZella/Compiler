@@ -18,14 +18,52 @@ public class DeadControlFlowElimination {
         boolean all = true;
         while (!finished) {
             finished = true;
+            finished &= mergeRedundantBranch();
+            finished &= deleteEmptyBlock();
             finished &= mergeBlock();
             finished &= promoteBranch();
             all &= finished;
         }
         return all;
     }
-
-
+    private boolean mergeRedundantBranch() {
+        boolean finished = true;
+        for (Function function : module.getFunctions()) {
+            for (BasicBlock block : function.getBlocks()) {
+                Instr terminator = block.getTerminator();
+                if (terminator instanceof Br) {
+                    Br br = (Br) terminator;
+                    if (br.isCondBr() && br.getTrueBB().equals(br.getFalseBB())) {
+                        finished = false;
+                        br.replaceAllUses(br.getTrueBB());
+                    }
+                }
+            }
+        }
+        return finished;
+    }
+    private boolean deleteEmptyBlock() {
+        boolean finished = true;
+        for (Function function : module.getFunctions()) {
+            for (BasicBlock block : function.getBlocks()) {
+                Instr entry = block.getEntryInstr();
+                if (entry.getValueTy() == Value.ValueType.br && !((Br) entry).isCondBr() && !block.getPrecBBs().isEmpty()) {
+                    finished = false;
+                    BasicBlock toBlock = (BasicBlock) entry.getOperand(0);
+                    for (BasicBlock precBlock : block.getPrecBBs()) {
+                        Br terminator = (Br) precBlock.getTerminator();
+                        terminator.replaceUsesOfWith(block, toBlock);
+                        precBlock.getSuccBBs().remove(block);
+                        precBlock.getSuccBBs().add(toBlock);
+                        toBlock.getPrecBBs().add(precBlock);
+                    }
+                    toBlock.getPrecBBs().remove(block);
+                    block.remove();
+                }
+            }
+        }
+        return finished;
+    }
     private boolean mergeBlock() {
         boolean finished = true;
         for (Function function : module.getFunctions()) {

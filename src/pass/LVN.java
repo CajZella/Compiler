@@ -33,7 +33,7 @@ public class LVN {
     }
     private boolean runLVN(BasicBlock block) {
         boolean finished = true;
-        HashMap<Integer, Instr> map = new HashMap<>();
+        HashMap<Integer, Instr> map = new HashMap<>(); // todo: 万一就冲突了
         for (Instr instr : block.getInstrs()) {
             if (instr instanceof Alu) {
                 Value op1 = instr.getOperand(0);
@@ -52,6 +52,7 @@ public class LVN {
                         case or -> result = lhs | rhs;
                     }
                     instr.replaceAllUsesWith(new ConstantInt(instr.getType(), result));
+                    instr.dropAllReferences();
                     instr.remove();
                     finished = false;
                 } else {
@@ -66,10 +67,12 @@ public class LVN {
                     }
                     if (map.containsKey(hash1)) {
                         instr.replaceAllUsesWith(map.get(hash1));
+                        instr.dropAllReferences();
                         instr.remove();
                         finished = false;
                     } else if (map.containsKey(hash2) && hash2 != -1) {
                         instr.replaceAllUsesWith(map.get(hash2));
+                        instr.dropAllReferences();
                         instr.remove();
                         finished = false;
                     } else {
@@ -91,6 +94,7 @@ public class LVN {
                         case slt -> result = ((ConstantInt) op1).getVal() < ((ConstantInt) op2).getVal() ? 1 : 0;
                     }
                     instr.replaceAllUsesWith(new ConstantInt(instr.getType(), result));
+                    instr.dropAllReferences();
                     instr.remove();
                     finished = false;
                 }

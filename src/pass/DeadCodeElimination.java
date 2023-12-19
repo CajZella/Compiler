@@ -170,6 +170,7 @@ public class DeadCodeElimination {
                     if (phi.operandsSize() == 1) {
                         finished = false;
                         phi.replaceAllUsesWith(phi.getOperand(0));
+                        phi.dropAllReferences();
                         iterator.remove();
                     }
                 }
