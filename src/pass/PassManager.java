@@ -20,14 +20,14 @@ public class PassManager {
         MakeCFG.run(module);
         DeadCodeElimination deadCodeElimination = new DeadCodeElimination(module);
         Mem2reg mem2reg = new Mem2reg(module);
-        new DeadControlFlowElimination(module).run();
+        new DeadControlFlowElimination(module).run(); // todo:可能没啥效果
         if (Config.isLLVMopt) {
-            new GlobalSymplify(module).run(); //todo: 有bug，如果使用全局变量的函数反复被调用
+            //new GlobalSymplify(module).run(); //todo: 有bug，如果使用全局变量的函数反复被调用
             MakeDom.run(module);
             mem2reg.run();
             new LVN(module).run();
-            deadCodeElimination.run();
             MyIO.writeFile(Config.LLVMFile, ManageFrontend.getModule().toString());
+            deadCodeElimination.run();
 
             // 函数解释器 todo: 递归调用太多次会爆栈
             boolean finished = false;
